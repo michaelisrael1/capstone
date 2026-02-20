@@ -12,10 +12,12 @@ const demoUsers = {
 function setSession(session) {
   localStorage.setItem("maa_session", JSON.stringify(session));
 }
+
 function getSession() {
   try { return JSON.parse(localStorage.getItem("maa_session") || "null"); }
   catch { return null; }
 }
+
 function clearSession() {
   localStorage.removeItem("maa_session");
 }
@@ -29,6 +31,7 @@ function requireAuth() {
 function canViewAll(role) {
   return role === "president";
 }
+
 function canEditEmergency(role, inGroup) {
   // staff can edit emergency contact info when they are in that group
   if (role === "president") return true;
