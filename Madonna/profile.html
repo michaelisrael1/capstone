@@ -46,6 +46,47 @@
       <div class="portal-grid">
         <!-- Main content -->
         <section class="portal-main">
+          <!-- Profile header -->
+            <div class="profile-header">
+              <div class="profile-photo">
+                <div class="photo-placeholder">Photo</div>
+              </div>
+
+              <div class="profile-basic">
+                <h2 class="portal-h2" style="margin-bottom:4px;">Personal Information</h2>
+
+                <div class="profile-address">
+                  <label class="portal-label">Address</label>
+                  <input
+                    class="portal-input"
+                    data-emergency-field
+                    placeholder="Street address"
+                    value="123 Main Street"
+                  />
+
+                  <div class="profile-address-grid">
+                    <input
+                      class="portal-input"
+                      data-emergency-field
+                      placeholder="City"
+                      value="Omaha"
+                    />
+                    <input
+                      class="portal-input"
+                      data-emergency-field
+                      placeholder="State"
+                      value="NE"
+                    />
+                    <input
+                      class="portal-input"
+                      data-emergency-field
+                      placeholder="ZIP"
+                      value="68106"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           <div class="portal-card">
             <div class="portal-card-head">
               <h2 class="portal-h2">Emergency Contacts</h2>
@@ -94,7 +135,10 @@
                 Later: replace “Save” with a Hubwise write (add/edit) and pull initial values from Hubwise (read).
               </div>
             </div>
-          </div>
+          <div class="portal-card">
+            
+
+            <hr class="portal-divider" />
         </section>
 
         <!-- Sidebar -->
