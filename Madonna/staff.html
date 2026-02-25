@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Staff | MAAP</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="portal-body" data-page="staff">
+  <header class="portal-header">
+    <div class="container portal-nav">
+      <a class="portal-brand" href="dashboard.html">
+        <img src="assets/logo-mark.jpg" alt="MAAP" class="portal-logo" />
+        <div class="portal-brand-text">
+          <div class="portal-org">Madonna Ability Alliance Portal</div>
+          <div class="portal-title">MAAP</div>
+        </div>
+      </a>
+      <div class="portal-right" data-auth></div>
+    </div>
+  </header>
+
+  <main class="portal-page">
+  <div class="container">
+    <div class="portal-heading">
+      <div>
+        <h1 class="portal-h1">Staff Directory</h1>
+        <p class="portal-sub">Search and open staff profiles (Program Coordinators, etc.).</p>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn-maap primary" href="dashboard.html">← Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="portal-card">
+      <div class="staff-toolbar">
+        <div class="staff-search" role="search">
+          <span aria-hidden="true">🔎</span>
+          <input id="staffSearch" placeholder="Search staff by name, title, email…" />
+        </div>
+        <div class="staff-count" id="staffCount">—</div>
+      </div>
+
+      <div id="staffList" class="staff-grid"></div>
+    </div>
+  </div>
+</main>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Staff Profile | MAAP</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="portal-body" data-page="staff_profile">
+  <header class="portal-header">
+    <div class="container portal-nav">
+      <a class="portal-brand" href="staff.html">
+        <img src="assets/logo-mark.jpg" alt="MAAP" class="portal-logo" />
+        <div class="portal-brand-text">
+          <div class="portal-org">Madonna Ability Alliance Portal</div>
+          <div class="portal-title">MAAP</div>
+        </div>
+      </a>
+      <div class="portal-right" data-auth></div>
+    </div>
+  </header>
+
+  <main class="portal-page">
+    <div class="container">
+      <div class="portal-heading">
+        <div>
+          <h1 class="portal-h1" id="staffTitle">Staff</h1>
+          <p class="portal-sub" id="staffRole">—</p>
+        </div>
+        <a class="btn-maap blue" href="staff.html">← Back to Staff</a>
+      </div>
+
+      <div class="portal-grid">
+        <section class="portal-main">
+          <div class="portal-card">
+            <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+              <img id="staffHeadshot" src="empty-headshot.jpg" alt="Headshot" style="height:120px; width:120px; border-radius:16px; object-fit:cover;" />
+              <div style="flex:1; min-width:220px;">
+                <div class="portal-label">Email</div>
+                <div id="staffEmail" class="portal-muted">—</div>
+
+                <div class="portal-label" style="margin-top:10px;">Phone</div>
+                <div id="staffPhone" class="portal-muted">—</div>
+
+                <div class="portal-label" style="margin-top:10px;">Address</div>
+                <div id="staffAddress" class="portal-muted">—</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="portal-side">
+          <div class="portal-card">
+            <div class="portal-card-head">
+              <h2 class="portal-h2">Notes</h2>
+              <p class="portal-muted">Later: permissions + assigned client list.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
