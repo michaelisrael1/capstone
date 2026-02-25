@@ -1,6 +1,6 @@
 /**
  * Minimal JS: demo auth, role simulation, search filtering
- * gotta replace these stubs with real authentication + Hubwise API calls later
+ * Replace these stubs with real authentication + Hubwise API calls later
  */
 
 const demoUsers = {
@@ -9,6 +9,55 @@ const demoUsers = {
   "guardian@madonna.local":  { role: "guardian",  name: "Guardian User" }
 };
 
+
+// Demo data (DB later)
+
+const staff = [
+  {
+    id: "S-2001",
+    name: "Taylor Smith",
+    title: "Program Coordinator",
+    email: "taylor.smith@madonna.local",
+    phone: "(402) 555-0199",
+    address: { street: "7197 Pine Street", city: "Omaha", state: "NE", zip: "68106" },
+    headshotUrl: "assets/empty-headshot.jpg" // placeholder
+  },
+  {
+    id: "S-2002",
+    name: "Jordan Lee",
+    title: "Program Coordinator",
+    email: "jordan.lee@madonna.local",
+    phone: "(402) 555-0108",
+    address: { street: "123 Center Ave", city: "Omaha", state: "NE", zip: "68104" },
+    headshotUrl: "assets/empty-headshot.jpg"
+  },
+  {
+    id: "S-2003",
+    name: "Avery Patel",
+    title: "Program Coordinator",
+    email: "avery.patel@madonna.local",
+    phone: "(402) 555-0141",
+    address: { street: "88 Maple Dr", city: "Omaha", state: "NE", zip: "68114" },
+    headshotUrl: "assets/empty-headshot.jpg"
+  }
+];
+
+// Client profiles (add programCoordinatorId)
+const profiles = [
+  { id:"P-1001", name:"Alex R.",   group:"Adult Services",    inGroup:true,  risk:"High", updated:"2026-02-10", programCoordinatorId:"S-2001" },
+  { id:"P-1002", name:"Jordan M.", group:"Special Education", inGroup:false, risk:"Med",  updated:"2026-01-28", programCoordinatorId:"S-2002" },
+  { id:"P-1003", name:"Sam K.",    group:"Athletics",         inGroup:true,  risk:"Low",  updated:"2026-02-01", programCoordinatorId:"S-2001" },
+];
+
+// Lookups
+function getStaffById(id) {
+  return staff.find(s => s.id === id) || null;
+}
+function getProfileById(id) {
+  return profiles.find(p => p.id === id) || null;
+}
+
+// Session helpers
 function setSession(session) {
   localStorage.setItem("maa_session", JSON.stringify(session));
 }
@@ -26,36 +75,45 @@ function requireAuth() {
   return s;
 }
 
+
+// Permissions
 function canViewAll(role) {
   return role === "president";
 }
 function canEditEmergency(role, inGroup) {
-  // staff can edit emergency contact info when they are in that group
   if (role === "president") return true;
   if (role === "staff" && inGroup) return true;
-  if (role === "guardian" && inGroup) return true; // guardian edits for their client (group membership = their client)
+  if (role === "guardian" && inGroup) return true;
   return false;
 }
 
+// Header auth UI
 function initNavAuthUI() {
   const s = getSession();
   const el = document.querySelector("[data-auth]");
   if (!el) return;
 
   if (!s) {
-    el.innerHTML = `<a class="btn primary" href="portal.html">Alliance Portal</a>`;
+    // If login page doesn't want a button here, leave blank
+    el.innerHTML = ``;
   } else {
+    // "tab" links (might remove if they dont look good in header)
+    const staffLink = `<a class="btn-maap blue" href="staff.html">Staff</a>`;
+
     el.innerHTML = `
       <span class="badge blue">${s.role.toUpperCase()}</span>
-      <button class="btn" id="logoutBtn">Log out</button>
+      ${staffLink}
+      <button class="btn-maap orange" id="logoutBtn">Log out</button>
     `;
+
     document.getElementById("logoutBtn")?.addEventListener("click", () => {
       clearSession();
-      window.location.href = "index.html";
+      window.location.href = "portal.html";
     });
   }
 }
 
+// Login
 function initLoginForm() {
   const form = document.getElementById("loginForm");
   if (!form) return;
@@ -74,25 +132,23 @@ function initLoginForm() {
   });
 }
 
+
+// Dashboard
 function initDashboard() {
   const s = requireAuth();
 
   const who = document.getElementById("whoami");
   if (who) who.textContent = `${s.name} • ${s.role}`;
 
-  // Demo data (replace with Hubwise read)
-  const profiles = [
-    { id:"P-1001", name:"Alex R.",   group:"Adult Services",   inGroup:true,  risk:"High",  updated:"2026-02-10" },
-    { id:"P-1002", name:"Jordan M.", group:"Special Education",inGroup:false, risk:"Med",   updated:"2026-01-28" },
-    { id:"P-1003", name:"Sam K.",    group:"Athletics",       inGroup:true,  risk:"Low",   updated:"2026-02-01" },
-  ];
-
   const tbody = document.getElementById("profilesBody");
   if (tbody) {
     tbody.innerHTML = "";
     profiles
-      .filter(p => canViewAll(s.role) ? true : p.inGroup) // simple “only what you have access to”
+      .filter(p => canViewAll(s.role) ? true : p.inGroup)
       .forEach(p => {
+        const coord = getStaffById(p.programCoordinatorId);
+        const coordinatorName = coord ? coord.name : "Unassigned";
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><a class="link" href="profile.html?id=${encodeURIComponent(p.id)}">${p.name}</a></td>
@@ -100,6 +156,7 @@ function initDashboard() {
           <td><span class="badge ${p.risk === "High" ? "orange" : p.risk === "Med" ? "" : "blue"}">${p.risk}</span></td>
           <td>${p.updated}</td>
         `;
+        // If later add a Coordinator column in the dashboard table, render here.
         tbody.appendChild(tr);
       });
   }
@@ -115,7 +172,7 @@ function initDashboard() {
     });
   }
 
-  // Emergency broadcast role gate (president only)
+  // Emergency broadcast role gate (prez only)
   const broadcastBox = document.getElementById("broadcastBox");
   if (broadcastBox) {
     broadcastBox.style.display = (s.role === "president") ? "block" : "none";
@@ -128,17 +185,38 @@ function initDashboard() {
   });
 }
 
+
+// Client Profile Page
 function initProfilePage() {
   const s = requireAuth();
 
   const params = new URLSearchParams(window.location.search);
   const id = params.get("id") || "P-1001";
 
-  const title = document.getElementById("profileTitle");
-  if (title) title.textContent = `Profile ${id}`;
+// Demo profile data (later replace with DB read)
+const profilesById = {
+  "P-1001": { name: "Alex R.", coordinator: "Taylor Smith" },
+  "P-1002": { name: "Jordan M.", coordinator: "Jordan Lee" },
+  "P-1003": { name: "Sam K.", coordinator: "Taylor Smith" }
+};
 
-  // Demo access: assume staff/guardian only for some profiles
-  const inGroup = (id !== "P-1002"); // pretend P-1002 is not in group
+const profile = profilesById[id] || { name: `Profile ${id}` };
+
+const title = document.getElementById("profileTitle");
+if (title) title.textContent = profile.name;
+
+const coordinatorEl = document.getElementById("coordinatorLink");
+
+if (coordinatorEl && profile.coordinator) {
+  coordinatorEl.innerHTML = `
+    <a href="staff-profile.html?name=${encodeURIComponent(profile.coordinator)}"
+       class="maap-link">
+      ${profile.coordinator}
+    </a>
+  `;
+}
+  // RBAC demo access
+  const inGroup = (id !== "P-1002");
   const canEdit = canEditEmergency(s.role, inGroup);
 
   const editNotice = document.getElementById("editNotice");
@@ -148,7 +226,18 @@ function initProfilePage() {
       : `<span class="badge">Read-only</span>`;
   }
 
-  // Lock/unlock fields
+  // Coordinator link
+  const prof = getProfileById(id);
+  const coord = prof ? getStaffById(prof.programCoordinatorId) : null;
+  const coordEl = document.getElementById("coordinatorLink");
+  if (coordEl) {
+    coordEl.innerHTML = coord
+      ? `<a class="link" href="staff_profile.html?id=${encodeURIComponent(coord.id)}">${coord.name}</a>
+         <div class="small">${coord.title}</div>`
+      : `<span class="small">Unassigned</span>`;
+  }
+
+  // Lock/unlock emergency fields
   const fields = document.querySelectorAll("[data-emergency-field]");
   fields.forEach(f => {
     f.disabled = !canEdit;
@@ -160,9 +249,97 @@ function initProfilePage() {
   });
 }
 
+
+// Staff Directory Page / Image fallback
+function initStaffDirectory() {
+  const s = requireAuth();
+
+  const who = document.getElementById("whoami");
+  if (who) who.textContent = `${s.name} • ${s.role}`;
+
+  const list = document.getElementById("staffList");
+  if (!list) return;
+
+  list.innerHTML = "";
+  staff.forEach(person => {
+    const row = document.createElement("div");
+    row.className = "staff-row";
+    row.innerHTML = `
+  <a class="staff-card" href="staff_profile.html?id=${encodeURIComponent(person.id)}">
+    <div class="staff-avatar">
+      <img
+        src="${person.headshotUrl || 'assets/empty-headshot.jpg'}"
+        alt="${person.name}"
+      />
+    </div>
+
+    <div class="staff-body">
+      <div class="staff-top">
+        <div class="staff-name">${person.name}</div>
+        <span class="staff-pill">${person.title}</span>
+      </div>
+      <div class="staff-meta">
+        <div>${person.email}</div>
+        <div>${person.phone}</div>
+      </div>
+    </div>
+  </a>
+`;
+    list.appendChild(row);
+  });
+
+  const search = document.getElementById("staffSearch");
+  if (search) {
+    search.addEventListener("input", () => {
+      const q = search.value.trim().toLowerCase();
+      [...list.querySelectorAll(".staff-row")].forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+      });
+    });
+  }
+  const staffCount = document.getElementById("staffCount");
+  if (staffCount) staffCount.textContent = `${staff.length} staff`;
+}
+
+
+// Staff Profile Page
+function initStaffProfilePage() {
+  const s = requireAuth();
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id") || "S-2001";
+
+  const person = getStaffById(id);
+
+  const title = document.getElementById("staffTitle");
+  if (title) title.textContent = person ? person.name : `Staff ${id}`;
+
+  const role = document.getElementById("staffRole");
+  if (role) role.textContent = person ? person.title : "—";
+
+  const img = document.getElementById("staffHeadshot");
+  if (img && person) img.src = person.headshotUrl;
+
+  const email = document.getElementById("staffEmail");
+  if (email) email.textContent = person ? person.email : "—";
+
+  const phone = document.getElementById("staffPhone");
+  if (phone) phone.textContent = person ? person.phone : "—";
+
+  const addr = document.getElementById("staffAddress");
+  if (addr && person) {
+    addr.textContent = `${person.address.street}, ${person.address.city}, ${person.address.state} ${person.address.zip}`;
+  }
+}
+
+
+// Boot
 document.addEventListener("DOMContentLoaded", () => {
   initNavAuthUI();
   initLoginForm();
+
   if (document.body.dataset.page === "dashboard") initDashboard();
   if (document.body.dataset.page === "profile") initProfilePage();
+  if (document.body.dataset.page === "staff") initStaffDirectory();
+  if (document.body.dataset.page === "staff_profile") initStaffProfilePage();
 });
