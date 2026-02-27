@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Alliance Portal | Log in</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+
+<body class="portal-body">
+  <header class="portal-header">
+    <div class="container portal-nav">
+      <a class="portal-brand" href="index.html" aria-label="Home">
+  <img
+    src="assets/logo-mark.jpg"
+    alt="Madonna Ability Alliance"
+    class="portal-logo"
+  />
+  <div class="portal-brand-text">
+    <div class="portal-org">Madonna Ability Alliance Portal</div>
+    <div class="portal-title">MAAP</div>
+  </div>
+</a>
+
+
+      <div class="portal-right" data-auth>
+        <!-- madonna logo -->
+  <img
+  src="assets/logo-mark.jpg?v=1"
+  alt="Madonna Ability Alliance"
+  style="height:48px; width:auto; display:block; border:2px solid red; background:#fff; padding:4px;"
+/>
+
+
+    </div>
+  </header>
+
+  <main class="portal-page">
+    <div class="container" style="max-width: 820px;">
+      <div class="portal-heading" style="margin-bottom: 10px;">
+        <div>
+          <h1 class="portal-h1">Log in</h1>
+          <p class="portal-sub">
+            Demo accounts:
+            <strong>president@madonna.local</strong>,
+            <strong>staff@madonna.local</strong>,
+            <strong>guardian@madonna.local</strong>
+            (any password).
+          </p>
+        </div>
+      </div>
+
+      <div class="portal-grid" style="grid-template-columns: 1fr 320px;">
+        <!-- Login card -->
+        <section class="portal-main">
+          <div class="portal-card">
+            <div class="portal-card-head">
+              <h2 class="portal-h2">Sign in</h2>
+              <p class="portal-muted">Use your assigned account to access profiles and emergency info.</p>
+            </div>
+
+            <form id="loginForm" class="portal-form">
+              <label class="portal-label" for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="username" required
+                     style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(0,0,0,.12);" />
+
+              <label class="portal-label" for="password">Password</label>
+              <input id="password" name="password" type="password" autocomplete="current-password" required
+                     style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(0,0,0,.12);" />
+
+              <div class="portal-actions" style="margin-top: 12px;">
+                <button class="portal-btn-orange" type="submit">Log in</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="portal-footnote">
+            Next step: connect this page to real authentication (Azure AD, Google Workspace, Auth0, etc.)
+            and replace demo storage with secure tokens.
+          </div>
+        </section>
+
+        <!-- Side card -->
+        <aside class="portal-side">
+          <div class="portal-card">
+            <div class="portal-card-head">
+              <h2 class="portal-h2">What you can do</h2>
+              <p class="portal-muted">
+                Search profiles, view emergency contacts, and update info based on your role.
+              </p>
+            </div>
+
+            <div class="quick-list">
+              <div class="quick-item" style="cursor:default;">
+                <div class="quick-icon">🔎</div>
+                <div>
+                  <div class="quick-title">Search fast</div>
+                  <div class="quick-sub">Find the right profile quickly</div>
+                </div>
+              </div>
+              <div class="quick-item" style="cursor:default;">
+                <div class="quick-icon">🧾</div>
+                <div>
+                  <div class="quick-title">Emergency info</div>
+                  <div class="quick-sub">Contacts + critical needs</div>
+                </div>
+              </div>
+              <div class="quick-item" style="cursor:default;">
+                <div class="quick-icon">🛡️</div>
+                <div>
+                  <div class="quick-title">Role-based access</div>
+                  <div class="quick-sub">Only what you’re allowed to see</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
+
+
+

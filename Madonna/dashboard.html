@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard | Alliance Portal</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+
+<body data-page="dashboard" class="portal-body">
+  <!-- Portal header -->
+  <header class="portal-header">
+    <div class="container portal-nav">
+      <a class="portal-brand" href="index.html" aria-label="Home">
+        <img src="assets/logo-mark.jpg" alt="Madonna Ability Alliance" class="portal-logo" />
+
+        <div class="portal-brand-text">
+          <div class="portal-org">Madonna Ability Alliance Portal</div>
+          <div class="portal-title">MAAP</div>
+        </div>
+      </a>
+
+      <div class="portal-right" data-auth></div>
+    </div>
+  </header>
+
+  <main class="portal-page">
+    <div class="container">
+      <!-- Page heading -->
+      <div class="portal-heading">
+        <div>
+          <h1 class="portal-h1">Dashboard</h1>
+          <p class="portal-sub">Signed in as <strong id="whoami"></strong></p>
+        </div>
+
+        <div class="portal-meta">
+          <span class="pill-label">Archive</span>
+          <span class="pill-label blue">Profiles</span>
+          <span class="pill-label orange">Emergency</span>
+        </div>
+      </div>
+
+      <!-- Layout: main + sidebar -->
+      <div class="portal-grid">
+        <!-- Main column -->
+        <section class="portal-main">
+          <!-- Search + filters -->
+          <div class="portal-toolbar">
+            <div class="portal-search" role="search" aria-label="Search profiles">
+              <span aria-hidden="true">🔎</span>
+              <input id="searchInput" placeholder="Search by name, group, allergy, mobility, risk…" />
+            </div>
+
+            <div class="portal-filters" aria-label="Filters">
+              <select id="filterRisk" aria-label="Filter by risk">
+                <option value="">Risk: Any</option>
+                <option>High</option>
+                <option>Med</option>
+                <option>Low</option>
+              </select>
+
+              <select id="filterUpdated" aria-label="Filter by updated date">
+                <option value="">Updated: Any</option>
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="365">Last year</option>
+              </select>
+
+              <button class="portal-btn-lite" id="clearFilters" type="button">Clear</button>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <div class="portal-card">
+            <div class="portal-card-head">
+              <h2 class="portal-h2">Profiles</h2>
+              <p class="portal-muted">Only profiles you have access to will appear here.</p>
+            </div>
+
+            <div class="portal-table-wrap">
+              <table class="portal-table" aria-label="Profiles list">
+                <thead>
+                  <tr>
+                    <th>Profile</th>
+                    <th>Group</th>
+                    <th>Flags</th>
+                    <th>Last Updated</th>
+                  </tr>
+                </thead>
+                <tbody id="profilesBody"></tbody>
+              </table>
+            </div>
+
+            <div class="portal-footnote">
+              Demo logic: President sees all profiles; staff/guardians see only in-group profiles.
+            </div>
+          </div>
+
+          <!-- President-only broadcast panel (kept with same id) -->
+          <div id="broadcastBox" class="portal-card" style="display:none;">
+            <div class="portal-card-head row-split">
+              <div>
+                <h2 class="portal-h2">Emergency Broadcast</h2>
+                <p class="portal-muted">President-only: send automated emergency messaging.</p>
+              </div>
+              <span class="pill-label orange">President</span>
+            </div>
+
+            <div class="portal-form">
+              <label class="portal-label" for="broadcastMsg">Message</label>
+              <textarea id="broadcastMsg" rows="3"
+                placeholder="Example: Weather closure today — all afternoon programs canceled."></textarea>
+
+              <div class="portal-actions">
+                <button class="portal-btn-orange" id="sendBroadcast" type="button">Send broadcast</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sidebar -->
+        <aside class="portal-side">
+          <div class="portal-card">
+            <div class="portal-card-head">
+              <h2 class="portal-h2">Quick Actions</h2>
+              <p class="portal-muted">Common tasks for emergencies and updates.</p>
+            </div>
+
+            <div class="quick-list">
+              <a class="quick-item" href="profile.html?id=P-1001">
+                <div class="quick-icon" aria-hidden="true">🧾</div>
+                <div>
+                  <div class="quick-title">Open a profile</div>
+                  <div class="quick-sub">Review emergency contacts & needs</div>
+                </div>
+              </a>
+
+              <a class="quick-item" href="#">
+                <div class="quick-icon" aria-hidden="true">👥</div>
+                <div>
+                  <div class="quick-title">Browse groups</div>
+                  <div class="quick-sub">View assigned groups (coming soon)</div>
+                </div>
+              </a>
+
+              <a class="quick-item" href="#">
+                <div class="quick-icon" aria-hidden="true">🛡️</div>
+                <div>
+                  <div class="quick-title">Access rules</div>
+                  <div class="quick-sub">Role-based visibility summary</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div class="portal-card">
+            <div class="portal-card-head">
+              <h2 class="portal-h2">Privacy Reminder</h2>
+              <p class="portal-muted">
+                This portal contains sensitive emergency information. Only access and update records you are authorized to view.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/app.js"></script>
+
+  <!-- small client-side filters (won’t break anything if removed) -->
+  <script>
+    // Simple table filtering on top of existing demo search.
+    // This only hides rows, real system should enforce RBAC on the server/Hubwise layer
+    (function () {
+      const riskSel = document.getElementById("filterRisk");
+      const updSel = document.getElementById("filterUpdated");
+      const clearBtn = document.getElementById("clearFilters");
+      const tbody = document.getElementById("profilesBody");
+
+      function apply() {
+        if (!tbody) return;
+        const risk = (riskSel?.value || "").trim().toLowerCase();
+        const days = parseInt(updSel?.value || "0", 10);
+
+        const now = new Date();
+        [...tbody.querySelectorAll("tr")].forEach(tr => {
+          const text = tr.textContent.toLowerCase();
+          let ok = true;
+
+          // Risk filter (looks for badge text)
+          if (risk) ok = ok && text.includes(risk);
+
+          // Updated filter (assumes last cell contains YYYY-MM-DD)
+          if (days > 0) {
+            const cells = tr.querySelectorAll("td");
+            const dateStr = (cells[cells.length - 1]?.textContent || "").trim();
+            const dt = new Date(dateStr);
+            if (!isNaN(dt)) {
+              const diffDays = Math.floor((now - dt) / (1000 * 60 * 60 * 24));
+              ok = ok && diffDays <= days;
+            }
+          }
+
+          tr.style.display = ok ? "" : "none";
+        });
+      }
+
+      riskSel?.addEventListener("change", apply);
+      updSel?.addEventListener("change", apply);
+      clearBtn?.addEventListener("click", () => {
+        if (riskSel) riskSel.value = "";
+        if (updSel) updSel.value = "";
+        apply();
+      });
+
+      // Re-apply after app.js populates rows
+      window.setTimeout(apply, 150);
+    })();
+  </script>
+</body>
+</html>
+
