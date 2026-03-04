@@ -163,6 +163,21 @@ function initProfilePage() {
   });
 }
 
+function handleYesNoOlympics(choice) {
+	const yes = document.getElementById('yes-olympics');
+	const no = document.getElementById('no-olympics');
+	const extra = document.getElementById('sport-options')
+
+	if(choice == 'yes') {
+		no.checked = false;
+		extra.style.display = yes.checked ? 'block' : 'none';
+	} else {
+		yes.checked = false;
+		extra.style.display = 'none';
+	}
+
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initNavAuthUI();
   initLoginForm();
