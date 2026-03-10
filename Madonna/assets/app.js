@@ -178,11 +178,35 @@ function initDashboard() {
     broadcastBox.style.display = (s.role === "president") ? "block" : "none";
   }
 
-  document.getElementById("sendBroadcast")?.addEventListener("click", () => {
-    const msg = (document.getElementById("broadcastMsg")?.value || "").trim();
-    if (!msg) return alert("Please enter a message.");
-    alert("Demo: would trigger automated emergency messaging.\n\n" + msg);
-  });
+  // Broadcast scope UI (president)
+const scopeSel = document.getElementById("broadcastScope");
+const programWrap = document.getElementById("broadcastProgramWrap");
+const groupWrap = document.getElementById("broadcastGroupWrap");
+
+function syncScopeUI() {
+  const scope = scopeSel?.value || "all";
+  if (programWrap) programWrap.style.display = (scope === "program") ? "block" : "none";
+  if (groupWrap) groupWrap.style.display = (scope === "group") ? "block" : "none";
+}
+scopeSel?.addEventListener("change", syncScopeUI);
+syncScopeUI();
+
+
+document.getElementById("sendBroadcast")?.addEventListener("click", () => {
+  const msg = (document.getElementById("broadcastMsg")?.value || "").trim();
+  if (!msg) return alert("Please enter a message.");
+
+  const scope = (document.getElementById("broadcastScope")?.value || "all");
+  const program = (document.getElementById("broadcastProgram")?.value || "");
+  const group = (document.getElementById("broadcastGroup")?.value || "");
+
+  let audienceLabel = "Everyone";
+  if (scope === "program") audienceLabel = `Program: ${program}`;
+  if (scope === "group") audienceLabel = `Group: ${group}`;
+
+  // Demo behavior (later: POST to Hubwise / messaging service)
+  alert(`Demo: would send emergency announcement to:\n${audienceLabel}\n\nMessage:\n${msg}`);
+});
 }
 
 
@@ -343,3 +367,4 @@ document.addEventListener("DOMContentLoaded", () => {
   if (document.body.dataset.page === "staff") initStaffDirectory();
   if (document.body.dataset.page === "staff_profile") initStaffProfilePage();
 });
+
