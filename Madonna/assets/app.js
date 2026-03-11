@@ -43,11 +43,68 @@ const staff = [
 ];
 
 // Client profiles (add programCoordinatorId)
-const profiles = [
-  { id:"P-1001", name:"Alex R.",   group:"Adult Services",    inGroup:true,  risk:"High", updated:"2026-02-10", programCoordinatorId:"S-2001" },
-  { id:"P-1002", name:"Jordan M.", group:"Special Education", inGroup:false, risk:"Med",  updated:"2026-01-28", programCoordinatorId:"S-2002" },
-  { id:"P-1003", name:"Sam K.",    group:"Athletics",         inGroup:true,  risk:"Low",  updated:"2026-02-01", programCoordinatorId:"S-2001" },
+const defaultProfiles = [
+  { id:"P-1001", name:"Alex R.",   group:"Adult Services",    inGroup:true,  tags:["ds", "se", "vr"], updated:"2026-02-10", programCoordinatorId:"S-2001" },
+  { id:"P-1002", name:"Jordan M.", group:"Special Education", inGroup:false, tags:["so", "se", "vr"],  updated:"2026-01-28", programCoordinatorId:"S-2002" },
+  { id:"P-1003", name:"Sam K.",    group:"Athletics",         inGroup:true,  tags:["ds", "se", "so"],  updated:"2026-02-01", programCoordinatorId:"S-2001" },
 ];
+
+// Saves profile changes to browser storage for illustration of feature only - in real app, would save to Hubwise or DB
+let profiles = getStoredProfiles();
+
+// Tags
+const tag_definitions = {
+  so: { text: "SO", className: "tag-so", label: "Special Olympics" },
+  e: { text: "E", className: "tag-e", label: "Elementary" },
+  s: { text: "S", className: "tag-s", label: "Secondary" },
+  ya: { text: "YA", className: "tag-ya", label: "Young Adult" },
+  ds: { text: "DS", className: "tag-ds", label: "Day Services" },
+  se: { text: "SE", className: "tag-se", label: "Supported Employment" },
+  vr: { text: "VR", className: "tag-vr", label: "Voc Rehab" },
+  sfl: { text: "SFL", className: "tag-sfl", label: "Supported Family Living" },
+  il: { text: "IL", className: "tag-il", label: "Independent Living" },
+  a: { text: "A", className: "tag-a", label: "Administrator" },
+}
+
+
+function renderTags(tagCodes = []) {
+  if (!tagCodes.length) return '<span class="portal-muted">-</span>';
+
+  return `
+    <div class="profile-tags">
+      ${tagCodes
+      .map(code => {
+        const tag = tag_definitions[code];
+        if (!tag) return '';
+        return `<span class="tags-form ${tag.className}" title="${tag.label}">${tag.text}</span>`;
+      })
+      .join("")}
+    </div>
+  `;
+}
+
+
+function renderTagCheckboxes(container, selectedTags = [], disabled = false) {
+  if (!container) return;
+
+  container.innerHTML = Object.entries(tag_definitions)
+      .map(([code, tag]) => `
+      <label class="tag-checkbox-item">
+        <input
+          type="checkbox"
+          value="${code}"
+          ${selectedTags.includes(code) ? "checked" : ""}
+          ${disabled ? "disabled" : ""}
+        />
+        <span class="tag-checkbox-label">
+          <span class="tags-form ${tag.className}" title="${tag.label}">${tag.text}</span>
+          <span>${tag.label}</span>
+        </span>
+      </label>
+    `)
+      .join("");
+}
+
 
 // Lookups
 function getStaffById(id) {
@@ -55,6 +112,20 @@ function getStaffById(id) {
 }
 function getProfileById(id) {
   return profiles.find(p => p.id === id) || null;
+}
+
+// Saves profile changes to browser storage for illustration of feature only - in real app, would save to Hubwise or DB
+function getStoredProfiles() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("maa_profiles") || "null");
+    return Array.isArray(saved) ? saved : structuredClone(defaultProfiles);
+  } catch {
+    return structuredClone(defaultProfiles);
+  }
+}
+
+function saveProfiles() {
+  localStorage.setItem("maa_profiles", JSON.stringify(profiles));
 }
 
 // Session helpers
@@ -153,7 +224,7 @@ function initDashboard() {
         tr.innerHTML = `
           <td><a class="link" href="profile.html?id=${encodeURIComponent(p.id)}">${p.name}</a></td>
           <td>${p.group}</td>
-          <td><span class="badge ${p.risk === "High" ? "orange" : p.risk === "Med" ? "" : "blue"}">${p.risk}</span></td>
+          <td>${renderTags(p.tags || [])}</td>
           <td>${p.updated}</td>
         `;
         // If later add a Coordinator column in the dashboard table, render here.
@@ -194,27 +265,27 @@ function initProfilePage() {
   const id = params.get("id") || "P-1001";
 
 // Demo profile data (later replace with DB read)
-const profilesById = {
-  "P-1001": { name: "Alex R.", coordinator: "Taylor Smith" },
-  "P-1002": { name: "Jordan M.", coordinator: "Jordan Lee" },
-  "P-1003": { name: "Sam K.", coordinator: "Taylor Smith" }
-};
+  const profilesById = {
+    "P-1001": {name: "Alex R.", coordinator: "Taylor Smith"},
+    "P-1002": {name: "Jordan M.", coordinator: "Jordan Lee"},
+    "P-1003": {name: "Sam K.", coordinator: "Taylor Smith"}
+  };
 
-const profile = profilesById[id] || { name: `Profile ${id}` };
+  const profile = profilesById[id] || {name: `Profile ${id}`};
 
-const title = document.getElementById("profileTitle");
-if (title) title.textContent = profile.name;
+  const title = document.getElementById("profileTitle");
+  if (title) title.textContent = profile.name;
 
-const coordinatorEl = document.getElementById("coordinatorLink");
+  const coordinatorEl = document.getElementById("coordinatorLink");
 
-if (coordinatorEl && profile.coordinator) {
-  coordinatorEl.innerHTML = `
+  if (coordinatorEl && profile.coordinator) {
+    coordinatorEl.innerHTML = `
     <a href="staff-profile.html?name=${encodeURIComponent(profile.coordinator)}"
        class="maap-link">
       ${profile.coordinator}
     </a>
   `;
-}
+  }
   // RBAC demo access
   const inGroup = (id !== "P-1002");
   const canEdit = canEditEmergency(s.role, inGroup);
@@ -222,8 +293,8 @@ if (coordinatorEl && profile.coordinator) {
   const editNotice = document.getElementById("editNotice");
   if (editNotice) {
     editNotice.innerHTML = canEdit
-      ? `<span class="badge blue">You can edit emergency info</span>`
-      : `<span class="badge">Read-only</span>`;
+        ? `<span class="badge blue">You can edit emergency info</span>`
+        : `<span class="badge">Read-only</span>`;
   }
 
   // Coordinator link
@@ -232,9 +303,9 @@ if (coordinatorEl && profile.coordinator) {
   const coordEl = document.getElementById("coordinatorLink");
   if (coordEl) {
     coordEl.innerHTML = coord
-      ? `<a class="link" href="staff_profile.html?id=${encodeURIComponent(coord.id)}">${coord.name}</a>
+        ? `<a class="link" href="staff_profile.html?id=${encodeURIComponent(coord.id)}">${coord.name}</a>
          <div class="small">${coord.title}</div>`
-      : `<span class="small">Unassigned</span>`;
+        : `<span class="small">Unassigned</span>`;
   }
 
   // Lock/unlock emergency fields
@@ -243,12 +314,31 @@ if (coordinatorEl && profile.coordinator) {
     f.disabled = !canEdit;
   });
 
+  // Render tag checkboxes
+  const tagEditor = document.getElementById("profileTagsEditor");
+  if (tagEditor && prof) {
+    renderTagCheckboxes(tagEditor, prof.tags || [], !canEdit);
+  }
+
   document.getElementById("saveEmergency")?.addEventListener("click", () => {
-    if (!canEdit) return alert("You don’t have permission to edit this profile’s emergency info.");
-    alert("Demo: would SAVE to Hubwise (add/edit).");
+    if (!canEdit) {
+      alert("You don’t have permission to edit this profile’s emergency info.");
+      return;
+    }
+
+    // Save selected tags back to profile object
+    if (prof && tagEditor) {
+      const selectedTags = [...tagEditor.querySelectorAll('input[type="checkbox"]:checked')]
+          .map(cb => cb.value);
+
+      prof.tags = selectedTags;
+      prof.updated = new Date().toISOString().slice(0, 10);
+      saveProfiles();
+    }
+
+    alert("Demo: would SAVE to Hubwise (add/edit). Tags updated for dashboard view.");
   });
 }
-
 
 // Staff Directory Page / Image fallback
 function initStaffDirectory() {
@@ -343,3 +433,5 @@ document.addEventListener("DOMContentLoaded", () => {
   if (document.body.dataset.page === "staff") initStaffDirectory();
   if (document.body.dataset.page === "staff_profile") initStaffProfilePage();
 });
+
+
