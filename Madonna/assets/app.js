@@ -44,15 +44,13 @@ const staff = [
 
 // Client profiles (add programCoordinatorId)
 const defaultProfiles = [
-  { id:"P-1001", name:"Alex R.",   group:"Adult Services",    inGroup:true,  tags:["ds", "se", "vr"], updated:"2026-02-10", programCoordinatorId:"S-2001" },
-  { id:"P-1002", name:"Jordan M.", group:"Special Education", inGroup:false, tags:["so", "se", "vr"],  updated:"2026-01-28", programCoordinatorId:"S-2002" },
-  { id:"P-1003", name:"Sam K.",    group:"Athletics",         inGroup:true,  tags:["ds", "se", "so"],  updated:"2026-02-01", programCoordinatorId:"S-2001" },
+  { id:"P-1001", name:"Alex R.", group:"Adult Services", inGroup:true, mediaConsent:"Yes", tags:["ds", "se", "vr"], risks:["allergy", "sensory", "mobility"], updated:"2026-02-10", programCoordinatorId:"S-2001" },
+  { id:"P-1002", name:"Jordan M.", group:"Special Education", inGroup:false, mediaConsent:"No", tags:["so", "se", "vr"], risks:["behavioral", "communication"], updated:"2026-01-28", programCoordinatorId:"S-2002" },
+  { id:"P-1003", name:"Sam K.", group:"Athletics", inGroup:true, mediaConsent:"Yes", tags:["ds", "se", "so"], risks:["seizure", "medication"], updated:"2026-02-01", programCoordinatorId:"S-2001" },
 ];
 
-// Saves profile changes to browser storage for illustration of feature only - in real app, would save to Hubwise or DB
 let profiles = getStoredProfiles();
 
-// Tags
 const tag_definitions = {
   so: { text: "SO", className: "tag-so", label: "Special Olympics" },
   e: { text: "E", className: "tag-e", label: "Elementary" },
@@ -64,8 +62,20 @@ const tag_definitions = {
   sfl: { text: "SFL", className: "tag-sfl", label: "Supported Family Living" },
   il: { text: "IL", className: "tag-il", label: "Independent Living" },
   a: { text: "A", className: "tag-a", label: "Administrator" },
-}
+};
 
+const risk_definitions = {
+  allergy: { label: "Allergy" },
+  seizure: { label: "Seizure" },
+  fall: { label: "Fall Risk" },
+  elopement: { label: "Elopement" },
+  wheelchair: { label: "Wheelchair" },
+  mobility: { label: "Mobility Support" },
+  communication: { label: "Communication Support" },
+  behavioral: { label: "Behavioral Support" },
+  sensory: { label: "Sensory Support" },
+  medication: { label: "Medication Alert" },
+};
 
 function renderTags(tagCodes = []) {
   if (!tagCodes.length) return '<span class="portal-muted">-</span>';
@@ -73,22 +83,21 @@ function renderTags(tagCodes = []) {
   return `
     <div class="profile-tags">
       ${tagCodes
-      .map(code => {
-        const tag = tag_definitions[code];
-        if (!tag) return '';
-        return `<span class="tags-form ${tag.className}" title="${tag.label}">${tag.text}</span>`;
-      })
-      .join("")}
+        .map(code => {
+          const tag = tag_definitions[code];
+          if (!tag) return "";
+          return `<span class="tags-form ${tag.className}" title="${tag.label}">${tag.text}</span>`;
+        })
+        .join("")}
     </div>
   `;
 }
-
 
 function renderTagCheckboxes(container, selectedTags = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(tag_definitions)
-      .map(([code, tag]) => `
+    .map(([code, tag]) => `
       <label class="tag-checkbox-item">
         <input
           type="checkbox"
@@ -102,9 +111,44 @@ function renderTagCheckboxes(container, selectedTags = [], disabled = false) {
         </span>
       </label>
     `)
-      .join("");
+    .join("");
 }
 
+function renderRiskBadges(riskCodes = []) {
+  if (!riskCodes.length) return '<span class="portal-muted">-</span>';
+
+  return `
+    <div class="risk-badges">
+      ${riskCodes
+        .map(code => {
+          const risk = risk_definitions[code];
+          if (!risk) return "";
+          return `<span class="risk-badge" title="${risk.label}">${risk.label}</span>`;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function renderRiskCheckboxes(container, selectedRisks = [], disabled = false) {
+  if (!container) return;
+
+  container.innerHTML = Object.entries(risk_definitions)
+    .map(([code, risk]) => `
+      <label class="tag-checkbox-item">
+        <input
+          type="checkbox"
+          value="${code}"
+          ${selectedRisks.includes(code) ? "checked" : ""}
+          ${disabled ? "disabled" : ""}
+        />
+        <span class="tag-checkbox-label">
+          <span>${risk.label}</span>
+        </span>
+      </label>
+    `)
+    .join("");
+}
 
 // Lookups
 function getStaffById(id) {
@@ -114,7 +158,6 @@ function getProfileById(id) {
   return profiles.find(p => p.id === id) || null;
 }
 
-// Saves profile changes to browser storage for illustration of feature only - in real app, would save to Hubwise or DB
 function getStoredProfiles() {
   try {
     const saved = JSON.parse(localStorage.getItem("maa_profiles") || "null");
@@ -151,11 +194,20 @@ function requireAuth() {
 function canViewAll(role) {
   return role === "president";
 }
+
+function canSendBroadcast(role) {
+  return role === "president" || role === "staff";
+}
+
 function canEditEmergency(role, inGroup) {
   if (role === "president") return true;
   if (role === "staff" && inGroup) return true;
   if (role === "guardian" && inGroup) return true;
   return false;
+}
+
+function getAccessibleProfiles(session) {
+  return profiles.filter(p => canViewAll(session.role) ? true : p.inGroup);
 }
 
 // Header auth UI
@@ -207,6 +259,7 @@ function initLoginForm() {
 // Dashboard
 function initDashboard() {
   const s = requireAuth();
+  const accessibleProfiles = getAccessibleProfiles(s);
 
   const who = document.getElementById("whoami");
   if (who) who.textContent = `${s.name} • ${s.role}`;
@@ -214,20 +267,20 @@ function initDashboard() {
   const tbody = document.getElementById("profilesBody");
   if (tbody) {
     tbody.innerHTML = "";
-    profiles
-      .filter(p => canViewAll(s.role) ? true : p.inGroup)
-      .forEach(p => {
-        const coord = getStaffById(p.programCoordinatorId);
-        const coordinatorName = coord ? coord.name : "Unassigned";
-
+    accessibleProfiles.forEach(p => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><a class="link" href="profile.html?id=${encodeURIComponent(p.id)}">${p.name}</a></td>
-          <td>${p.group}</td>
-          <td>${renderTags(p.tags || [])}</td>
+        <td>${renderTags(p.tags || [])}</td>
+        <td>${renderRiskBadges(p.risks || [])}</td>
+        <td>
+          <span class="badge ${p.mediaConsent === "Yes" ? "blue" : "orange"}">
+            ${p.mediaConsent}
+            </span>
+          </td>
           <td>${p.updated}</td>
         `;
-        // If later add a Coordinator column in the dashboard table, render here.
+        // If I later add a Coordinator column in the dashboard table, render here.
         tbody.appendChild(tr);
       });
   }
@@ -243,16 +296,90 @@ function initDashboard() {
     });
   }
 
-  // Emergency broadcast role gate (prez only)
+  // Emergency broadcast role gate
   const broadcastBox = document.getElementById("broadcastBox");
   if (broadcastBox) {
-    broadcastBox.style.display = (s.role === "president") ? "block" : "none";
+    broadcastBox.style.display = canSendBroadcast(s.role) ? "block" : "none";
   }
+
+  const broadcastHelp = document.getElementById("broadcastHelp");
+  const broadcastRoleBadge = document.getElementById("broadcastRoleBadge");
+  const scopeSel = document.getElementById("broadcastScope");
+  const programWrap = document.getElementById("broadcastProgramWrap");
+  const groupWrap = document.getElementById("broadcastGroupWrap");
+  const programSel = document.getElementById("broadcastProgram");
+  const groupSel = document.getElementById("broadcastGroup");
+
+  const accessibleTagCodes = [...new Set(accessibleProfiles.flatMap(p => p.tags || []))]
+    .filter(code => tag_definitions[code]);
+  const accessibleGroups = [...new Set(accessibleProfiles.map(p => p.group).filter(Boolean))];
+
+  if (broadcastRoleBadge) {
+    broadcastRoleBadge.textContent = s.role === "president" ? "President" : "Staff";
+    broadcastRoleBadge.className = `pill-label ${s.role === "president" ? "orange" : "blue"}`;
+  }
+
+  if (broadcastHelp) {
+    broadcastHelp.textContent = s.role === "president"
+      ? "President: send automated emergency messaging to everyone or targeted recipients."
+      : "Staff: send alerts only to the people and guardians tied to profiles you can access.";
+  }
+
+  if (scopeSel) {
+    scopeSel.options[0].text = s.role === "president" ? "Everyone" : "My assigned people";
+  }
+
+  if (programSel) {
+    const defaultLabel = s.role === "president" ? "All accessible programs" : "All my programs";
+    programSel.innerHTML = [
+      `<option value="">${defaultLabel}</option>`,
+      ...accessibleTagCodes.map(code => `<option value="${code}">${tag_definitions[code].label}</option>`)
+    ].join("");
+  }
+
+  if (groupSel) {
+    const defaultLabel = s.role === "president" ? "All accessible groups" : "All my groups";
+    groupSel.innerHTML = [
+      `<option value="">${defaultLabel}</option>`,
+      ...accessibleGroups.map(group => `<option value="${group}">${group}</option>`)
+    ].join("");
+  }
+
+  function syncScopeUI() {
+    const scope = scopeSel?.value || "all";
+    if (programWrap) programWrap.style.display = (scope === "program") ? "block" : "none";
+    if (groupWrap) groupWrap.style.display = (scope === "group") ? "block" : "none";
+  }
+
+  scopeSel?.addEventListener("change", syncScopeUI);
+  syncScopeUI();
 
   document.getElementById("sendBroadcast")?.addEventListener("click", () => {
     const msg = (document.getElementById("broadcastMsg")?.value || "").trim();
     if (!msg) return alert("Please enter a message.");
-    alert("Demo: would trigger automated emergency messaging.\n\n" + msg);
+    if (!canSendBroadcast(s.role)) return alert("You do not have permission to send alerts.");
+
+    const scope = scopeSel?.value || "all";
+    const program = programSel?.value || "";
+    const group = groupSel?.value || "";
+
+    let targets = accessibleProfiles;
+    let audienceLabel = s.role === "president" ? "Everyone" : "My assigned people and guardians";
+
+    if (scope === "program" && program) {
+      targets = accessibleProfiles.filter(p => (p.tags || []).includes(program));
+      audienceLabel = `Program: ${tag_definitions[program]?.label || program}`;
+    } else if (scope === "group" && group) {
+      targets = accessibleProfiles.filter(p => p.group === group);
+      audienceLabel = `Group: ${group}`;
+    }
+
+    if (!targets.length) {
+      return alert("No eligible recipients were found for that selection.");
+    }
+
+    const recipientNames = targets.map(p => p.name).join(", ");
+    alert(`Demo: would send emergency announcement to:\n${audienceLabel}\nRecipients: ${recipientNames}\n\nMessage:\n${msg}`);
   });
 }
 
@@ -265,27 +392,27 @@ function initProfilePage() {
   const id = params.get("id") || "P-1001";
 
 // Demo profile data (later replace with DB read)
-  const profilesById = {
-    "P-1001": {name: "Alex R.", coordinator: "Taylor Smith"},
-    "P-1002": {name: "Jordan M.", coordinator: "Jordan Lee"},
-    "P-1003": {name: "Sam K.", coordinator: "Taylor Smith"}
-  };
+const profilesById = {
+  "P-1001": { name: "Alex R.", coordinator: "Taylor Smith" },
+  "P-1002": { name: "Jordan M.", coordinator: "Jordan Lee" },
+  "P-1003": { name: "Sam K.", coordinator: "Taylor Smith" }
+};
 
-  const profile = profilesById[id] || {name: `Profile ${id}`};
+const profile = profilesById[id] || { name: `Profile ${id}` };
 
-  const title = document.getElementById("profileTitle");
-  if (title) title.textContent = profile.name;
+const title = document.getElementById("profileTitle");
+if (title) title.textContent = profile.name;
 
-  const coordinatorEl = document.getElementById("coordinatorLink");
+const coordinatorEl = document.getElementById("coordinatorLink");
 
-  if (coordinatorEl && profile.coordinator) {
-    coordinatorEl.innerHTML = `
+if (coordinatorEl && profile.coordinator) {
+  coordinatorEl.innerHTML = `
     <a href="staff-profile.html?name=${encodeURIComponent(profile.coordinator)}"
        class="maap-link">
       ${profile.coordinator}
     </a>
   `;
-  }
+}
   // RBAC demo access
   const inGroup = (id !== "P-1002");
   const canEdit = canEditEmergency(s.role, inGroup);
@@ -293,8 +420,8 @@ function initProfilePage() {
   const editNotice = document.getElementById("editNotice");
   if (editNotice) {
     editNotice.innerHTML = canEdit
-        ? `<span class="badge blue">You can edit emergency info</span>`
-        : `<span class="badge">Read-only</span>`;
+      ? `<span class="badge blue">You can edit emergency info</span>`
+      : `<span class="badge">Read-only</span>`;
   }
 
   // Coordinator link
@@ -303,9 +430,9 @@ function initProfilePage() {
   const coordEl = document.getElementById("coordinatorLink");
   if (coordEl) {
     coordEl.innerHTML = coord
-        ? `<a class="link" href="staff_profile.html?id=${encodeURIComponent(coord.id)}">${coord.name}</a>
+      ? `<a class="link" href="staff_profile.html?id=${encodeURIComponent(coord.id)}">${coord.name}</a>
          <div class="small">${coord.title}</div>`
-        : `<span class="small">Unassigned</span>`;
+      : `<span class="small">Unassigned</span>`;
   }
 
   // Lock/unlock emergency fields
@@ -314,31 +441,34 @@ function initProfilePage() {
     f.disabled = !canEdit;
   });
 
-  // Render tag checkboxes
   const tagEditor = document.getElementById("profileTagsEditor");
   if (tagEditor && prof) {
     renderTagCheckboxes(tagEditor, prof.tags || [], !canEdit);
   }
 
-  document.getElementById("saveEmergency")?.addEventListener("click", () => {
-    if (!canEdit) {
-      alert("You don’t have permission to edit this profile’s emergency info.");
-      return;
-    }
+  const riskEditor = document.getElementById("profileRisksEditor");
+  if (riskEditor && prof) {
+    renderRiskCheckboxes(riskEditor, prof.risks || [], !canEdit);
+  }
 
-    // Save selected tags back to profile object
+  document.getElementById("saveEmergency")?.addEventListener("click", () => {
+    if (!canEdit) return alert("You don’t have permission to edit this profile’s emergency info.");
     if (prof && tagEditor) {
       const selectedTags = [...tagEditor.querySelectorAll('input[type="checkbox"]:checked')]
-          .map(cb => cb.value);
+        .map(cb => cb.value);
 
       prof.tags = selectedTags;
+      prof.risks = riskEditor
+        ? [...riskEditor.querySelectorAll('input[type="checkbox"]:checked')].map(cb => cb.value)
+        : (prof.risks || []);
       prof.updated = new Date().toISOString().slice(0, 10);
       saveProfiles();
     }
 
-    alert("Demo: would SAVE to Hubwise (add/edit). Tags updated for dashboard view.");
+    alert("Demo: would SAVE to Hubwise (add/edit).");
   });
 }
+
 
 // Staff Directory Page / Image fallback
 function initStaffDirectory() {
@@ -420,6 +550,22 @@ function initStaffProfilePage() {
   if (addr && person) {
     addr.textContent = `${person.address.street}, ${person.address.city}, ${person.address.state} ${person.address.zip}`;
   }
+  // ---------- Personal notes (account-specific) ----------
+const noteKey = `maap_note_${id}_${s.email}`;
+
+const notesField = document.getElementById("personalNotes");
+const saveNotesBtn = document.getElementById("saveNotes");
+
+// load saved note
+if (notesField) {
+  notesField.value = localStorage.getItem(noteKey) || "";
+}
+
+// save note
+saveNotesBtn?.addEventListener("click", () => {
+  localStorage.setItem(noteKey, notesField.value.trim());
+  alert("Personal note saved.");
+});
 }
 
 
@@ -433,5 +579,3 @@ document.addEventListener("DOMContentLoaded", () => {
   if (document.body.dataset.page === "staff") initStaffDirectory();
   if (document.body.dataset.page === "staff_profile") initStaffProfilePage();
 });
-
-

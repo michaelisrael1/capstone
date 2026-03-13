@@ -55,9 +55,16 @@
             <div class="portal-filters" aria-label="Filters">
               <select id="filterRisk" aria-label="Filter by risk">
                 <option value="">Risk: Any</option>
-                <option>High</option>
-                <option>Med</option>
-                <option>Low</option>
+                <option value="allergy">Allergy</option>
+                <option value="seizure">Seizure</option>
+                <option value="fall">Fall Risk</option>
+                <option value="elopement">Elopement</option>
+                <option value="wheelchair">Wheelchair</option>
+                <option value="mobility">Mobility Support</option>
+                <option value="communication">Communication Support</option>
+                <option value="behavioral">Behavioral Support</option>
+                <option value="sensory">Sensory Support</option>
+                <option value="medication">Medication Alert</option>
               </select>
 
               <select id="filterUpdated" aria-label="Filter by updated date">
@@ -83,8 +90,9 @@
                 <thead>
                   <tr>
                     <th>Profile</th>
-                    <th>Group</th>
                     <th>Tags</th>
+                    <th>Risks</th>
+                    <th>Media Consent</th>
                     <th>Last Updated</th>
                   </tr>
                 </thead>
@@ -97,27 +105,63 @@
             </div>
           </div>
 
-          <!-- President-only broadcast panel (kept with same id) -->
-          <div id="broadcastBox" class="portal-card" style="display:none;">
-            <div class="portal-card-head row-split">
-              <div>
-                <h2 class="portal-h2">Emergency Broadcast</h2>
-                <p class="portal-muted">President-only: send automated emergency messaging.</p>
-              </div>
-              <span class="pill-label orange">President</span>
-            </div>
+          <!-- Authorized broadcast panel -->
+<div id="broadcastBox" class="portal-card" style="display:none;">
+  <div class="portal-card-head row-split">
+    <div>
+      <h2 class="portal-h2">Emergency Broadcast</h2>
+      <p class="portal-muted" id="broadcastHelp">Send automated emergency messaging to authorized recipients.</p>
+    </div>
+    <span class="pill-label orange" id="broadcastRoleBadge">President</span>
+  </div>
 
-            <div class="portal-form">
-              <label class="portal-label" for="broadcastMsg">Message</label>
-              <textarea id="broadcastMsg" rows="3"
-                placeholder="Example: Weather closure today — all afternoon programs canceled."></textarea>
+  <div class="portal-form">
+    <!-- NEW: Scope -->
+    <div class="portal-form-grid">
+      <div>
+        <label class="portal-label" for="broadcastScope">Send to</label>
+        <select id="broadcastScope" class="portal-input">
+          <option value="all">Everyone</option>
+          <option value="program">A program</option>
+          <option value="group">A group</option>
+        </select>
+      </div>
 
-              <div class="portal-actions">
-                <button class="portal-btn-orange" id="sendBroadcast" type="button">Send broadcast</button>
-              </div>
-            </div>
-          </div>
-        </section>
+      <div id="broadcastProgramWrap" style="display:none;">
+        <label class="portal-label" for="broadcastProgram">Program</label>
+        <select id="broadcastProgram" class="portal-input">
+          <option value="Special Education">Special Education</option>
+          <option value="Adult Services">Adult Services</option>
+          <option value="Athletics">Athletics & Activities</option>
+          <option value="Family Supports">Family Supports</option>
+        </select>
+      </div>
+
+      <div id="broadcastGroupWrap" style="display:none;">
+        <label class="portal-label" for="broadcastGroup">Group</label>
+        <select id="broadcastGroup" class="portal-input">
+          <option value="All Groups">All Groups</option>
+          <option value="Adult Services - A">Adult Services - A</option>
+          <option value="Adult Services - B">Adult Services - B</option>
+          <option value="Special Ed - Room 12">Special Ed - Room 12</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Existing message -->
+    <label class="portal-label" for="broadcastMsg" style="margin-top:12px;">Message</label>
+    <textarea
+      id="broadcastMsg"
+      class="portal-textarea"
+      rows="3"
+      placeholder="Example: Weather closure today — all afternoon programs canceled."
+    ></textarea>
+
+    <div class="portal-actions">
+      <button class="portal-btn-orange" id="sendBroadcast" type="button">Send broadcast</button>
+    </div>
+  </div>
+</div>
 
         <!-- Sidebar -->
         <aside class="portal-side">
@@ -221,4 +265,3 @@
   </script>
 </body>
 </html>
-

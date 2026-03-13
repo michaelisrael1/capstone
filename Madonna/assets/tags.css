@@ -68,3 +68,21 @@
     gap: 10px;
     min-width: 0;
 }
+
+.risk-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.risk-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    border: 1px solid rgba(11, 94, 168, 0.16);
+    background: rgba(11, 94, 168, 0.08);
+    color: #0a4f8a;
+}
