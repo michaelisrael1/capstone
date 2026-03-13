@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Profile | Alliance Portal</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="assets/tags.css" />
 </head>
 
 <body data-page="profile" class="portal-body">
@@ -79,7 +80,16 @@
       </div>
     </div>
 
-    <!-- Emergency + Critical Needs -->
+    <div class="portal-card">
+      <div class="portal-card-head">
+        <h2 class="portal-h2">Programs / Tags</h2>
+        <p class="portal-muted">Assign program tags to this profile.</p>
+      </div>
+
+      <div id="profileTagsEditor" class="tag-checkbox-grid"></div>
+    </div>
+
+    <!-- Emergency + Critical Needs + Personal Notes -->
     <div class="portal-card">
       <div class="portal-card-head">
         <h2 class="portal-h2">Emergency Contacts</h2>
@@ -111,14 +121,11 @@
 
         <div class="portal-card-head" style="margin-bottom:6px;">
           <h2 class="portal-h2">Critical Needs</h2>
-          <p class="portal-muted">Medical, allergy, and communication/mobility notes.</p>
+          <p class="portal-muted">Select common risks and support needs so they can be searched on the dashboard.</p>
         </div>
 
-        <label class="portal-label">Allergies / Medical Notes</label>
-        <textarea class="portal-textarea" data-emergency-field rows="3">Peanut allergy. Carry epipen. Anxiety triggers: loud alarms.</textarea>
-
-        <label class="portal-label">Communication / Mobility Notes</label>
-        <textarea class="portal-textarea" data-emergency-field rows="3">Prefers short instructions; uses noise-canceling headphones; needs wheelchair access.</textarea>
+        <label class="portal-label">Common Risks / Needs</label>
+        <div id="profileRisksEditor" class="tag-checkbox-grid"></div>
 
         <div class="portal-actions">
           <button class="portal-btn-orange" id="saveEmergency" type="button">Save emergency info</button>
@@ -127,6 +134,27 @@
         <div class="portal-footnote">
           Later: replace “Save” with a Hubwise write (add/edit) and pull initial values from Hubwise (read).
         </div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="margin-top:16px;">
+      <div class="portal-card-head">
+        <h2 class="portal-h2">Personal Notes</h2>
+        <p class="portal-muted">Private notes visible only to your account.</p>
+      </div>
+
+      <label class="portal-label">Your Notes</label>
+      <textarea
+        id="personalNotes"
+        class="portal-textarea"
+       rows="4"
+        placeholder="Write private observations or reminders here..."
+  >   </textarea>
+
+      <div class="portal-actions">
+        <button class="portal-btn-orange" id="saveNotes" type="button">
+          Save personal notes
+        </button>
       </div>
     </div>
   </section>

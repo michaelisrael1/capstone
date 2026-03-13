@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dashboard | Alliance Portal</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="assets/tags.css" />
 </head>
 
 <body data-page="dashboard" class="portal-body">
@@ -54,9 +55,16 @@
             <div class="portal-filters" aria-label="Filters">
               <select id="filterRisk" aria-label="Filter by risk">
                 <option value="">Risk: Any</option>
-                <option>High</option>
-                <option>Med</option>
-                <option>Low</option>
+                <option value="allergy">Allergy</option>
+                <option value="seizure">Seizure</option>
+                <option value="fall">Fall Risk</option>
+                <option value="elopement">Elopement</option>
+                <option value="wheelchair">Wheelchair</option>
+                <option value="mobility">Mobility Support</option>
+                <option value="communication">Communication Support</option>
+                <option value="behavioral">Behavioral Support</option>
+                <option value="sensory">Sensory Support</option>
+                <option value="medication">Medication Alert</option>
               </select>
 
               <select id="filterUpdated" aria-label="Filter by updated date">
@@ -82,8 +90,9 @@
                 <thead>
                   <tr>
                     <th>Profile</th>
-                    <th>Group</th>
-                    <th>Flags</th>
+                    <th>Tags</th>
+                    <th>Risks</th>
+                    <th>Media Consent</th>
                     <th>Last Updated</th>
                   </tr>
                 </thead>
@@ -96,14 +105,14 @@
             </div>
           </div>
 
-          <!-- President-only broadcast panel (kept with same id) -->
+          <!-- Authorized broadcast panel -->
 <div id="broadcastBox" class="portal-card" style="display:none;">
   <div class="portal-card-head row-split">
     <div>
       <h2 class="portal-h2">Emergency Broadcast</h2>
-      <p class="portal-muted">President-only: send automated emergency messaging.</p>
+      <p class="portal-muted" id="broadcastHelp">Send automated emergency messaging to authorized recipients.</p>
     </div>
-    <span class="pill-label orange">President</span>
+    <span class="pill-label orange" id="broadcastRoleBadge">President</span>
   </div>
 
   <div class="portal-form">
