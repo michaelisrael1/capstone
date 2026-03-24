@@ -77,6 +77,11 @@ const risk_definitions = {
   medication: { label: "Medication Alert" },
 };
 
+/**
+ * Renders HTML markup for profile tags based on tag codes.
+ * @param {string[]} tagCodes - Array of tag code strings
+ * @returns {string} HTML string representing the tags
+ */
 function renderTags(tagCodes = []) {
   if (!tagCodes.length) return '<span class="portal-muted">-</span>';
 
@@ -114,6 +119,11 @@ function renderTagCheckboxes(container, selectedTags = [], disabled = false) {
     .join("");
 }
 
+/**
+ * Renders HTML markup for risk badges based on risk codes.
+ * @param {string[]} riskCodes - Array of risk code strings
+ * @returns {string} HTML string representing the risk badges
+ */
 function renderRiskBadges(riskCodes = []) {
   if (!riskCodes.length) return '<span class="portal-muted">-</span>';
 
@@ -154,10 +164,20 @@ function renderRiskCheckboxes(container, selectedRisks = [], disabled = false) {
 function getStaffById(id) {
   return staff.find(s => s.id === id) || null;
 }
+
+/**
+ * Retrieves a client profile by its ID.
+ * @param {string} id - The profile ID
+ * @returns {Object|null} Profile object or null if not found
+ */
 function getProfileById(id) {
   return profiles.find(p => p.id === id) || null;
 }
 
+/**
+ * Retrieves all client profiles from localStorage or returns defaults.
+ * @returns {Object[]} Array of profile objects
+ */
 function getStoredProfiles() {
   try {
     const saved = JSON.parse(localStorage.getItem("maa_profiles") || "null");
@@ -167,38 +187,74 @@ function getStoredProfiles() {
   }
 }
 
+/**
+ * Saves all client profiles to localStorage.
+ * @returns {void}
+ */
 function saveProfiles() {
   localStorage.setItem("maa_profiles", JSON.stringify(profiles));
 }
 
-// Session helpers
+/**
+ * Stores a user session in localStorage.
+ * @param {Object} session - The session object containing user info
+ * @returns {void}
+ */
 function setSession(session) {
   localStorage.setItem("maa_session", JSON.stringify(session));
 }
+
+/**
+ * Retrieves the current user session from localStorage.
+ * @returns {Object|null} Session object or null if no session exists
+ */
 function getSession() {
   try { return JSON.parse(localStorage.getItem("maa_session") || "null"); }
   catch { return null; }
 }
+
+/**
+ * Clears the user session from localStorage.
+ * @returns {void}
+ */
 function clearSession() {
   localStorage.removeItem("maa_session");
 }
 
+/**
+ * Ensures a user is authenticated; redirects to login if not.
+ * @returns {Object} The current session object
+ */
 function requireAuth() {
   const s = getSession();
   if (!s) window.location.href = "portal.html";
   return s;
 }
 
-
-// Permissions
+/**
+ * Checks if a role can view all profiles.
+ * @param {string} role - The user's role (president, staff, guardian)
+ * @returns {boolean} True if the role can view all profiles
+ */
 function canViewAll(role) {
   return role === "president";
 }
 
+/**
+ * Checks if a role can send broadcast messages.
+ * @param {string} role - The user's role (president, staff, guardian)
+ * @returns {boolean} True if the role can send broadcasts
+ */
 function canSendBroadcast(role) {
   return role === "president" || role === "staff";
 }
 
+/**
+ * Checks if a role can edit emergency information for a profile.
+ * @param {string} role - The user's role (president, staff, guardian)
+ * @param {boolean} inGroup - Whether the user is in the same group as the profile
+ * @returns {boolean} True if the role can edit emergency info
+ */
 function canEditEmergency(role, inGroup) {
   if (role === "president") return true;
   if (role === "staff" && inGroup) return true;
@@ -206,11 +262,19 @@ function canEditEmergency(role, inGroup) {
   return false;
 }
 
+/**
+ * Filters profiles based on role-based access control.
+ * @param {Object} session - The current user session
+ * @returns {Object[]} Array of profiles the user can access
+ */
 function getAccessibleProfiles(session) {
   return profiles.filter(p => canViewAll(session.role) ? true : p.inGroup);
 }
 
-// Header auth UI
+/**
+ * Initializes the navigation bar authentication UI elements.
+ * @returns {void}
+ */
 function initNavAuthUI() {
   const s = getSession();
   const el = document.querySelector("[data-auth]");
@@ -236,7 +300,10 @@ function initNavAuthUI() {
   }
 }
 
-// Login
+/**
+ * Initializes the login form with demo user authentication.
+ * @returns {void}
+ */
 function initLoginForm() {
   const form = document.getElementById("loginForm");
   if (!form) return;
@@ -255,8 +322,10 @@ function initLoginForm() {
   });
 }
 
-
-// Dashboard
+/**
+ * Initializes the dashboard view with profile listings and broadcast controls.
+ * @returns {void}
+ */
 function initDashboard() {
   const s = requireAuth();
   const accessibleProfiles = getAccessibleProfiles(s);
@@ -383,8 +452,10 @@ function initDashboard() {
   });
 }
 
-
-// Client Profile Page
+/**
+ * Initializes the individual client profile page with edit controls.
+ * @returns {void}
+ */
 function initProfilePage() {
   const s = requireAuth();
 
@@ -469,8 +540,11 @@ if (coordinatorEl && profile.coordinator) {
   });
 }
 
-
-// Staff Directory Page / Image fallback
+/**
+ * Initializes the staff directory page with searchable staff listings.
+ * Staff Directory Page / Image fallback
+ * @returns {void}
+ */
 function initStaffDirectory() {
   const s = requireAuth();
 
@@ -521,8 +595,10 @@ function initStaffDirectory() {
   if (staffCount) staffCount.textContent = `${staff.length} staff`;
 }
 
-
-// Staff Profile Page
+/**
+ * Initializes the individual staff profile page with notes functionality.
+ * @returns {void}
+ */
 function initStaffProfilePage() {
   const s = requireAuth();
 
