@@ -13,7 +13,6 @@ jobs:
 
       - name: Install and Generate 
         run: |
-          npm install
           npx jsdoc -r Madonna/ -d ./docs # Generate docs into a 'docs' folder
           touch ./docs/.nojekyll
 
