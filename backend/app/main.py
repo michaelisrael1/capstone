@@ -35,5 +35,5 @@ def get_db_time():
     except Exception as e:
         return {
             "status": "error",
-            "message": "Internal Server Error"
+            "message": str(e)
         }
