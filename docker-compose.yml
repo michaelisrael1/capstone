@@ -45,6 +45,7 @@ services:
     volumes:
       # Combine ro and Z with a comma, not a colon
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z  
+      - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro,Z
       - ./Madonna:/usr/share/nginx/html:ro,Z
     depends_on:
       - fastapi
