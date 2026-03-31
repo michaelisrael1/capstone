@@ -1,0 +1,57 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: capstone_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    command: 
+      - --performance_schema=OFF
+      - --innodb_buffer_pool_size=64M
+      - --max_connections=20
+    volumes:
+      - mysql_data:/var/lib/mysql
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+
+  fastapi:
+    build: ./backend
+    container_name: capstone_api
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+
+  nginx:
+    image: nginx:latest
+    container_name: capstone_nginx
+    restart: always
+    ports:
+      - "8080:80"  # Map to 8080 for easier Fedora dev
+    volumes:
+      # Combine ro and Z with a comma, not a colon
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z  
+      - ./Madonna:/usr/share/nginx/html:ro,Z
+    depends_on:
+      - fastapi
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+
+volumes:
+  mysql_data:
