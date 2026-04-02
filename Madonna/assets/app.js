@@ -221,7 +221,12 @@ function initNavAuthUI() {
 
   fileInput.onchange = (e) => {
     const file = e.target.files[0];
-    console.log("Selected file:", file.name);
+    const { spawn } = require('child_process');
+    const pythonProcess = spawn('python', ['extractionTool.py', file.path]);
+
+    pythonProcess.stdout.on('data', (data) => {
+      console.log('Output from Python:', data.toString());
+    });
   };
 
   if (!s) {
@@ -245,12 +250,6 @@ function initNavAuthUI() {
 
     document.getElementById("uploadBtn")?.addEventListener("click", () => {
       fileInput.click();
-      const { spawn } = require('child_process');
-      const pythonProcess = spawn('python', ['extractionTool.py', result]);
-
-      pythonProcess.stdout.on('data', (data) => {
-        console.log('Output from Python:', data.toString());
-      });
     });
   }
 }
