@@ -1,0 +1,25 @@
+name: Deploy JSDoc to GitHub Pages
+
+on:
+  push:
+    branches: [ main ] # Or your default branch name
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+
+      - name: Install and Generate 
+        run: |
+          npx jsdoc -r Madonna/ -d ./docs # Generate docs into a 'docs' folder
+          touch ./docs/.nojekyll
+
+      - name: Deploy 
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs # The folder the action should deploy
+          branch: gh-pages # The branch the action deploys to
