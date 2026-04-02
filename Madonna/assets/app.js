@@ -279,6 +279,19 @@ function initNavAuthUI() {
   const s = getSession();
   const el = document.querySelector("[data-auth]");
   if (!el) return;
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.style.display = 'none';
+
+  fileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    const { spawn } = require('child_process');
+    const pythonProcess = spawn('python', ['extractionTool.py', file.path]);
+
+    pythonProcess.stdout.on('data', (data) => {
+      console.log('Output from Python:', data.toString());
+    });
+  };
 
   if (!s) {
     // If login page doesn't want a button here, leave blank
@@ -290,12 +303,17 @@ function initNavAuthUI() {
     el.innerHTML = `
       <span class="badge blue">${s.role.toUpperCase()}</span>
       ${staffLink}
-      <button class="btn-maap orange" id="logoutBtn">Log out</button>
+      <button class="btn-maap orange" id="uploadBtn">Import Data</button>
+      <button class="btn-maap orange" id="logoutBtn">Log Out</button>
     `;
 
     document.getElementById("logoutBtn")?.addEventListener("click", () => {
       clearSession();
       window.location.href = "portal.html";
+    });
+
+    document.getElementById("uploadBtn")?.addEventListener("click", () => {
+      fileInput.click();
     });
   }
 }
