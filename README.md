@@ -17,3 +17,4 @@ Key features:
 ### Release Notes:
 -  **v0.1**: This release includes a completed conversion tool from exel to postgressql. As well as a front end that has Login    Dashboard, Client Profile, and Staff Directory. Only branch that is up to date and is for Milestone 1 is Main.  
 -  **v0.2**: This release includes an updated tagging scheme, ability for staff to send broadcasts to groups. These features were directly requested by the team and will help with knowing groups of clients at a glance. DB support has not been implemented for this release. Next release will include a fuctional DB. 
+- **v0.3**: This release includes the additon of a MySQL database as well as API endpoints to retrieve data stored on the database. As well as an updated conversion tool that is intergrated into the JS to populate the database. The site is also live at ``madonna.michaelisrael.dev`` for demo purposes. 
