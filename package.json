@@ -1,0 +1,26 @@
+{
+  "name": "capstone",
+  "version": "1.0.0",
+  "description": "MAAP is a web-based application that centralizes record-keeping and administrative\r workflows for organizations supporting individuals with special needs including\r students and adults. The portal stores client profiles, support plans, medical and\r educational histories, contact details, staff assignments, case notes, and activity\r logs to help teams coordinate care and maintain accurate, accessible records.",
+  "homepage": "https://github.com/michaelisrael1/capstone#readme",
+  "bugs": {
+    "url": "https://github.com/michaelisrael1/capstone/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelisrael1/capstone.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "require": "^2.4.20"
+  }
+}
