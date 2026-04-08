@@ -5,3 +5,7 @@ cryptography
 python-jose[cryptography]
 passlib[bcrypt]
 pydantic-settings
+python-json-logger
+logging
+pandas
+openpyxl
