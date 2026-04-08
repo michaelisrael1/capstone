@@ -1,4 +1,5 @@
 import os
+from sys import stdout
 import pandas as pd
 import re
 import uuid
@@ -147,14 +148,14 @@ def main():
     # Split sanitized DataFrame into stakeholder tables
     students_df, clients_df, staff_df = flatten_and_split(clean_df)
 
-    print(f"Prepared {len(students_df)} students, {len(clients_df)} clients, {len(staff_df)} staff.")
+    stdout.write(f"Prepared {len(students_df)} students, {len(clients_df)} clients, {len(staff_df)} staff.\n")
 
     db_url = os.environ.get('DATABASE_URL')
     if db_url:
         save_to_postgres(students_df, clients_df, staff_df, db_url)
-        print("Saved stakeholder tables to Postgres.")
+        stdout.write("Saved stakeholder tables to Postgres.\n")
     else:
-        print("DATABASE_URL not set — skipping DB save. To save, set DATABASE_URL env var.")
+        stdout.write("DATABASE_URL not set — skipping DB save. To save, set DATABASE_URL env var.\n")
 
 if __name__ == '__main__':
     main()
