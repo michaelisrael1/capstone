@@ -12,7 +12,7 @@
   <!-- Portal header -->
   <header class="portal-header">
     <div class="container portal-nav">
-      <a class="portal-brand" href="index.html" aria-label="Home">
+      <a class="portal-brand" href="dashboard.html" aria-label="Dashboard Home">
         <img src="assets/logo-mark.jpg" alt="Madonna Ability Alliance" class="portal-logo" />
 
         <div class="portal-brand-text">
@@ -49,12 +49,12 @@
           <div class="portal-toolbar">
             <div class="portal-search" role="search" aria-label="Search profiles">
               <span aria-hidden="true">🔎</span>
-              <input id="searchInput" placeholder="Search by name, group, allergy, mobility, risk…" />
+              <input id="searchInput" placeholder="Search by name, tags, risks, group, or consent…" />
             </div>
 
             <div class="portal-filters" aria-label="Filters">
-              <select id="filterRisk" aria-label="Filter by risk">
-                <option value="">Risk: Any</option>
+              <select id="filterRisk" aria-label="Filter by risk or support">
+                <option value="">Risk / Support: Any</option>
                 <option value="allergy">Allergy</option>
                 <option value="seizure">Seizure</option>
                 <option value="fall">Fall Risk</option>
@@ -101,67 +101,64 @@
             </div>
 
             <div class="portal-footnote">
-              Demo logic: President sees all profiles; staff/guardians see only in-group profiles.
+              Profiles are loaded from the backend database and filtered by the current role.
             </div>
           </div>
 
           <!-- Authorized broadcast panel -->
-<div id="broadcastBox" class="portal-card" style="display:none;">
-  <div class="portal-card-head row-split">
-    <div>
-      <h2 class="portal-h2">Emergency Broadcast</h2>
-      <p class="portal-muted" id="broadcastHelp">Send automated emergency messaging to authorized recipients.</p>
-    </div>
-    <span class="pill-label orange" id="broadcastRoleBadge">President</span>
-  </div>
+          <div id="broadcastBox" class="portal-card" style="display:none;">
+            <div class="portal-card-head row-split">
+              <div>
+                <h2 class="portal-h2">Emergency Broadcast</h2>
+                <p class="portal-muted" id="broadcastHelp">
+                  Send automated emergency messaging to authorized recipients.
+                </p>
+              </div>
+              <span class="pill-label orange" id="broadcastRoleBadge">President</span>
+            </div>
 
-  <div class="portal-form">
-    <!-- NEW: Scope -->
-    <div class="portal-form-grid">
-      <div>
-        <label class="portal-label" for="broadcastScope">Send to</label>
-        <select id="broadcastScope" class="portal-input">
-          <option value="all">Everyone</option>
-          <option value="program">A program</option>
-          <option value="group">A group</option>
-        </select>
-      </div>
+            <div class="portal-form">
+              <!-- Scope -->
+              <div class="portal-form-grid">
+                <div>
+                  <label class="portal-label" for="broadcastScope">Send to</label>
+                  <select id="broadcastScope" class="portal-input">
+                    <option value="all">Everyone</option>
+                    <option value="program">A program</option>
+                    <option value="group">A group</option>
+                  </select>
+                </div>
 
-      <div id="broadcastProgramWrap" style="display:none;">
-        <label class="portal-label" for="broadcastProgram">Program</label>
-        <select id="broadcastProgram" class="portal-input">
-          <option value="Special Education">Special Education</option>
-          <option value="Adult Services">Adult Services</option>
-          <option value="Athletics">Athletics & Activities</option>
-          <option value="Family Supports">Family Supports</option>
-        </select>
-      </div>
+                <div id="broadcastProgramWrap" style="display:none;">
+                  <label class="portal-label" for="broadcastProgram">Program / Service</label>
+                  <select id="broadcastProgram" class="portal-input">
+                    <option value="">All accessible programs</option>
+                  </select>
+                </div>
 
-      <div id="broadcastGroupWrap" style="display:none;">
-        <label class="portal-label" for="broadcastGroup">Group</label>
-        <select id="broadcastGroup" class="portal-input">
-          <option value="All Groups">All Groups</option>
-          <option value="Adult Services - A">Adult Services - A</option>
-          <option value="Adult Services - B">Adult Services - B</option>
-          <option value="Special Ed - Room 12">Special Ed - Room 12</option>
-        </select>
-      </div>
-    </div>
+                <div id="broadcastGroupWrap" style="display:none;">
+                  <label class="portal-label" for="broadcastGroup">Group</label>
+                  <select id="broadcastGroup" class="portal-input">
+                    <option value="">All accessible groups</option>
+                  </select>
+                </div>
+              </div>
 
-    <!-- Existing message -->
-    <label class="portal-label" for="broadcastMsg" style="margin-top:12px;">Message</label>
-    <textarea
-      id="broadcastMsg"
-      class="portal-textarea"
-      rows="3"
-      placeholder="Example: Weather closure today — all afternoon programs canceled."
-    ></textarea>
+              <!-- Existing message -->
+              <label class="portal-label" for="broadcastMsg" style="margin-top:12px;">Message</label>
+              <textarea
+                id="broadcastMsg"
+                class="portal-textarea"
+                rows="3"
+                placeholder="Example: Weather closure today — all afternoon programs canceled."
+              ></textarea>
 
-    <div class="portal-actions">
-      <button class="portal-btn-orange" id="sendBroadcast" type="button">Send broadcast</button>
-    </div>
-  </div>
-</div>
+              <div class="portal-actions">
+                <button class="portal-btn-orange" id="sendBroadcast" type="button">Send broadcast</button>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <!-- Sidebar -->
         <aside class="portal-side">
@@ -172,6 +169,21 @@
             </div>
 
             <div class="quick-list">
+              <label class="quick-item upload-tile" for="excelUpload" style="cursor:pointer;">
+                <div class="quick-icon" aria-hidden="true">📤</div>
+                <div>
+                  <div class="quick-title">Upload Excel</div>
+                  <div class="quick-sub">Import spreadsheet data into the database</div>
+                </div>
+              </label>
+
+              <input
+                id="excelUpload"
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                style="display:none;"
+              />
+
               <a class="quick-item" href="profile.html?id=P-1001">
                 <div class="quick-icon" aria-hidden="true">🧾</div>
                 <div>
@@ -180,22 +192,24 @@
                 </div>
               </a>
 
-              <a class="quick-item" href="#">
+              <div class="quick-item" aria-disabled="true">
                 <div class="quick-icon" aria-hidden="true">👥</div>
                 <div>
                   <div class="quick-title">Browse groups</div>
                   <div class="quick-sub">View assigned groups (coming soon)</div>
                 </div>
-              </a>
+              </div>
 
-              <a class="quick-item" href="#">
+              <div class="quick-item" aria-disabled="true">
                 <div class="quick-icon" aria-hidden="true">🛡️</div>
                 <div>
                   <div class="quick-title">Access rules</div>
                   <div class="quick-sub">Role-based visibility summary</div>
                 </div>
-              </a>
+              </div>
             </div>
+
+            <div id="uploadStatus" class="portal-muted" style="margin-top:10px;"></div>
           </div>
 
           <div class="portal-card">
@@ -215,8 +229,7 @@
 
   <!-- small client-side filters (won’t break anything if removed) -->
   <script>
-    // Simple table filtering on top of existing demo search.
-    // This only hides rows, real system should enforce RBAC on the server/Hubwise layer
+    // Simple table filtering on top of the rows populated by app.js
     (function () {
       const riskSel = document.getElementById("filterRisk");
       const updSel = document.getElementById("filterUpdated");
@@ -233,10 +246,8 @@
           const text = tr.textContent.toLowerCase();
           let ok = true;
 
-          // Risk filter (looks for badge text)
           if (risk) ok = ok && text.includes(risk);
 
-          // Updated filter (assumes last cell contains YYYY-MM-DD)
           if (days > 0) {
             const cells = tr.querySelectorAll("td");
             const dateStr = (cells[cells.length - 1]?.textContent || "").trim();
@@ -259,8 +270,7 @@
         apply();
       });
 
-      // Re-apply after app.js populates rows
-      window.setTimeout(apply, 150);
+      window.setTimeout(apply, 250);
     })();
   </script>
 </body>
