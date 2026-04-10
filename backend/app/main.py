@@ -131,7 +131,7 @@ def ensure_clients_table():
 @app.get("/health", tags=["Health Check"])
 def health_check():
     logger.info("health_check_called")
-    return {"status": "online", "message": "FastAPI is running"}
+    return {"status": "online", "message": "FastAPI is running", "Joe is_cool": True}
 
 
 @app.get("/db-time", tags=["Database"])
