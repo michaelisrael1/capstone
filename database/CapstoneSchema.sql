@@ -105,3 +105,18 @@ CREATE TABLE PersonService (
     FOREIGN KEY (person_id) REFERENCES Person(person_id),
     FOREIGN KEY (service_id) REFERENCES Service(service_id)
 );
+
+-- 12. ANNOUNCEMENTS
+CREATE TABLE Announcements (
+    announcement_id VARCHAR(64) PRIMARY KEY,
+    author_name VARCHAR(255) NOT NULL,
+    author_role VARCHAR(100) NOT NULL,
+    author_email VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    audience_tags TEXT,
+    attachments LONGTEXT,
+    likes LONGTEXT,
+    comments LONGTEXT,
+    created_at DATETIME NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
