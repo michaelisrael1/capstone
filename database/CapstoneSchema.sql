@@ -71,6 +71,8 @@ CREATE TABLE UserAccount (
 
     password_hash VARCHAR(255) NOT NULL,
 
+    role VARCHAR(50),
+
     is_active BOOLEAN DEFAULT TRUE,
     is_locked BOOLEAN DEFAULT FALSE,
 
