@@ -62,7 +62,28 @@ CREATE TABLE ContactRelationship (
     FOREIGN KEY (contact_person_id) REFERENCES Person(person_id)
 );
 
--- 7. EMPLOYER
+-- 7. USER ACCOUNT
+CREATE TABLE UserAccount (
+    user_id SERIAL PRIMARY KEY,
+
+    person_id INT NOT NULL,
+    email_id INT NOT NULL,
+
+    password_hash VARCHAR(255) NOT NULL,
+
+    is_active BOOLEAN DEFAULT TRUE,
+    is_locked BOOLEAN DEFAULT FALSE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    last_login TIMESTAMP,
+
+    FOREIGN KEY (person_id) REFERENCES Person(person_id),
+    FOREIGN KEY (email_id) REFERENCES Email(email_id)
+);
+
+-- 8. EMPLOYER
 CREATE TABLE Employer (
     employer_id INT PRIMARY KEY,
     name VARCHAR(150),
@@ -70,7 +91,7 @@ CREATE TABLE Employer (
     FOREIGN KEY (address_id) REFERENCES Address(address_id)
 );
 
--- 8. EMPLOYMENT
+-- 9. EMPLOYMENT
 CREATE TABLE Employment (
     employment_id INT PRIMARY KEY,
     person_id INT,
@@ -82,7 +103,7 @@ CREATE TABLE Employment (
     FOREIGN KEY (employer_id) REFERENCES Employer(employer_id)
 );
 
--- 9. COORDINATOR ASSIGNMENT
+-- 10. COORDINATOR ASSIGNMENT
 CREATE TABLE CoordinatorAssignment (
     assignment_id INT PRIMARY KEY,
     person_id INT,
@@ -91,13 +112,13 @@ CREATE TABLE CoordinatorAssignment (
     FOREIGN KEY (coordinator_id) REFERENCES Person(person_id)
 );
 
--- 10. SERVICE
+-- 11. SERVICE
 CREATE TABLE Service (
     service_id INT PRIMARY KEY,
     service_code VARCHAR(10) UNIQUE -- CI, DS, SFL, etc.
 );
 
--- 11. PERSON SERVICE
+-- 12. PERSON SERVICE
 CREATE TABLE PersonService (
     person_id INT,
     service_id INT,
