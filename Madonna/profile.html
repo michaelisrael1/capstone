@@ -40,6 +40,7 @@
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn-maap orange" id="deleteProfileBtn" type="button" style="display:none;">Delete Profile</button>
           <a class="btn-maap primary" href="dashboard.html">← Back to Dashboard</a>
         </div>
       </div>
@@ -65,15 +66,15 @@
             <label class="portal-label">Address</label>
             <input
               class="portal-input"
-              data-emergency-field
+              data-full-edit-field
               placeholder="Street address"
               value="123 Main Street"
             />
 
             <div class="profile-address-grid" style="margin-top:8px;">
-              <input class="portal-input" data-emergency-field placeholder="City" value="Omaha" />
-              <input class="portal-input" data-emergency-field placeholder="State" value="NE" />
-              <input class="portal-input" data-emergency-field placeholder="ZIP" value="68106" />
+              <input class="portal-input" data-full-edit-field placeholder="City" value="Omaha" />
+              <input class="portal-input" data-full-edit-field placeholder="State" value="NE" />
+              <input class="portal-input" data-full-edit-field placeholder="ZIP" value="68106" />
             </div>
           </div>
         </div>
@@ -83,10 +84,30 @@
     <div class="portal-card">
       <div class="portal-card-head">
         <h2 class="portal-h2">Programs / Tags</h2>
-        <p class="portal-muted">Assign program tags to this profile.</p>
+          <p class="portal-muted">Program tags can be updated by broader-access staff roles.</p>
       </div>
 
       <div id="profileTagsEditor" class="tag-checkbox-grid"></div>
+    </div>
+
+    <!-- Special Olympics sports (visible only when the 'SO' tag is set) -->
+    <div class="portal-card" id="profileSportsCard" style="display:none;">
+      <div class="portal-card-head">
+        <h2 class="portal-h2">Special Olympics Sports</h2>
+        <p class="portal-muted">Quick view of sports this client participates in.</p>
+      </div>
+
+      <div id="profileSportsEditor" class="tag-checkbox-grid"></div>
+    </div>
+
+    <!-- Elementary partner schools (visible only when the 'E' tag is set) -->
+    <div class="portal-card" id="profileSchoolsCard" style="display:none;">
+      <div class="portal-card-head">
+        <h2 class="portal-h2">Elementary Schools</h2>
+        <p class="portal-muted">Quick view of the partner school(s) this client attends.</p>
+      </div>
+
+      <div id="profileSchoolsEditor" class="tag-checkbox-grid"></div>
     </div>
 
     <!-- Emergency + Critical Needs + Personal Notes -->
@@ -121,7 +142,7 @@
 
         <div class="portal-card-head" style="margin-bottom:6px;">
           <h2 class="portal-h2">Critical Needs</h2>
-          <p class="portal-muted">Select common risks and support needs so they can be searched on the dashboard.</p>
+          <p class="portal-muted">Select common risks and support needs as part of emergency planning.</p>
         </div>
 
         <label class="portal-label">Common Risks / Needs</label>
@@ -131,7 +152,7 @@
           <button class="portal-btn-orange" id="saveEmergency" type="button">Save emergency info</button>
         </div>
 
-        <div class="portal-footnote">
+        <div class="portal-footnote" id="profileAccessSummary">
           Later: replace “Save” with a Hubwise write (add/edit) and pull initial values from Hubwise (read).
         </div>
       </div>

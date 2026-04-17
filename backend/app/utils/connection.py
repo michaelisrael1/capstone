@@ -1,42 +1,38 @@
 import os
 from sqlalchemy import create_engine, text
-
-class DatabaseClient():
-    """A simple database client to manage connections and queries."""
-    def __init__(self):
-        import os
-        from sqlalchemy import create_engine
-
-        DB_USER = os.getenv("DB_USER")
-        DB_PASS = os.getenv("DB_PASSWORD")
-        DB_HOST = os.getenv("DB_HOST", "db")
-        DB_NAME = os.getenv("DB_NAME")
-
-        self.DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
-        self.engine = create_engine(self.DATABASE_URL)
-
-    def send_query(self, query):
-        try:
-            with self.engine.connect() as connection:
-                result = connection.execute(text(query))
-                return result.fetchall()
-        except Exception as e:
-            print(f"Database query error: {e}")
-            return None
+from sqlalchemy.engine import Engine
+from sqlalchemy.sql.elements import TextClause
 
 
+class DatabaseClient:
+    """Thin wrapper around a SQLAlchemy engine for running raw SQL."""
 
-# def database_connection():
-#     # This function can be used to create and return a database connection
-#     # using the same logic as in main.py, but it is not currently being used.
-#     import os
-#     from sqlalchemy import create_engine
+    def __init__(self, url: str | None = None):
+        self.url = url or self._build_url_from_env()
+        self.engine: Engine = create_engine(
+            self.url,
+            pool_pre_ping=True,
+            pool_recycle=3600,
+            future=True,
+        )
 
-#     DB_USER = os.getenv("DB_USER")
-#     DB_PASS = os.getenv("DB_PASSWORD")
-#     DB_HOST = os.getenv("DB_HOST", "db")
-#     DB_NAME = os.getenv("DB_NAME")
+    @staticmethod
+    def _build_url_from_env() -> str:
+        user = os.getenv("DB_USER", "root")
+        pw   = os.getenv("DB_PASSWORD", "")
+        host = os.getenv("DB_HOST", "db")
+        port = os.getenv("DB_PORT", "3306")
+        name = os.getenv("DB_NAME", "capstone")
+        return f"mysql+pymysql://{user}:{pw}@{host}:{port}/{name}"
 
-#     DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
-#     engine = create_engine(DATABASE_URL)
-#     return engine.connect()
+    def send_query(self, query, params: dict | None = None):
+        """
+        Run a SQL statement. Accepts either a plain string or a
+        SQLAlchemy TextClause (already wrapped with text()).
+        """
+        stmt = query if isinstance(query, TextClause) else text(query)
+        with self.engine.begin() as conn:
+            result = conn.execute(stmt, params or {})
+            if result.returns_rows:
+                return [dict(row._mapping) for row in result]
+            return result.rowcount

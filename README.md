@@ -13,8 +13,10 @@ Key features:
 - Search, filtering, and basic reporting tools to help staff find and summarize data.
 - Import/export and conversion utilities for migrating existing records (see `conversion/`).
 - A simple, responsive frontend for dashboards and profile management (see `Madonna/`).
+- A page dedicated to a messaging board, fitted with filtering options and media upload.
 
 ### Release Notes:
 -  **v0.1**: This release includes a completed conversion tool from exel to postgressql. As well as a front end that has Login    Dashboard, Client Profile, and Staff Directory. Only branch that is up to date and is for Milestone 1 is Main.  
 -  **v0.2**: This release includes an updated tagging scheme, ability for staff to send broadcasts to groups. These features were directly requested by the team and will help with knowing groups of clients at a glance. DB support has not been implemented for this release. Next release will include a fuctional DB. 
-- **v0.3**: This release includes the additon of a MySQL database as well as API endpoints to retrieve data stored on the database. As well as an updated conversion tool that is intergrated into the JS to populate the database. The site is also live at ``madonna.michaelisrael.dev`` for demo purposes. 
+- **v0.3**: This release includes the additon of a MySQL database as well as API endpoints to retrieve data stored on the database. As well as an updated conversion tool that is intergrated into the JS to populate the database. The site is also live at ``madonna.michaelisrael.dev`` for demo purposes.
+- **v0.4**: This release includes an updated messaging broadcast 'station'. Those with access to this feature will now enjoy a dedicated menu with refreshed filtering options. New options allow users to message exactly those who will benefit. Also, choices for two profile options (SO and Elem) now reveal a hidden set of choices when selected. The improved profile options allow for the enhanced filtering mentioned at the start, as well as improve readability and usability needed by both faculty and patients.

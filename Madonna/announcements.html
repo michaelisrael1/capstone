@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Announcements | MAAP</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="assets/tags.css" />
+</head>
+
+<body class="portal-body" data-page="announcements">
+  <header class="portal-header">
+    <div class="container portal-nav">
+      <a class="portal-brand" href="dashboard.html">
+        <img src="assets/logo-mark.jpg" alt="MAAP" class="portal-logo" />
+        <div class="portal-brand-text">
+          <div class="portal-org">Madonna Ability Alliance Portal</div>
+          <div class="portal-title">MAAP</div>
+        </div>
+      </a>
+      <div class="portal-right" data-auth></div>
+    </div>
+  </header>
+
+  <main class="portal-page">
+    <div class="container">
+      <div class="portal-heading">
+        <div>
+          <h1 class="portal-h1">Announcements</h1>
+          <p class="portal-sub">
+            A shared feed for updates. Director, Head Coordinator, and Program Coordinators can post.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn-maap primary" href="dashboard.html">Back to Dashboard</a>
+        </div>
+      </div>
+
+      <div class="portal-grid">
+        <section class="portal-main">
+          <div class="portal-card" id="announcementComposerCard" style="display:none;">
+            <div class="portal-card-head">
+              <h2 class="portal-h2">Create Announcement</h2>
+              <p class="portal-muted" id="announcementComposerHelp">
+                Choose the profile tags that should be able to see this update.
+              </p>
+            </div>
+
+            <div class="portal-form">
+              <label class="portal-label" for="announcementMessage">Message</label>
+              <textarea
+                id="announcementMessage"
+                class="portal-textarea"
+                rows="4"
+                placeholder="Share a program update, reminder, or event note."
+              ></textarea>
+
+              <label class="portal-label">Audience Tags</label>
+              <div id="announcementTagEditor" class="tag-checkbox-grid"></div>
+
+              <!-- Sports picker — visible only when 'SO' is in the audience tags -->
+              <div id="announcementSportsSection" style="display:none; margin-top:12px;">
+                <label class="portal-label">Special Olympics Sports</label>
+                <p class="portal-muted" style="margin:0 0 6px;">Narrow the audience to specific sports (optional).</p>
+                <div id="announcementSportsEditor" class="tag-checkbox-grid"></div>
+              </div>
+
+              <!-- Schools picker — visible only when 'E' (Elementary) is in the audience tags -->
+              <div id="announcementSchoolsSection" style="display:none; margin-top:12px;">
+                <label class="portal-label">Elementary Schools</label>
+                <p class="portal-muted" style="margin:0 0 6px;">Narrow the audience to specific partner schools (optional).</p>
+                <div id="announcementSchoolsEditor" class="tag-checkbox-grid"></div>
+              </div>
+
+              <label class="portal-label" for="announcementAttachments">Photos or Files</label>
+              <input
+                id="announcementAttachments"
+                class="portal-input"
+                type="file"
+                multiple
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip"
+              />
+              <div id="announcementAttachmentPreview" class="portal-footnote">
+                Add images, PDFs, or common office files to the post.
+              </div>
+
+              <div class="portal-actions" style="align-items:center; gap:10px;">
+                <label class="portal-label" style="margin:0; white-space:nowrap;" for="announcementExpiration">Expires</label>
+                <select id="announcementExpiration" class="portal-select">
+                  <option value="">No expiration</option>
+                  <option value="1">1 day</option>
+                  <option value="3">3 days</option>
+                  <option value="7">1 week</option>
+                  <option value="14">2 weeks</option>
+                  <option value="30">30 days</option>
+                </select>
+
+                <label class="portal-label" style="margin:0; white-space:nowrap;" for="announcementImportance">Importance</label>
+                <select id="announcementImportance" class="portal-select">
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+
+                <button class="portal-btn-orange" id="postAnnouncement" type="button">Post announcement</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="portal-card">
+            <div class="portal-card-head row-split">
+              <div>
+                <h2 class="portal-h2">Feed</h2>
+                <p class="portal-muted" id="announcementFeedHelp">
+                  Posts appear when one of their tags matches the tags on profiles you can access.
+                </p>
+              </div>
+              <span class="pill-label blue" id="announcementFeedCount">0 visible posts</span>
+            </div>
+
+            <div id="announcementList" class="announcement-list"></div>
+          </div>
+        </section>
+
+        <aside class="portal-side">
+          <div class="portal-card">
+            <div class="portal-card-head">
+              <h2 class="portal-h2">Your Feed Access</h2>
+              <p class="portal-muted" id="announcementAccessSummary">
+                Feed visibility follows the tags on the profiles you can access.
+              </p>
+            </div>
+
+            <label class="portal-label">Visible Tags</label>
+            <div id="announcementVisibleTags"></div>
+          </div>
+
+          <div class="portal-card">
+            <div class="portal-card-head">
+              <h2 class="portal-h2">Participation</h2>
+              <p class="portal-muted">
+                Everyone can like and comment on announcements they can see.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

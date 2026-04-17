@@ -114,7 +114,7 @@
                   Send automated emergency messaging to authorized recipients.
                 </p>
               </div>
-              <span class="pill-label orange" id="broadcastRoleBadge">President</span>
+              <span class="pill-label orange" id="broadcastRoleBadge">Director</span>
             </div>
 
             <div class="portal-form">
@@ -169,11 +169,19 @@
             </div>
 
             <div class="quick-list">
-              <label class="quick-item upload-tile" for="excelUpload" style="cursor:pointer;">
+              <a class="quick-item" href="announcements.html">
+                <div class="quick-icon" aria-hidden="true">Feed</div>
+                <div>
+                  <div class="quick-title">View Announcements</div>
+                  <div class="quick-sub">Tagged feed with likes and comments</div>
+                </div>
+              </a>
+
+              <label class="quick-item upload-tile" id="uploadTile" for="excelUpload" style="cursor:pointer;">
                 <div class="quick-icon" aria-hidden="true">📤</div>
                 <div>
                   <div class="quick-title">Upload Excel</div>
-                  <div class="quick-sub">Import spreadsheet data into the database</div>
+                  <div class="quick-sub">Director-only import into the database</div>
                 </div>
               </label>
 
@@ -204,7 +212,7 @@
                 <div class="quick-icon" aria-hidden="true">🛡️</div>
                 <div>
                   <div class="quick-title">Access rules</div>
-                  <div class="quick-sub">Role-based visibility summary</div>
+                    <div class="quick-sub" id="accessRuleSummary">Role-based visibility summary</div>
                 </div>
               </div>
             </div>
