@@ -1,6 +1,7 @@
 import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
+from sqlalchemy.sql.elements import TextClause
 
 
 class DatabaseClient:
@@ -24,14 +25,14 @@ class DatabaseClient:
         name = os.getenv("DB_NAME", "capstone")
         return f"mysql+pymysql://{user}:{pw}@{host}:{port}/{name}"
 
-    def send_query(self, query: str, params: dict | None = None):
+    def send_query(self, query, params: dict | None = None):
         """
-        Run a SQL statement.
-          - SELECT: returns a list of dict rows
-          - INSERT/UPDATE/DELETE: commits and returns rowcount
+        Run a SQL statement. Accepts either a plain string or a
+        SQLAlchemy TextClause (already wrapped with text()).
         """
+        stmt = query if isinstance(query, TextClause) else text(query)
         with self.engine.begin() as conn:
-            result = conn.execute(text(query), params or {})
+            result = conn.execute(stmt, params or {})
             if result.returns_rows:
                 return [dict(row._mapping) for row in result]
             return result.rowcount
