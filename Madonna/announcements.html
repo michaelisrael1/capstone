@@ -59,6 +59,20 @@
               <label class="portal-label">Audience Tags</label>
               <div id="announcementTagEditor" class="tag-checkbox-grid"></div>
 
+              <!-- Sports picker — visible only when 'SO' is in the audience tags -->
+              <div id="announcementSportsSection" style="display:none; margin-top:12px;">
+                <label class="portal-label">Special Olympics Sports</label>
+                <p class="portal-muted" style="margin:0 0 6px;">Narrow the audience to specific sports (optional).</p>
+                <div id="announcementSportsEditor" class="tag-checkbox-grid"></div>
+              </div>
+
+              <!-- Schools picker — visible only when 'E' (Elementary) is in the audience tags -->
+              <div id="announcementSchoolsSection" style="display:none; margin-top:12px;">
+                <label class="portal-label">Elementary Schools</label>
+                <p class="portal-muted" style="margin:0 0 6px;">Narrow the audience to specific partner schools (optional).</p>
+                <div id="announcementSchoolsEditor" class="tag-checkbox-grid"></div>
+              </div>
+
               <label class="portal-label" for="announcementAttachments">Photos or Files</label>
               <input
                 id="announcementAttachments"

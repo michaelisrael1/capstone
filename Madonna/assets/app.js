@@ -291,6 +291,30 @@ const risk_definitions = {
   medication: { label: "Medication Alert" }
 };
 
+// Sport definitions shown only when a client is flagged Special Olympics.
+// Source: https://www.madonnaalliance.org/special-olympics-and-unified-sports
+const sport_definitions = {
+  // Traditional Special Olympics
+  powerlifting: { label: "Powerlifting (Traditional · Winter)" },
+  swimming:     { label: "Swimming (Traditional · Spring)" },
+  track:        { label: "Track (Traditional · Spring)" },
+  // Unified Sports
+  basketball:    { label: "Basketball (Unified · Winter)" },
+  bowling:       { label: "Bowling (Unified · Fall)" },
+  cornhole:      { label: "Cornhole (Unified · Fall)" },
+  esports:       { label: "E-Sports (Unified · Spring)" },
+  flag_football: { label: "Flag Football (Unified · Fall)" },
+  volleyball:    { label: "Volleyball (Unified · Spring)" }
+};
+
+// Elementary partner schools, shown only when a client is flagged Elementary ('e').
+// Source: https://www.madonnaalliance.org/elementary-program
+const school_definitions = {
+  holy_name:           { label: "Holy Name" },
+  st_pius_st_leo:      { label: "St. Pius X / St. Leo" },
+  st_robert_bellarmine:{ label: "St. Robert Bellarmine Catholic Schools" }
+};
+
 function normalizeRole(role) {
   const normalized = LEGACY_ROLE_MAP[String(role || "").toLowerCase()] || String(role || "").toLowerCase();
   return ROLE_CONFIG[normalized] ? normalized : "student";
@@ -396,6 +420,52 @@ function renderRiskCheckboxes(container, selectedRisks = [], disabled = false) {
         />
         <span class="tag-checkbox-label">
           <span>${risk.label}</span>
+        </span>
+      </label>
+    `
+    )
+    .join("");
+}
+
+// Render editable Special Olympics sport checkboxes on the profile page
+function renderSportCheckboxes(container, selectedSports = [], disabled = false) {
+  if (!container) return;
+
+  container.innerHTML = Object.entries(sport_definitions)
+    .map(
+      ([code, sport]) => `
+      <label class="tag-checkbox-item">
+        <input
+          type="checkbox"
+          value="${code}"
+          ${selectedSports.includes(code) ? "checked" : ""}
+          ${disabled ? "disabled" : ""}
+        />
+        <span class="tag-checkbox-label">
+          <span>${sport.label}</span>
+        </span>
+      </label>
+    `
+    )
+    .join("");
+}
+
+// Render editable Elementary partner-school checkboxes on the profile page
+function renderSchoolCheckboxes(container, selectedSchools = [], disabled = false) {
+  if (!container) return;
+
+  container.innerHTML = Object.entries(school_definitions)
+    .map(
+      ([code, school]) => `
+      <label class="tag-checkbox-item">
+        <input
+          type="checkbox"
+          value="${code}"
+          ${selectedSchools.includes(code) ? "checked" : ""}
+          ${disabled ? "disabled" : ""}
+        />
+        <span class="tag-checkbox-label">
+          <span>${school.label}</span>
         </span>
       </label>
     `
@@ -1144,6 +1214,71 @@ async function initProfilePage() {
     renderRiskCheckboxes(riskEditor, prof.risks || [], !canEditRisks);
   }
 
+  // Sports picker — always mounted; visibility tracks the 'SO' tag in real time
+  const sportCard = document.getElementById("profileSportsCard");
+  const sportEditor = document.getElementById("profileSportsEditor");
+  const sportKey = `maap_sports_${id}`;
+
+  function ensureSportsRendered() {
+    if (!sportEditor || sportEditor.dataset.rendered === "true") return;
+    let storedSports = [];
+    try {
+      const raw = localStorage.getItem(sportKey);
+      storedSports = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(storedSports)) storedSports = [];
+    } catch {
+      storedSports = [];
+    }
+    renderSportCheckboxes(sportEditor, storedSports, !canEditFull);
+    sportEditor.dataset.rendered = "true";
+  }
+
+  function updateSportsCardVisibility(show) {
+    if (!sportCard) return;
+    sportCard.style.display = show ? "" : "none";
+    if (show) ensureSportsRendered();
+  }
+
+  updateSportsCardVisibility(Array.isArray(prof.tags) && prof.tags.includes("so"));
+
+  // Schools picker — always mounted; visibility tracks the 'E' (Elementary) tag in real time
+  const schoolCard = document.getElementById("profileSchoolsCard");
+  const schoolEditor = document.getElementById("profileSchoolsEditor");
+  const schoolKey = `maap_schools_${id}`;
+
+  function ensureSchoolsRendered() {
+    if (!schoolEditor || schoolEditor.dataset.rendered === "true") return;
+    let storedSchools = [];
+    try {
+      const raw = localStorage.getItem(schoolKey);
+      storedSchools = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(storedSchools)) storedSchools = [];
+    } catch {
+      storedSchools = [];
+    }
+    renderSchoolCheckboxes(schoolEditor, storedSchools, !canEditFull);
+    schoolEditor.dataset.rendered = "true";
+  }
+
+  function updateSchoolsCardVisibility(show) {
+    if (!schoolCard) return;
+    schoolCard.style.display = show ? "" : "none";
+    if (show) ensureSchoolsRendered();
+  }
+
+  updateSchoolsCardVisibility(Array.isArray(prof.tags) && prof.tags.includes("e"));
+
+  // Live toggle: react the moment the SO or E checkboxes flip in the tag editor
+  if (tagEditor && tagEditor.dataset.conditionalListenerBound !== "true") {
+    tagEditor.dataset.conditionalListenerBound = "true";
+    tagEditor.addEventListener("change", (event) => {
+      const target = event.target;
+      if (!target || target.type !== "checkbox") return;
+      if (target.value === "so") updateSportsCardVisibility(target.checked);
+      if (target.value === "e") updateSchoolsCardVisibility(target.checked);
+    });
+  }
+
   const saveEmergencyBtn = document.getElementById("saveEmergency");
   if (saveEmergencyBtn) {
     saveEmergencyBtn.style.display = canEditFull || canEdit ? "" : "none";
@@ -1176,6 +1311,24 @@ async function initProfilePage() {
       prof.tags = selectedTags;
       prof.risks = selectedRisks;
       prof.updated = new Date().toISOString().slice(0, 10);
+
+      // Persist Special Olympics sports selection (local-only quick view)
+      if (canEditFull && sportEditor && prof.tags.includes("so")) {
+        const selectedSports = [...sportEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
+        localStorage.setItem(sportKey, JSON.stringify(selectedSports));
+      } else if (!prof.tags.includes("so")) {
+        // No longer a Special Olympics client — clear any stale sports picks
+        localStorage.removeItem(sportKey);
+      }
+
+      // Persist Elementary schools selection (local-only quick view)
+      if (canEditFull && schoolEditor && prof.tags.includes("e")) {
+        const selectedSchools = [...schoolEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
+        localStorage.setItem(schoolKey, JSON.stringify(selectedSchools));
+      } else if (!prof.tags.includes("e")) {
+        // No longer an Elementary client — clear any stale school picks
+        localStorage.removeItem(schoolKey);
+      }
 
       if (canEditFull && addressFields.length >= 4) {
         prof.address = {
@@ -1483,7 +1636,7 @@ function addAnnouncementComment(session, announcementId, body) {
   return announcements.find((announcement) => announcement.id === announcementId) || null;
 }
 
-function createAnnouncement(session, body, tags, attachments = []) {
+function createAnnouncement(session, body, tags, attachments = [], sports = [], schools = []) {
   const announcement = {
     id: `ANN-${Date.now()}`,
     authorName: session.name,
@@ -1491,6 +1644,8 @@ function createAnnouncement(session, body, tags, attachments = []) {
     authorEmail: session.email,
     body,
     tags,
+    sports,
+    schools,
     attachments: attachments.map(normalizeAttachment),
     createdAt: new Date().toISOString(),
     likes: [],
@@ -1537,6 +1692,48 @@ async function initAnnouncementsPage() {
   const tagEditor = document.getElementById("announcementTagEditor");
   if (tagEditor) {
     renderTagCheckboxes(tagEditor, [], !canPost);
+  }
+
+  // Conditional Sports / Schools pickers inside the composer.
+  // Same pattern as profile.html: always mounted, visibility toggles with SO/E tags.
+  const composerSportsSection = document.getElementById("announcementSportsSection");
+  const composerSportsEditor = document.getElementById("announcementSportsEditor");
+  const composerSchoolsSection = document.getElementById("announcementSchoolsSection");
+  const composerSchoolsEditor = document.getElementById("announcementSchoolsEditor");
+
+  function renderComposerSports() {
+    if (composerSportsEditor) renderSportCheckboxes(composerSportsEditor, [], !canPost);
+  }
+  function renderComposerSchools() {
+    if (composerSchoolsEditor) renderSchoolCheckboxes(composerSchoolsEditor, [], !canPost);
+  }
+
+  function setComposerSportsVisibility(show) {
+    if (!composerSportsSection) return;
+    composerSportsSection.style.display = show ? "" : "none";
+    if (show && composerSportsEditor && composerSportsEditor.dataset.rendered !== "true") {
+      renderComposerSports();
+      composerSportsEditor.dataset.rendered = "true";
+    }
+  }
+  function setComposerSchoolsVisibility(show) {
+    if (!composerSchoolsSection) return;
+    composerSchoolsSection.style.display = show ? "" : "none";
+    if (show && composerSchoolsEditor && composerSchoolsEditor.dataset.rendered !== "true") {
+      renderComposerSchools();
+      composerSchoolsEditor.dataset.rendered = "true";
+    }
+  }
+
+  // Live toggle: react to SO / E flips in the audience-tag editor
+  if (tagEditor && tagEditor.dataset.conditionalListenerBound !== "true") {
+    tagEditor.dataset.conditionalListenerBound = "true";
+    tagEditor.addEventListener("change", (event) => {
+      const target = event.target;
+      if (!target || target.type !== "checkbox") return;
+      if (target.value === "so") setComposerSportsVisibility(target.checked);
+      if (target.value === "e") setComposerSchoolsVisibility(target.checked);
+    });
   }
 
   const attachmentInput = document.getElementById("announcementAttachments");
@@ -1595,7 +1792,14 @@ async function initAnnouncementsPage() {
         return;
       }
 
-      const localAnnouncement = createAnnouncement(session, body, selectedTags, pendingAttachments);
+      const selectedSports = composerSportsEditor && selectedTags.includes("so")
+        ? [...composerSportsEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value)
+        : [];
+      const selectedSchools = composerSchoolsEditor && selectedTags.includes("e")
+        ? [...composerSchoolsEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value)
+        : [];
+
+      const localAnnouncement = createAnnouncement(session, body, selectedTags, pendingAttachments, selectedSports, selectedSchools);
 
       try {
         await createAnnouncementInBackend(session, localAnnouncement);
@@ -1613,6 +1817,17 @@ async function initAnnouncementsPage() {
         attachmentPreview.textContent = "Add images, PDFs, or common office files to the post.";
       }
       renderTagCheckboxes(tagEditor, [], !canPost);
+      // Reset + hide the conditional pickers so they match the cleared audience tags
+      if (composerSportsEditor) {
+        renderComposerSports();
+        composerSportsEditor.dataset.rendered = "true";
+      }
+      if (composerSchoolsEditor) {
+        renderComposerSchools();
+        composerSchoolsEditor.dataset.rendered = "true";
+      }
+      setComposerSportsVisibility(false);
+      setComposerSchoolsVisibility(false);
       renderAnnouncementList(session);
     });
   }
