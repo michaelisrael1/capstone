@@ -85,7 +85,24 @@
                 Add images, PDFs, or common office files to the post.
               </div>
 
-              <div class="portal-actions">
+              <div class="portal-actions" style="align-items:center; gap:10px;">
+                <label class="portal-label" style="margin:0; white-space:nowrap;" for="announcementExpiration">Expires</label>
+                <select id="announcementExpiration" class="portal-select">
+                  <option value="">No expiration</option>
+                  <option value="1">1 day</option>
+                  <option value="3">3 days</option>
+                  <option value="7">1 week</option>
+                  <option value="14">2 weeks</option>
+                  <option value="30">30 days</option>
+                </select>
+
+                <label class="portal-label" style="margin:0; white-space:nowrap;" for="announcementImportance">Importance</label>
+                <select id="announcementImportance" class="portal-select">
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+
                 <button class="portal-btn-orange" id="postAnnouncement" type="button">Post announcement</button>
               </div>
             </div>

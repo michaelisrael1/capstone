@@ -477,6 +477,27 @@
   margin-top: 10px;
 }
 
+.portal-select{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.12);
+  font-size: 14px;
+  background: #fff;
+  color: var(--maa-text);
+  cursor: pointer;
+}
+
+.pill-label.high{
+  background: rgba(234,179,8,.14);
+  border-color: rgba(234,179,8,.30);
+  color: #92400e;
+}
+.pill-label.urgent{
+  background: rgba(220,38,38,.12);
+  border-color: rgba(220,38,38,.25);
+  color: #991b1b;
+}
+
 .portal-btn-orange{
   background: var(--maa-orange);
   border: none;

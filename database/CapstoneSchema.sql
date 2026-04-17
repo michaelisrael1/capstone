@@ -140,6 +140,9 @@ CREATE TABLE Announcements (
     attachments LONGTEXT,
     likes LONGTEXT,
     comments LONGTEXT,
+    expires_at DATETIME NULL,
+    importance VARCHAR(20) DEFAULT 'normal',
     created_at DATETIME NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+

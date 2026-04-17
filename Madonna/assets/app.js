@@ -1475,11 +1475,18 @@ function renderAnnouncementList(session) {
   if (!container) return;
 
   const visibleAnnouncements = getVisibleAnnouncements(session);
+
+  const now = new Date();
+  const activeAnnouncements = visibleAnnouncements.filter((a) => {
+    if (!a.expiresAt) return true;
+    return new Date(a.expiresAt) > now;
+  });
+
   if (count) {
-    count.textContent = `${visibleAnnouncements.length} visible post${visibleAnnouncements.length === 1 ? "" : "s"}`;
+    count.textContent = `${activeAnnouncements.length} visible post${activeAnnouncements.length === 1 ? "" : "s"}`;
   }
 
-  if (!visibleAnnouncements.length) {
+  if (!activeAnnouncements.length) {
     container.innerHTML = `
       <div class="announcement-empty">
         No announcements match the tags on the profiles you can access yet.
@@ -1488,19 +1495,31 @@ function renderAnnouncementList(session) {
     return;
   }
 
-  container.innerHTML = visibleAnnouncements
+  container.innerHTML = activeAnnouncements
     .map((announcement) => {
       const liked = (announcement.likes || []).includes(session.email);
       const comments = Array.isArray(announcement.comments) ? announcement.comments : [];
+      const importance = announcement.importance || "normal";
+      const importanceBadge = importance === "urgent"
+        ? '<span class="pill-label urgent">Urgent</span>'
+        : importance === "high"
+          ? '<span class="pill-label high">High</span>'
+          : '';
+      const expiresLabel = announcement.expiresAt
+        ? `<span class="portal-muted" style="font-size:12px;">Expires ${formatAnnouncementTime(announcement.expiresAt)}</span>`
+        : '';
 
       return `
         <article class="announcement-card" data-announcement-id="${announcement.id}">
           <div class="announcement-top">
             <div>
               <div class="announcement-author">${announcement.authorName}</div>
-              <div class="announcement-meta">${announcement.authorRole} | ${formatAnnouncementTime(announcement.createdAt)}</div>
+              <div class="announcement-meta">${announcement.authorRole} | ${formatAnnouncementTime(announcement.createdAt)}${expiresLabel ? ' | ' + expiresLabel : ''}</div>
             </div>
-            <span class="pill-label blue">${(announcement.tags || []).length} tag${(announcement.tags || []).length === 1 ? "" : "s"}</span>
+            <div style="display:flex; gap:6px; align-items:center;">
+              ${importanceBadge}
+              <span class="pill-label blue">${(announcement.tags || []).length} tag${(announcement.tags || []).length === 1 ? "" : "s"}</span>
+            </div>
           </div>
 
           <div class="announcement-body">${announcement.body}</div>
@@ -1636,7 +1655,15 @@ function addAnnouncementComment(session, announcementId, body) {
   return announcements.find((announcement) => announcement.id === announcementId) || null;
 }
 
-function createAnnouncement(session, body, tags, attachments = [], sports = [], schools = []) {
+function createAnnouncement(session, body, tags, attachments = [], sports = [], schools = [], expiresIn = "", importance = "normal") {
+  const now = new Date();
+  let expiresAt = null;
+  if (expiresIn) {
+    const exp = new Date(now);
+    exp.setDate(exp.getDate() + parseInt(expiresIn, 10));
+    expiresAt = exp.toISOString();
+  }
+
   const announcement = {
     id: `ANN-${Date.now()}`,
     authorName: session.name,
@@ -1647,7 +1674,9 @@ function createAnnouncement(session, body, tags, attachments = [], sports = [], 
     sports,
     schools,
     attachments: attachments.map(normalizeAttachment),
-    createdAt: new Date().toISOString(),
+    createdAt: now.toISOString(),
+    expiresAt,
+    importance,
     likes: [],
     comments: []
   };
@@ -1799,7 +1828,12 @@ async function initAnnouncementsPage() {
         ? [...composerSchoolsEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value)
         : [];
 
-      const localAnnouncement = createAnnouncement(session, body, selectedTags, pendingAttachments, selectedSports, selectedSchools);
+      const expirationSelect = document.getElementById("announcementExpiration");
+      const importanceSelect = document.getElementById("announcementImportance");
+      const expiresIn = expirationSelect ? expirationSelect.value : "";
+      const importance = importanceSelect ? importanceSelect.value : "normal";
+
+      const localAnnouncement = createAnnouncement(session, body, selectedTags, pendingAttachments, selectedSports, selectedSchools, expiresIn, importance);
 
       try {
         await createAnnouncementInBackend(session, localAnnouncement);
@@ -1816,6 +1850,8 @@ async function initAnnouncementsPage() {
         attachmentPreview.className = "portal-footnote";
         attachmentPreview.textContent = "Add images, PDFs, or common office files to the post.";
       }
+      if (expirationSelect) expirationSelect.value = "";
+      if (importanceSelect) importanceSelect.value = "normal";
       renderTagCheckboxes(tagEditor, [], !canPost);
       // Reset + hide the conditional pickers so they match the cleared audience tags
       if (composerSportsEditor) {

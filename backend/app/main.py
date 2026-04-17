@@ -319,12 +319,23 @@ def ensure_announcements_table():
             attachments LONGTEXT NULL,
             likes LONGTEXT NULL,
             comments LONGTEXT NULL,
+            expires_at DATETIME NULL,
+            importance VARCHAR(20) DEFAULT 'normal',
             created_at DATETIME NOT NULL,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )
         """
     )
     db_client.send_query(query)
+    # Add columns if table already existed without them
+    for col_sql in [
+        "ALTER TABLE announcements ADD COLUMN expires_at DATETIME NULL",
+        "ALTER TABLE announcements ADD COLUMN importance VARCHAR(20) DEFAULT 'normal'",
+    ]:
+        try:
+            db_client.send_query(text(col_sql))
+        except Exception:
+            pass  # column already exists
 
 
 def normalize_attachment_payload(item):
@@ -346,7 +357,7 @@ def normalize_comment_payload(item):
         "authorRole": clean_str(item.get("authorRole")),
         "authorEmail": clean_str(item.get("authorEmail")),
         "body": clean_str(item.get("body")),
-        "createdAt": clean_str(item.get("createdAt")),
+        "createdAt": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") if not item.get("createdAt") else item.get("createdAt").replace("T", " ").replace("Z", "").split(".")[0],
     }
 
 
@@ -379,6 +390,8 @@ def row_to_announcement_dict(row):
         "attachments": safe_json_loads(mapped.get("attachments"), []),
         "likes": safe_json_loads(mapped.get("likes"), []),
         "comments": safe_json_loads(mapped.get("comments"), []),
+        "expiresAt": str(mapped.get("expires_at")) if mapped.get("expires_at") else None,
+        "importance": mapped.get("importance", "normal") or "normal",
         "createdAt": str(mapped.get("created_at")),
     }
 
@@ -397,6 +410,8 @@ def fetch_announcements():
             attachments,
             likes,
             comments,
+            expires_at,
+            importance,
             created_at
         FROM announcements
         ORDER BY created_at DESC
@@ -420,6 +435,8 @@ def fetch_announcement_by_id(announcement_id: str):
             attachments,
             likes,
             comments,
+            expires_at,
+            importance,
             created_at
         FROM announcements
         WHERE id = :announcement_id
@@ -446,6 +463,8 @@ def save_announcement_record(announcement: dict):
             attachments,
             likes,
             comments,
+            expires_at,
+            importance,
             created_at
         )
         VALUES (
@@ -458,6 +477,8 @@ def save_announcement_record(announcement: dict):
             :attachments,
             :likes,
             :comments,
+            :expires_at,
+            :importance,
             :created_at
         )
         ON DUPLICATE KEY UPDATE
@@ -469,6 +490,8 @@ def save_announcement_record(announcement: dict):
             attachments = VALUES(attachments),
             likes = VALUES(likes),
             comments = VALUES(comments),
+            expires_at = VALUES(expires_at),
+            importance = VALUES(importance),
             created_at = VALUES(created_at)
         """
     )
@@ -484,6 +507,8 @@ def save_announcement_record(announcement: dict):
             "attachments": json.dumps(announcement.get("attachments", [])),
             "likes": json.dumps(announcement.get("likes", [])),
             "comments": json.dumps(announcement.get("comments", [])),
+            "expires_at": clean_str(announcement.get("expiresAt")) or None,
+            "importance": clean_str(announcement.get("importance"), "normal"),
             "created_at": clean_str(announcement.get("createdAt")),
         },
     )
@@ -596,6 +621,19 @@ def create_announcement(payload: dict, request: Request):
         if not tags:
             raise HTTPException(status_code=400, detail="At least one audience tag is required")
 
+        raw_expires = clean_str(payload.get("expiresAt"))
+        expires_at = None
+        if raw_expires:
+            try:
+                dt = datetime.datetime.fromisoformat(raw_expires.replace("Z", "+00:00"))
+                expires_at = dt.strftime("%Y-%m-%d %H:%M:%S")
+            except (ValueError, AttributeError):
+                expires_at = None
+
+        importance = clean_str(payload.get("importance"), "normal")
+        if importance not in ("normal", "high", "urgent"):
+            importance = "normal"
+
         announcement = {
             "id": clean_str(payload.get("id")),
             "authorName": clean_str(payload.get("authorName")),
@@ -606,7 +644,9 @@ def create_announcement(payload: dict, request: Request):
             "attachments": attachments,
             "likes": [],
             "comments": [],
-            "createdAt": clean_str(payload.get("createdAt")),
+            "expiresAt": expires_at,
+            "importance": importance,
+            "createdAt": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
         save_announcement_record(announcement)
