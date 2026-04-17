@@ -20,7 +20,9 @@ services:
           memory: 400M
 
   fastapi:
-    build: ./backend
+    build: 
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: capstone_api
     restart: always
     depends_on:

@@ -5,13 +5,15 @@ FROM python:3.12-slim
 WORKDIR /code
 
 # 3. Copy the requirements file first to take advantage of Docker caching
-COPY ./requirements.txt /code/requirements.txt
-
+COPY ./backend/requirements.txt /code/backend/requirements.txt
 # 4. Install your Python dependencies
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/backend/requirements.txt
 
 # 5. Copy your 'app' folder into the container
-COPY ./app /code/app
+
+COPY ./conversion /code/conversion
+COPY ./backend /code/backend
+
 
 # 6. The command to start the FastAPI server
-CMD ["fastapi", "run", "app/main.py", "--port", "8000", "--proxy-headers"]
+CMD ["fastapi", "run", "backend/app/main.py", "--port", "8000", "--proxy-headers"]
