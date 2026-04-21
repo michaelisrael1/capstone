@@ -15,16 +15,7 @@ from pythonjsonlogger import jsonlogger
 from sqlalchemy import text
 
 from utils.connection import DatabaseClient
-
-
-# --------------------------------------------------
-# Make project root importable so backend can use /conversion
-# --------------------------------------------------
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.append(str(PROJECT_ROOT))
-
-from conversion.extractionTool import PROGRAM_FLAG_COLUMNS, flatten_and_split, sanitize_data  # noqa: E402
+from utils.extractionTool import PROGRAM_FLAG_COLUMNS, flatten_and_split, sanitize_data  # noqa: E402
 
 
 # --------------------------------------------------

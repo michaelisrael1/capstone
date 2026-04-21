@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from conversion.extractionTool import process_row, flatten_and_split
+from backend.app.utils.extractionTool import process_row, flatten_and_split
 
 
 class TestProcessRow:
