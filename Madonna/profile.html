@@ -1,223 +1,249 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Profile | Alliance Portal</title>
-  <link rel="stylesheet" href="assets/styles.css" />
-  <link rel="stylesheet" href="assets/tags.css" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Profile | Alliance Portal</title>
+    <link rel="stylesheet" href="assets/styles.css"/>
+    <link rel="stylesheet" href="assets/tags.css"/>
 </head>
 
 <body data-page="profile" class="portal-body">
-  <!-- Portal header -->
-  <header class="portal-header">
+<!-- Portal header -->
+<header class="portal-header">
     <div class="container portal-nav">
-      <a class="portal-brand" href="index.html" aria-label="Home">
-        <img src="assets/logo-mark.jpg" alt="Madonna Ability Alliance" class="portal-logo" />
+        <a class="portal-brand" href="index.html" aria-label="Home">
+            <img src="assets/logo-mark.jpg" alt="Madonna Ability Alliance" class="portal-logo"/>
 
-        <div class="portal-brand-text">
-          <div class="portal-org">Madonna Ability Alliance Portal</div>
-          <div class="portal-title">MAAP</div>
-        </div>
-      </a>
-
-      <div class="portal-right" data-auth>
-        <!-- Logo -->
-        <img src="assets/logo-mark.jpg" alt="Madonna Ability Alliance" class="portal-logo" />
-      </div>
-    </div>
-  </header>
-
-  <main class="portal-page">
-    <div class="container">
-      <!-- Page heading -->
-      <div class="portal-heading">
-        <div>
-          <h1 class="portal-h1" id="profileTitle">Profile</h1>
-          <p class="portal-sub">
-            Emergency details are role-based. <span id="editNotice"></span>
-          </p>
-        </div>
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn-maap orange" id="deleteProfileBtn" type="button" style="display:none;">Delete Profile</button>
-          <a class="btn-maap primary" href="dashboard.html">← Back to Dashboard</a>
-        </div>
-      </div>
-
-      <div class="portal-grid">
-  <section class="portal-main">
-    <!-- Personal Information -->
-    <div class="portal-card">
-      <h2 class="portal-h2" style="margin-bottom:10px;">Personal Information</h2>
-
-      <div class="profile-header">
-        <div class="profile-photo">
-          <div class="photo-placeholder">Photo</div>
-        </div>
-
-        <div class="profile-basic">
-          <div class="profile-coordinator">
-            <label class="portal-label">Program Coordinator</label>
-            <div id="coordinatorLink" class="portal-muted">Unassigned</div>
-          </div>
-
-          <div class="profile-address" style="margin-top:10px;">
-            <label class="portal-label">Address</label>
-            <input
-              class="portal-input"
-              data-full-edit-field
-              placeholder="Street address"
-              value="123 Main Street"
-            />
-
-            <div class="profile-address-grid" style="margin-top:8px;">
-              <input class="portal-input" data-full-edit-field placeholder="City" value="Omaha" />
-              <input class="portal-input" data-full-edit-field placeholder="State" value="NE" />
-              <input class="portal-input" data-full-edit-field placeholder="ZIP" value="68106" />
+            <div class="portal-brand-text">
+                <div class="portal-org">Madonna Ability Alliance Portal</div>
+                <div class="portal-title">MAAP</div>
             </div>
-          </div>
+        </a>
+
+        <div class="portal-right" data-auth>
+            <!-- Logo -->
+            <img src="assets/logo-mark.jpg" alt="Madonna Ability Alliance" class="portal-logo"/>
         </div>
-      </div>
     </div>
+</header>
 
-    <div class="portal-card">
-      <div class="portal-card-head">
-        <h2 class="portal-h2">Programs / Tags</h2>
-          <p class="portal-muted">Program tags can be updated by broader-access staff roles.</p>
-      </div>
+<main class="portal-page">
+    <div class="container">
+        <!-- Page heading -->
+        <div class="portal-heading">
+            <div>
+                <h1 class="portal-h1" id="profileTitle">Profile</h1>
+                <p class="portal-sub">
+                    Emergency details are role-based. <span id="editNotice"></span>
+                </p>
+            </div>
 
-      <div id="profileTagsEditor" class="tag-checkbox-grid"></div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn-maap orange" id="deleteProfileBtn" type="button" style="display:none;">Delete
+                    Profile
+                </button>
+                <a class="btn-maap primary" href="dashboard.html">← Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="portal-grid">
+            <section class="portal-main">
+                <!-- Personal Information -->
+                <div class="portal-card">
+                    <h2 class="portal-h2" style="margin-bottom:10px;">Personal Information</h2>
+
+                    <div class="profile-header">
+                        <div class="profile-photo">
+                            <div class="photo-placeholder">Photo</div>
+                        </div>
+
+                        <div class="profile-basic">
+                            <div class="profile-coordinator">
+                                <label class="portal-label">Program Coordinator</label>
+                                <div id="coordinatorLink" class="portal-muted">Unassigned</div>
+                            </div>
+
+                            <div class="profile-address" style="margin-top:10px;">
+                                <label class="portal-label">Address</label>
+                                <label>
+                                    <input
+                                            class="portal-input"
+                                            data-full-edit-field
+                                            placeholder="Street address"
+                                            value="123 Main Street"
+                                    />
+                                </label>
+
+                                <div class="profile-address-grid" style="margin-top:8px;">
+                                    <label>
+                                        <input class="portal-input" data-full-edit-field placeholder="City" value="Omaha"/>
+                                    </label>
+                                    <label>
+                                        <input class="portal-input" data-full-edit-field placeholder="State" value="NE"/>
+                                    </label>
+                                    <label>
+                                        <input class="portal-input" data-full-edit-field placeholder="ZIP" value="68106"/>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="portal-card">
+                    <div class="portal-card-head">
+                        <h2 class="portal-h2">Programs / Tags</h2>
+                        <p class="portal-muted">Program tags can be updated by broader-access staff roles.</p>
+                    </div>
+
+                    <div id="profileTagsEditor" class="tag-checkbox-grid"></div>
+                </div>
+
+                <!-- Special Olympics sports (visible only when the 'SO' tag is set) -->
+                <div class="portal-card" id="profileSportsCard" style="display:none;">
+                    <div class="portal-card-head">
+                        <h2 class="portal-h2">Special Olympics Sports</h2>
+                        <p class="portal-muted">Quick view of sports this client participates in.</p>
+                    </div>
+
+                    <div id="profileSportsEditor" class="tag-checkbox-grid"></div>
+                </div>
+
+                <!-- Elementary partner schools (visible only when the 'E' tag is set) -->
+                <div class="portal-card" id="profileSchoolsCard" style="display:none;">
+                    <div class="portal-card-head">
+                        <h2 class="portal-h2">Elementary Schools</h2>
+                        <p class="portal-muted">Quick view of the partner school(s) this client attends.</p>
+                    </div>
+
+                    <div id="profileSchoolsEditor" class="tag-checkbox-grid"></div>
+                </div>
+
+                <!-- Emergency + Critical Needs + Personal Notes -->
+                <div class="portal-card">
+                    <div class="portal-card-head">
+                        <h2 class="portal-h2">Emergency Contacts</h2>
+                        <p class="portal-muted">Update contact details when role allows editing.</p>
+                    </div>
+
+                    <div class="portal-form">
+                        <div class="portal-form-grid">
+                            <div>
+                                <label class="portal-label">Primary Contact Name</label>
+                                <label>
+                                    <input class="portal-input" data-emergency-field placeholder="Full name"
+                                           value="Jamie R."/>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="portal-label">Primary Contact Phone</label>
+                                <label>
+                                    <input class="portal-input" data-emergency-field placeholder="(###) ###-####"
+                                           value="(402) 555-0123"/>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label class="portal-label">Secondary Contact Name</label>
+                                <label>
+                                    <input class="portal-input" data-emergency-field placeholder="Full name"
+                                           value="Casey R."/>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="portal-label">Secondary Contact Phone</label>
+                                <label>
+                                    <input class="portal-input" data-emergency-field placeholder="(###) ###-####"
+                                           value="(402) 555-0456"/>
+                                </label>
+                            </div>
+                        </div>
+
+                        <hr class="portal-divider"/>
+
+                        <div class="portal-card-head" style="margin-bottom:6px;">
+                            <h2 class="portal-h2">Critical Needs</h2>
+                            <p class="portal-muted">Select common risks and support needs as part of emergency
+                                planning.</p>
+                        </div>
+
+                        <label class="portal-label">Common Risks / Needs</label>
+                        <div id="profileRisksEditor" class="tag-checkbox-grid"></div>
+
+                        <div class="portal-actions">
+                            <button class="portal-btn-orange" id="saveEmergency" type="button">Save emergency info
+                            </button>
+                        </div>
+
+                        <div class="portal-footnote" id="profileAccessSummary">
+                            Later: replace “Save” with a Hubwise write (add/edit) and pull initial values from Hubwise
+                            (read).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="portal-card" style="margin-top:16px;">
+                    <div class="portal-card-head">
+                        <h2 class="portal-h2">Personal Notes</h2>
+                        <p class="portal-muted">Private notes visible only to your account.</p>
+                    </div>
+
+                    <label class="portal-label">Your Notes</label>
+                    <label for="personalNotes"></label><textarea
+                            id="personalNotes"
+                            class="portal-textarea"
+                            rows="4"
+                            placeholder="Write private observations or reminders here..."
+                    >   </textarea>
+
+                    <div class="portal-actions">
+                        <button class="portal-btn-orange" id="saveNotes" type="button">
+                            Save personal notes
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sidebar -->
+            <aside class="portal-side">
+                <div class="portal-card">
+                    <div class="portal-card-head">
+                        <h2 class="portal-h2">Quick Help</h2>
+                        <p class="portal-muted">Tips for keeping emergency info useful and consistent.</p>
+                    </div>
+
+                    <div class="quick-list">
+                        <div class="quick-item" style="cursor:default;">
+                            <div class="quick-icon" aria-hidden="true">☎️</div>
+                            <div>
+                                <div class="quick-title">Phone format</div>
+                                <div class="quick-sub">(###) ###-#### is easiest to scan</div>
+                            </div>
+                        </div>
+
+                        <div class="quick-item" style="cursor:default;">
+                            <div class="quick-icon" aria-hidden="true">🧠</div>
+                            <div>
+                                <div class="quick-title">Keep notes short</div>
+                                <div class="quick-sub">Use bullet-style sentences if possible</div>
+                            </div>
+                        </div>
+
+                        <div class="quick-item" style="cursor:default;">
+                            <div class="quick-icon" aria-hidden="true">🛡️</div>
+                            <div>
+                                <div class="quick-title">Privacy</div>
+                                <div class="quick-sub">Only view/update profiles you’re authorized to access</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
     </div>
+</main>
 
-    <!-- Special Olympics sports (visible only when the 'SO' tag is set) -->
-    <div class="portal-card" id="profileSportsCard" style="display:none;">
-      <div class="portal-card-head">
-        <h2 class="portal-h2">Special Olympics Sports</h2>
-        <p class="portal-muted">Quick view of sports this client participates in.</p>
-      </div>
-
-      <div id="profileSportsEditor" class="tag-checkbox-grid"></div>
-    </div>
-
-    <!-- Elementary partner schools (visible only when the 'E' tag is set) -->
-    <div class="portal-card" id="profileSchoolsCard" style="display:none;">
-      <div class="portal-card-head">
-        <h2 class="portal-h2">Elementary Schools</h2>
-        <p class="portal-muted">Quick view of the partner school(s) this client attends.</p>
-      </div>
-
-      <div id="profileSchoolsEditor" class="tag-checkbox-grid"></div>
-    </div>
-
-    <!-- Emergency + Critical Needs + Personal Notes -->
-    <div class="portal-card">
-      <div class="portal-card-head">
-        <h2 class="portal-h2">Emergency Contacts</h2>
-        <p class="portal-muted">Update contact details when role allows editing.</p>
-      </div>
-
-      <div class="portal-form">
-        <div class="portal-form-grid">
-          <div>
-            <label class="portal-label">Primary Contact Name</label>
-            <input class="portal-input" data-emergency-field placeholder="Full name" value="Jamie R." />
-          </div>
-          <div>
-            <label class="portal-label">Primary Contact Phone</label>
-            <input class="portal-input" data-emergency-field placeholder="(###) ###-####" value="(402) 555-0123" />
-          </div>
-
-          <div>
-            <label class="portal-label">Secondary Contact Name</label>
-            <input class="portal-input" data-emergency-field placeholder="Full name" value="Casey R." />
-          </div>
-          <div>
-            <label class="portal-label">Secondary Contact Phone</label>
-            <input class="portal-input" data-emergency-field placeholder="(###) ###-####" value="(402) 555-0456" />
-          </div>
-        </div>
-
-        <hr class="portal-divider" />
-
-        <div class="portal-card-head" style="margin-bottom:6px;">
-          <h2 class="portal-h2">Critical Needs</h2>
-          <p class="portal-muted">Select common risks and support needs as part of emergency planning.</p>
-        </div>
-
-        <label class="portal-label">Common Risks / Needs</label>
-        <div id="profileRisksEditor" class="tag-checkbox-grid"></div>
-
-        <div class="portal-actions">
-          <button class="portal-btn-orange" id="saveEmergency" type="button">Save emergency info</button>
-        </div>
-
-        <div class="portal-footnote" id="profileAccessSummary">
-          Later: replace “Save” with a Hubwise write (add/edit) and pull initial values from Hubwise (read).
-        </div>
-      </div>
-    </div>
-
-    <div class="portal-card" style="margin-top:16px;">
-      <div class="portal-card-head">
-        <h2 class="portal-h2">Personal Notes</h2>
-        <p class="portal-muted">Private notes visible only to your account.</p>
-      </div>
-
-      <label class="portal-label">Your Notes</label>
-      <textarea
-        id="personalNotes"
-        class="portal-textarea"
-       rows="4"
-        placeholder="Write private observations or reminders here..."
-  >   </textarea>
-
-      <div class="portal-actions">
-        <button class="portal-btn-orange" id="saveNotes" type="button">
-          Save personal notes
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Sidebar -->
-  <aside class="portal-side">
-    <div class="portal-card">
-      <div class="portal-card-head">
-        <h2 class="portal-h2">Quick Help</h2>
-        <p class="portal-muted">Tips for keeping emergency info useful and consistent.</p>
-      </div>
-
-      <div class="quick-list">
-        <div class="quick-item" style="cursor:default;">
-          <div class="quick-icon" aria-hidden="true">☎️</div>
-          <div>
-            <div class="quick-title">Phone format</div>
-            <div class="quick-sub">(###) ###-#### is easiest to scan</div>
-          </div>
-        </div>
-
-        <div class="quick-item" style="cursor:default;">
-          <div class="quick-icon" aria-hidden="true">🧠</div>
-          <div>
-            <div class="quick-title">Keep notes short</div>
-            <div class="quick-sub">Use bullet-style sentences if possible</div>
-          </div>
-        </div>
-
-        <div class="quick-item" style="cursor:default;">
-          <div class="quick-icon" aria-hidden="true">🛡️</div>
-          <div>
-            <div class="quick-title">Privacy</div>
-            <div class="quick-sub">Only view/update profiles you’re authorized to access</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </aside>
-</div>
-  </main>
-
-  <script src="assets/app.js"></script>
+<script src="assets/app.js"></script>
 </body>
 </html>
