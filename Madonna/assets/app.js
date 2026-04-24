@@ -376,7 +376,7 @@ function renderTagCheckboxes(container, selectedTags = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(tag_definitions)
-    .filter(([code, tag]) => !tag._hidden || selectedTags.includes(code))
+    .filter(([code, tag]) => !tag._hidden)
     .map(
       ([code, tag]) => `
       <label class="tag-checkbox-item">
@@ -418,7 +418,7 @@ function renderRiskCheckboxes(container, selectedRisks = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(risk_definitions)
-    .filter(([code, risk]) => !risk._hidden || selectedRisks.includes(code))
+    .filter(([code, risk]) => !risk._hidden)
     .map(
       ([code, risk]) => `
       <label class="tag-checkbox-item">
@@ -442,7 +442,7 @@ function renderSportCheckboxes(container, selectedSports = [], disabled = false)
   if (!container) return;
 
   container.innerHTML = Object.entries(sport_definitions)
-    .filter(([code, sport]) => !sport._hidden || selectedSports.includes(code))
+    .filter(([code, sport]) => !sport._hidden)
     .map(
       ([code, sport]) => `
       <label class="tag-checkbox-item">
@@ -466,7 +466,7 @@ function renderSchoolCheckboxes(container, selectedSchools = [], disabled = fals
   if (!container) return;
 
   container.innerHTML = Object.entries(school_definitions)
-    .filter(([code, school]) => !school._hidden || selectedSchools.includes(code))
+    .filter(([code, school]) => !school._hidden)
     .map(
       ([code, school]) => `
       <label class="tag-checkbox-item">
@@ -1318,13 +1318,17 @@ async function initProfilePage() {
         return alert("Profile not found.");
       }
 
-      const selectedTags = canEditFull && tagEditor
+      const visibleCheckedTags = canEditFull && tagEditor
         ? [...tagEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value)
         : prof.tags || [];
+      const hiddenTags = (prof.tags || []).filter(code => tag_definitions[code]?._hidden);
+      const selectedTags = [...new Set([...visibleCheckedTags, ...hiddenTags])];
 
-      const selectedRisks = canEditRisks && riskEditor
+      const visibleCheckedRisks = canEditRisks && riskEditor
         ? [...riskEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value)
         : prof.risks || [];
+      const hiddenRisks = (prof.risks || []).filter(code => risk_definitions[code]?._hidden);
+      const selectedRisks = [...new Set([...visibleCheckedRisks, ...hiddenRisks])];
 
       prof.tags = selectedTags;
       prof.risks = selectedRisks;
@@ -1332,19 +1336,21 @@ async function initProfilePage() {
 
       // Persist Special Olympics sports selection (local-only quick view)
       if (canEditFull && sportEditor && prof.tags.includes("so")) {
-        const selectedSports = [...sportEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
-        localStorage.setItem(sportKey, JSON.stringify(selectedSports));
+        const visibleCheckedSports = [...sportEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
+        const storedSports = JSON.parse(localStorage.getItem(sportKey) || "[]");
+        const hiddenSports = storedSports.filter(code => sport_definitions[code]?._hidden);
+        localStorage.setItem(sportKey, JSON.stringify([...new Set([...visibleCheckedSports, ...hiddenSports])]));
       } else if (!prof.tags.includes("so")) {
-        // No longer a Special Olympics client — clear any stale sports picks
         localStorage.removeItem(sportKey);
       }
 
       // Persist Elementary schools selection (local-only quick view)
       if (canEditFull && schoolEditor && prof.tags.includes("e")) {
-        const selectedSchools = [...schoolEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
-        localStorage.setItem(schoolKey, JSON.stringify(selectedSchools));
+        const visibleCheckedSchools = [...schoolEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
+        const storedSchools = JSON.parse(localStorage.getItem(schoolKey) || "[]");
+        const hiddenSchools = storedSchools.filter(code => school_definitions[code]?._hidden);
+        localStorage.setItem(schoolKey, JSON.stringify([...new Set([...visibleCheckedSchools, ...hiddenSchools])]));
       } else if (!prof.tags.includes("e")) {
-        // No longer an Elementary client — clear any stale school picks
         localStorage.removeItem(schoolKey);
       }
 

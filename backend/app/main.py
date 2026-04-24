@@ -43,6 +43,11 @@ app = FastAPI(root_path="/api")
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_ROOT)), name="uploads")
 
 
+@app.on_event("startup")
+def on_startup():
+    ensure_option_definitions_table()
+
+
 # --------------------------------------------------
 # Small helpers
 # --------------------------------------------------
@@ -327,6 +332,84 @@ def ensure_announcements_table():
             db_client.send_query(text(col_sql))
         except Exception:
             pass  # column already exists
+
+
+def ensure_option_definitions_table():
+    query = text(
+        """
+        CREATE TABLE IF NOT EXISTS option_definitions (
+            option_id INT AUTO_INCREMENT PRIMARY KEY,
+            category ENUM('sport', 'risk', 'school', 'tag') NOT NULL,
+            option_key VARCHAR(50) NOT NULL,
+            label VARCHAR(150) NOT NULL,
+            short_text VARCHAR(20) NULL,
+            css_class VARCHAR(50) NULL,
+            is_hidden BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_category_key (category, option_key)
+        )
+        """
+    )
+    db_client.send_query(query)
+
+    # Seed defaults if table is empty
+    count_result = db_client.send_query(text("SELECT COUNT(*) AS cnt FROM option_definitions"))
+    if count_result and count_result[0]["cnt"] == 0:
+        seed_data = [
+            # Tags
+            ("tag", "so", "Special Olympics", "SO", "tag-so"),
+            ("tag", "e", "Elementary", "E", "tag-e"),
+            ("tag", "s", "Secondary", "S", "tag-s"),
+            ("tag", "ya", "Young Adult", "YA", "tag-ya"),
+            ("tag", "ds", "Day Services", "DS", "tag-ds"),
+            ("tag", "se", "Supported Employment", "SE", "tag-se"),
+            ("tag", "vr", "Voc Rehab", "VR", "tag-vr"),
+            ("tag", "sfl", "Supported Family Living", "SFL", "tag-sfl"),
+            ("tag", "il", "Independent Living", "IL", "tag-il"),
+            ("tag", "a", "Administrator", "A", "tag-a"),
+            # Risks
+            ("risk", "allergy", "Allergy", None, None),
+            ("risk", "seizure", "Seizure", None, None),
+            ("risk", "fall", "Fall Risk", None, None),
+            ("risk", "elopement", "Elopement", None, None),
+            ("risk", "wheelchair", "Wheelchair", None, None),
+            ("risk", "mobility", "Mobility Support", None, None),
+            ("risk", "communication", "Communication Support", None, None),
+            ("risk", "behavioral", "Behavioral Support", None, None),
+            ("risk", "sensory", "Sensory Support", None, None),
+            ("risk", "medication", "Medication Alert", None, None),
+            # Sports
+            ("sport", "powerlifting", "Powerlifting (Traditional - Winter)", None, None),
+            ("sport", "swimming", "Swimming (Traditional - Spring)", None, None),
+            ("sport", "track", "Track (Traditional - Spring)", None, None),
+            ("sport", "basketball", "Basketball (Unified - Winter)", None, None),
+            ("sport", "bowling", "Bowling (Unified - Fall)", None, None),
+            ("sport", "cornhole", "Cornhole (Unified - Fall)", None, None),
+            ("sport", "esports", "E-Sports (Unified - Spring)", None, None),
+            ("sport", "flag_football", "Flag Football (Unified - Fall)", None, None),
+            ("sport", "volleyball", "Volleyball (Unified - Spring)", None, None),
+            # Schools
+            ("school", "holy_name", "Holy Name", None, None),
+            ("school", "st_pius_st_leo", "St. Pius X / St. Leo", None, None),
+            ("school", "st_robert_bellarmine", "St. Robert Bellarmine Catholic Schools", None, None),
+        ]
+        insert_query = text(
+            """
+            INSERT INTO option_definitions (category, option_key, label, short_text, css_class)
+            VALUES (:category, :option_key, :label, :short_text, :css_class)
+            """
+        )
+        for category, option_key, label, short_text, css_class in seed_data:
+            db_client.send_query(
+                insert_query,
+                {
+                    "category": category,
+                    "option_key": option_key,
+                    "label": label,
+                    "short_text": short_text,
+                    "css_class": css_class,
+                },
+            )
 
 
 def normalize_attachment_payload(item):
@@ -745,6 +828,7 @@ async def import_excel(file: UploadFile = File(...)):
         # Ensure tables exist
         ensure_staff_table()
         ensure_clients_table()
+        ensure_option_definitions_table()
 
         # For now the spreadsheet is the source of truth, so replace imported rows each upload
         db_client.send_query("DELETE FROM clients")
