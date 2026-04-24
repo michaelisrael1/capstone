@@ -2076,61 +2076,89 @@ function saveAdminDefinitions(storageKey, defs) {
   localStorage.setItem(storageKey, JSON.stringify(defs));
 }
 
-// --- Render the list of items with Hide/Show + Delete ---
-function renderAdminList(containerId, defs, storageKey, labelField, rerender) {
+// --- Render active (non-retired) items with a Retire button ---
+function renderAdminList(containerId, defs, storageKey, labelField, rerender, retiredRerender) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  const keys = Object.keys(defs);
+  const activeKeys = Object.keys(defs).filter(k => !defs[k]._hidden);
 
-  container.innerHTML = keys.map(key => {
+  container.innerHTML = activeKeys.map(key => {
     const item = defs[key];
-    const hidden = item._hidden === true;
     const display = labelField === "tag"
       ? `${item.text} — ${item.label}`
       : item.label;
-    const visCls = hidden ? "is-hidden" : "is-visible";
-    const visText = hidden ? "Hidden" : "Visible";
     return `
-      <div class="admin-option-item ${hidden ? "hidden-item" : ""}">
+      <div class="admin-option-item">
         <div>
           <span class="admin-option-label">${display}</span>
           <span class="admin-option-key">${key}</span>
         </div>
         <div class="admin-option-actions">
-          <button class="admin-option-visibility ${visCls}" data-key="${key}">${visText}</button>
-          <button class="admin-option-remove" data-key="${key}">Delete</button>
+          <button class="admin-option-retire" data-key="${key}">Retire</button>
         </div>
       </div>`;
   }).join("");
 
-  // Visibility toggle
-  container.querySelectorAll(".admin-option-visibility").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const k = btn.dataset.key;
-      const item = defs[k];
-      const toggling = item._hidden ? "visible" : "hidden";
-      if (!confirm(`Set "${item.label || item.text || k}" to ${toggling}? This changes what users see across the portal.`)) return;
-      item._hidden = !item._hidden;
-      saveAdminDefinitions(storageKey, defs);
-      rerender();
-    });
-  });
+  if (!activeKeys.length) {
+    container.innerHTML = '<p class="admin-retired-empty">No active options. Check the Retired Options tab.</p>';
+  }
 
-  // Delete with confirmation — marks as _deleted + _hidden, keeps in object
-  container.querySelectorAll(".admin-option-remove").forEach(btn => {
+  container.querySelectorAll(".admin-option-retire").forEach(btn => {
     btn.addEventListener("click", () => {
       const k = btn.dataset.key;
       const item = defs[k];
       const name = item.label || item.text || k;
       if (!confirm(
-        `Are you sure you want to delete "${name}"?\n\nThis will hide it from all users. ` +
-        `Existing records that reference this option will be preserved in the database.`
+        `Retire "${name}"?\n\nThis will hide it from all users and move it to the Retired Options tab. ` +
+        `Existing records that reference this option will not be affected.`
       )) return;
       item._hidden = true;
-      item._deleted = true;
       saveAdminDefinitions(storageKey, defs);
       rerender();
+      if (retiredRerender) retiredRerender();
+    });
+  });
+}
+
+// --- Render retired (hidden) items with a Restore button ---
+function renderRetiredList(containerId, emptyId, defs, storageKey, labelField, rerender, activeRerender) {
+  const container = document.getElementById(containerId);
+  const emptyMsg = document.getElementById(emptyId);
+  if (!container) return;
+
+  const retiredKeys = Object.keys(defs).filter(k => defs[k]._hidden === true);
+
+  container.innerHTML = retiredKeys.map(key => {
+    const item = defs[key];
+    const display = labelField === "tag"
+      ? `${item.text} — ${item.label}`
+      : item.label;
+    return `
+      <div class="admin-option-item retired-item">
+        <div>
+          <span class="admin-option-label">${display}</span>
+          <span class="admin-option-key">${key}</span>
+        </div>
+        <div class="admin-option-actions">
+          <button class="admin-option-restore" data-key="${key}">Restore</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  if (emptyMsg) emptyMsg.style.display = retiredKeys.length ? "none" : "block";
+
+  container.querySelectorAll(".admin-option-restore").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const k = btn.dataset.key;
+      const item = defs[k];
+      const name = item.label || item.text || k;
+      if (!confirm(`Restore "${name}"? It will become visible to users again.`)) return;
+      item._hidden = false;
+      delete item._deleted;
+      saveAdminDefinitions(storageKey, defs);
+      rerender();
+      if (activeRerender) activeRerender();
     });
   });
 }
@@ -2253,17 +2281,26 @@ function initAdminPage() {
   const SCHOOL_KEY = "maap_school_definitions";
   const TAG_KEY = "maap_tag_definitions";
 
-  // Rerender helpers (closures so renderAdminList can call back)
-  function rerenderSports() { renderAdminList("adminSportList", sport_definitions, SPORT_KEY, "label", rerenderSports); }
-  function rerenderRisks() { renderAdminList("adminRiskList", risk_definitions, RISK_KEY, "label", rerenderRisks); }
-  function rerenderSchools() { renderAdminList("adminSchoolList", school_definitions, SCHOOL_KEY, "label", rerenderSchools); }
-  function rerenderTags() { renderAdminList("adminTagList", tag_definitions, TAG_KEY, "tag", rerenderTags); }
+  // Rerender helpers — active and retired lists cross-update each other
+  function rerenderRetiredSports() { renderRetiredList("retiredSportList", "retiredSportEmpty", sport_definitions, SPORT_KEY, "label", rerenderRetiredSports, rerenderSports); }
+  function rerenderRetiredRisks() { renderRetiredList("retiredRiskList", "retiredRiskEmpty", risk_definitions, RISK_KEY, "label", rerenderRetiredRisks, rerenderRisks); }
+  function rerenderRetiredSchools() { renderRetiredList("retiredSchoolList", "retiredSchoolEmpty", school_definitions, SCHOOL_KEY, "label", rerenderRetiredSchools, rerenderSchools); }
+  function rerenderRetiredTags() { renderRetiredList("retiredTagList", "retiredTagEmpty", tag_definitions, TAG_KEY, "tag", rerenderRetiredTags, rerenderTags); }
+
+  function rerenderSports() { renderAdminList("adminSportList", sport_definitions, SPORT_KEY, "label", rerenderSports, rerenderRetiredSports); }
+  function rerenderRisks() { renderAdminList("adminRiskList", risk_definitions, RISK_KEY, "label", rerenderRisks, rerenderRetiredRisks); }
+  function rerenderSchools() { renderAdminList("adminSchoolList", school_definitions, SCHOOL_KEY, "label", rerenderSchools, rerenderRetiredSchools); }
+  function rerenderTags() { renderAdminList("adminTagList", tag_definitions, TAG_KEY, "tag", rerenderTags, rerenderRetiredTags); }
 
   // --- Initial render ---
   rerenderSports();
   rerenderRisks();
   rerenderSchools();
   rerenderTags();
+  rerenderRetiredSports();
+  rerenderRetiredRisks();
+  rerenderRetiredSchools();
+  rerenderRetiredTags();
 
   // --- Live previews ---
   initAdminPreview("adminSportPreview", ["adminSportKey", "adminSportLabel"]);
