@@ -790,6 +790,98 @@ def toggle_announcement_like(announcement_id: str, request: Request):
 
 
 # --------------------------------------------------
+# Admin option-definitions routes
+# --------------------------------------------------
+ADMIN_ROLES = {"director", "head_coordinator", "program_coordinator"}
+VALID_CATEGORIES = {"sport", "risk", "school", "tag"}
+
+
+@app.get("/admin/options", tags=["Admin"])
+async def get_option_definitions(request: Request, category: str = None):
+    role = get_request_role(request)
+    if role not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    if category:
+        if category not in VALID_CATEGORIES:
+            raise HTTPException(status_code=400, detail=f"Invalid category: {category}")
+        query = text(
+            "SELECT option_id, category, option_key, label, short_text, css_class, is_hidden "
+            "FROM option_definitions WHERE category = :category ORDER BY option_id"
+        )
+        rows = db_client.send_query(query, {"category": category})
+    else:
+        query = text(
+            "SELECT option_id, category, option_key, label, short_text, css_class, is_hidden "
+            "FROM option_definitions ORDER BY category, option_id"
+        )
+        rows = db_client.send_query(query)
+
+    return [dict(r) for r in (rows or [])]
+
+
+@app.post("/admin/options", tags=["Admin"])
+async def add_option_definition(request: Request):
+    role = get_request_role(request)
+    if role not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    body = await request.json()
+    category = clean_str(body.get("category")).lower()
+    option_key = clean_str(body.get("option_key")).lower().replace(" ", "_")
+    label = clean_str(body.get("label"))
+    short_text = body.get("short_text") or None
+    css_class = body.get("css_class") or None
+    is_hidden = bool(body.get("is_hidden", False))
+
+    if category not in VALID_CATEGORIES:
+        raise HTTPException(status_code=400, detail=f"Invalid category: {category}")
+    if not option_key or not label:
+        raise HTTPException(status_code=400, detail="option_key and label are required")
+
+    try:
+        insert_query = text(
+            """
+            INSERT INTO option_definitions (category, option_key, label, short_text, css_class, is_hidden)
+            VALUES (:category, :option_key, :label, :short_text, :css_class, :is_hidden)
+            """
+        )
+        db_client.send_query(insert_query, {
+            "category": category,
+            "option_key": option_key,
+            "label": label,
+            "short_text": short_text,
+            "css_class": css_class,
+            "is_hidden": is_hidden,
+        })
+    except Exception as e:
+        if "Duplicate" in str(e):
+            raise HTTPException(status_code=409, detail=f"Option '{option_key}' already exists in '{category}'")
+        raise
+
+    return {"status": "created", "category": category, "option_key": option_key}
+
+
+@app.put("/admin/options/{option_id}", tags=["Admin"])
+async def update_option_definition(option_id: int, request: Request):
+    role = get_request_role(request)
+    if role not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    body = await request.json()
+    is_hidden = body.get("is_hidden")
+    if is_hidden is None:
+        raise HTTPException(status_code=400, detail="is_hidden is required")
+
+    update_query = text(
+        "UPDATE option_definitions SET is_hidden = :is_hidden WHERE option_id = :option_id"
+    )
+    db_client.send_query(update_query, {"is_hidden": bool(is_hidden), "option_id": option_id})
+
+    return {"status": "updated", "option_id": option_id, "is_hidden": bool(is_hidden)}
+
+
+# --------------------------------------------------
 # Excel / CSV import route
 # --------------------------------------------------
 @app.post("/import/excel", tags=["Database"])
