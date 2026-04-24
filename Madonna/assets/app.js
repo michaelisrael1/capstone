@@ -264,7 +264,8 @@ let announcements = getStoredAnnouncements();
 let backendHydrated = false;
 
 // Tag definitions used across the dashboard and profile editor
-const tag_definitions = {
+// These serve as defaults — admin overrides are loaded from localStorage at boot.
+const DEFAULT_TAG_DEFINITIONS = {
   so: { text: "SO", className: "tag-so", label: "Special Olympics" },
   e: { text: "E", className: "tag-e", label: "Elementary" },
   s: { text: "S", className: "tag-s", label: "Secondary" },
@@ -277,8 +278,7 @@ const tag_definitions = {
   a: { text: "A", className: "tag-a", label: "Administrator" }
 };
 
-// Risk / support definitions used for badges and profile editing
-const risk_definitions = {
+const DEFAULT_RISK_DEFINITIONS = {
   allergy: { label: "Allergy" },
   seizure: { label: "Seizure" },
   fall: { label: "Fall Risk" },
@@ -291,14 +291,10 @@ const risk_definitions = {
   medication: { label: "Medication Alert" }
 };
 
-// Sport definitions shown only when a client is flagged Special Olympics.
-// Source: https://www.madonnaalliance.org/special-olympics-and-unified-sports
-const sport_definitions = {
-  // Traditional Special Olympics
+const DEFAULT_SPORT_DEFINITIONS = {
   powerlifting: { label: "Powerlifting (Traditional · Winter)" },
   swimming:     { label: "Swimming (Traditional · Spring)" },
   track:        { label: "Track (Traditional · Spring)" },
-  // Unified Sports
   basketball:    { label: "Basketball (Unified · Winter)" },
   bowling:       { label: "Bowling (Unified · Fall)" },
   cornhole:      { label: "Cornhole (Unified · Fall)" },
@@ -307,13 +303,25 @@ const sport_definitions = {
   volleyball:    { label: "Volleyball (Unified · Spring)" }
 };
 
-// Elementary partner schools, shown only when a client is flagged Elementary ('e').
-// Source: https://www.madonnaalliance.org/elementary-program
-const school_definitions = {
+const DEFAULT_SCHOOL_DEFINITIONS = {
   holy_name:           { label: "Holy Name" },
   st_pius_st_leo:      { label: "St. Pius X / St. Leo" },
   st_robert_bellarmine:{ label: "St. Robert Bellarmine Catholic Schools" }
 };
+
+// Live definitions — hydrated from localStorage (admin overrides) or defaults
+function loadDefinitionsFromStorage(key, defaults) {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) return JSON.parse(stored);
+  } catch (_) { /* fall through */ }
+  return structuredClone(defaults);
+}
+
+let tag_definitions = loadDefinitionsFromStorage("maap_tag_definitions", DEFAULT_TAG_DEFINITIONS);
+let risk_definitions = loadDefinitionsFromStorage("maap_risk_definitions", DEFAULT_RISK_DEFINITIONS);
+let sport_definitions = loadDefinitionsFromStorage("maap_sport_definitions", DEFAULT_SPORT_DEFINITIONS);
+let school_definitions = loadDefinitionsFromStorage("maap_school_definitions", DEFAULT_SCHOOL_DEFINITIONS);
 
 function normalizeRole(role) {
   const normalized = LEGACY_ROLE_MAP[String(role || "").toLowerCase()] || String(role || "").toLowerCase();
@@ -739,6 +747,10 @@ function canDeleteRecords(role) {
   return ["director", "head_coordinator"].includes(normalizeRole(role));
 }
 
+function canAccessAdmin(role) {
+  return ["director", "head_coordinator", "program_coordinator"].includes(normalizeRole(role));
+}
+
 function isAssignedToProfile(session, profile) {
   if (!session || !profile) return false;
 
@@ -873,12 +885,14 @@ function initNavAuthUI() {
   } else {
     const announcementLink = `<a class="btn-maap blue" href="announcements.html">Announcements</a>`;
     const staffLink = `<a class="btn-maap blue" href="staff.html">Staff</a>`;
+    const adminLink = canAccessAdmin(s.role) ? `<a class="btn-maap blue" href="admin.html">Admin</a>` : ``;
     const importButton = canImportData(s.role) ? `<button class="btn-maap orange" id="uploadBtn">Import Data</button>` : ``;
 
     el.innerHTML = `
       <span class="badge blue">${getRoleLabel(s.role).toUpperCase()}</span>
       ${announcementLink}
       ${staffLink}
+      ${adminLink}
       ${importButton}
       <button class="btn-maap orange" id="logoutBtn">Log Out</button>
     `;
@@ -2050,6 +2064,156 @@ async function initStaffProfilePage() {
   }
 }
 
+// ==================================================
+// Admin Control Page
+// ==================================================
+
+function saveAdminDefinitions(storageKey, defs) {
+  localStorage.setItem(storageKey, JSON.stringify(defs));
+}
+
+function renderAdminList(containerId, countId, defs, storageKey, labelField) {
+  const container = document.getElementById(containerId);
+  const countEl = document.getElementById(countId);
+  if (!container) return;
+
+  const keys = Object.keys(defs);
+  countEl.textContent = `${keys.length} item${keys.length !== 1 ? "s" : ""}`;
+
+  container.innerHTML = keys.map(key => {
+    const item = defs[key];
+    const display = labelField === "tag"
+      ? `${item.text} — ${item.label}`
+      : item.label;
+    return `
+      <div class="admin-option-item">
+        <div>
+          <span class="admin-option-label">${display}</span>
+          <span class="admin-option-key">${key}</span>
+        </div>
+        <button class="admin-option-remove" data-key="${key}">Remove</button>
+      </div>`;
+  }).join("");
+
+  container.querySelectorAll(".admin-option-remove").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const k = btn.dataset.key;
+      delete defs[k];
+      saveAdminDefinitions(storageKey, defs);
+      renderAdminList(containerId, countId, defs, storageKey, labelField);
+    });
+  });
+}
+
+function initAdminPage() {
+  const s = requireAuth();
+  if (!canAccessAdmin(s.role)) {
+    alert("You do not have permission to access the admin page.");
+    window.location.href = "dashboard.html";
+    return;
+  }
+
+  // --- Storage keys ---
+  const SPORT_KEY = "maap_sport_definitions";
+  const RISK_KEY = "maap_risk_definitions";
+  const SCHOOL_KEY = "maap_school_definitions";
+  const TAG_KEY = "maap_tag_definitions";
+
+  // --- Render all lists (using the live module-level definition objects) ---
+  renderAdminList("adminSportList", "sportCount", sport_definitions, SPORT_KEY, "label");
+  renderAdminList("adminRiskList", "riskCount", risk_definitions, RISK_KEY, "label");
+  renderAdminList("adminSchoolList", "schoolCount", school_definitions, SCHOOL_KEY, "label");
+  renderAdminList("adminTagList", "tagCount", tag_definitions, TAG_KEY, "tag");
+
+  // --- Add handlers ---
+  document.getElementById("addSportBtn")?.addEventListener("click", () => {
+    const keyEl = document.getElementById("adminSportKey");
+    const labelEl = document.getElementById("adminSportLabel");
+    const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
+    const label = labelEl.value.trim();
+    if (!key || !label) return;
+    sport_definitions[key] = { label };
+    saveAdminDefinitions(SPORT_KEY, sport_definitions);
+    renderAdminList("adminSportList", "sportCount", sport_definitions, SPORT_KEY, "label");
+    keyEl.value = "";
+    labelEl.value = "";
+  });
+
+  document.getElementById("addRiskBtn")?.addEventListener("click", () => {
+    const keyEl = document.getElementById("adminRiskKey");
+    const labelEl = document.getElementById("adminRiskLabel");
+    const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
+    const label = labelEl.value.trim();
+    if (!key || !label) return;
+    risk_definitions[key] = { label };
+    saveAdminDefinitions(RISK_KEY, risk_definitions);
+    renderAdminList("adminRiskList", "riskCount", risk_definitions, RISK_KEY, "label");
+    keyEl.value = "";
+    labelEl.value = "";
+  });
+
+  document.getElementById("addSchoolBtn")?.addEventListener("click", () => {
+    const keyEl = document.getElementById("adminSchoolKey");
+    const labelEl = document.getElementById("adminSchoolLabel");
+    const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
+    const label = labelEl.value.trim();
+    if (!key || !label) return;
+    school_definitions[key] = { label };
+    saveAdminDefinitions(SCHOOL_KEY, school_definitions);
+    renderAdminList("adminSchoolList", "schoolCount", school_definitions, SCHOOL_KEY, "label");
+    keyEl.value = "";
+    labelEl.value = "";
+  });
+
+  document.getElementById("addTagBtn")?.addEventListener("click", () => {
+    const keyEl = document.getElementById("adminTagKey");
+    const textEl = document.getElementById("adminTagText");
+    const labelEl = document.getElementById("adminTagLabel");
+    const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
+    const text = textEl.value.trim().toUpperCase();
+    const label = labelEl.value.trim();
+    if (!key || !text || !label) return;
+    tag_definitions[key] = { text, className: `tag-${key}`, label };
+    saveAdminDefinitions(TAG_KEY, tag_definitions);
+    renderAdminList("adminTagList", "tagCount", tag_definitions, TAG_KEY, "tag");
+    keyEl.value = "";
+    textEl.value = "";
+    labelEl.value = "";
+  });
+
+  // --- Import Data (director only) ---
+  const importCard = document.getElementById("adminImportCard");
+  if (importCard && canImportData(s.role)) {
+    importCard.style.display = "";
+    const fileInput = document.getElementById("adminExcelUpload");
+    const status = document.getElementById("adminUploadStatus");
+
+    fileInput?.addEventListener("change", async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      status.textContent = `Uploading ${file.name}...`;
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const headers = buildSessionHeaders();
+        const res = await fetch("/api/import/excel", {
+          method: "POST",
+          headers,
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Import failed");
+        status.textContent = `Import complete — ${data.clients_inserted ?? 0} clients, ${data.staff_inserted ?? 0} staff inserted.`;
+      } catch (err) {
+        status.textContent = `Error: ${err.message}`;
+      }
+      fileInput.value = "";
+    });
+  }
+}
+
 // Boot the correct page logic after the DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
   initNavAuthUI();
@@ -2060,6 +2224,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (document.body.dataset.page === "profile") await initProfilePage();
   if (document.body.dataset.page === "staff") await initStaffDirectory();
   if (document.body.dataset.page === "staff_profile") await initStaffProfilePage();
+  if (document.body.dataset.page === "admin") initAdminPage();
 
   initExcelUpload();
 });
