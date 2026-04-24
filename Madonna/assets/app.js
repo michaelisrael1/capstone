@@ -2392,10 +2392,12 @@ function initAdminPage() {
     );
   });
 
-  // --- Import Data (director only) ---
+  // --- Export / Import Data (director only) ---
+  const exportCard = document.getElementById("adminExportCard");
   const importCard = document.getElementById("adminImportCard");
   const noAccessCard = document.getElementById("adminImportNoAccess");
   if (canImportData(s.role)) {
+    if (exportCard) exportCard.style.display = "";
     if (importCard) importCard.style.display = "";
     if (noAccessCard) noAccessCard.style.display = "none";
     const fileInput = document.getElementById("adminExcelUpload");

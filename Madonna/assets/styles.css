@@ -1141,6 +1141,16 @@ a.btn-maap, a.btn-maap:visited{
   font-size: 13px;
   padding: 8px 14px;
 }
+.admin-export-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top: 12px;
+}
+.admin-export-actions .btn-maap[disabled]{
+  opacity: .5;
+  cursor: not-allowed;
+}
 .admin-option-remove{
   border: 1px solid rgba(220,38,38,.25);
   background: rgba(220,38,38,.08);
