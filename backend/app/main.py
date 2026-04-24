@@ -83,6 +83,8 @@ CLIENT_SELECT_COLUMNS = [
     "media_consent",
     "tags",
     "risks",
+    "sports",
+    "schools",
     "updated",
     "program_coordinator_id",
     "street_address",
@@ -159,6 +161,8 @@ def fetch_existing_client(client_id: str):
             media_consent,
             tags,
             risks,
+            sports,
+            schools,
             updated,
             program_coordinator_id,
             street_address,
@@ -232,6 +236,8 @@ def merged_payload_for_role(existing_client: dict, payload: dict, role: str):
         "group": existing_client.get("group_name"),
         "mediaConsent": existing_client.get("media_consent"),
         "tags": json.loads(existing_client.get("tags") or "[]"),
+        "sports": json.loads(existing_client.get("sports") or "[]"),
+        "schools": json.loads(existing_client.get("schools") or "[]"),
         "programCoordinatorId": existing_client.get("program_coordinator_id"),
         "address": {
             "street": existing_client.get("street_address"),
@@ -283,6 +289,8 @@ def ensure_clients_table():
             media_consent VARCHAR(10) NULL,
             tags TEXT NULL,
             risks TEXT NULL,
+            sports TEXT NULL,
+            schools TEXT NULL,
             updated DATE NULL,
             program_coordinator_id VARCHAR(50) NULL,
             street_address VARCHAR(255) NULL,
@@ -300,6 +308,15 @@ def ensure_clients_table():
         """
     )
     db_client.send_query(query)
+    # Add columns if table already existed without them
+    for col_sql in [
+        "ALTER TABLE clients ADD COLUMN sports TEXT NULL",
+        "ALTER TABLE clients ADD COLUMN schools TEXT NULL",
+    ]:
+        try:
+            db_client.send_query(text(col_sql))
+        except Exception:
+            pass  # column already exists
 
 
 def ensure_announcements_table():
@@ -992,6 +1009,8 @@ async def import_excel(file: UploadFile = File(...)):
                 media_consent,
                 tags,
                 risks,
+                sports,
+                schools,
                 updated,
                 program_coordinator_id,
                 street_address,
@@ -1011,6 +1030,8 @@ async def import_excel(file: UploadFile = File(...)):
                 :media_consent,
                 :tags,
                 :risks,
+                :sports,
+                :schools,
                 :updated,
                 :program_coordinator_id,
                 :street_address,
@@ -1045,6 +1066,8 @@ async def import_excel(file: UploadFile = File(...)):
                 "media_consent": normalize_media_consent(row.get("media_consent")),
                 "tags": build_tag_json(row),
                 "risks": "[]",
+                "sports": "[]",
+                "schools": "[]",
                 "updated": clean_date(row.get("start_date")),
                 "program_coordinator_id": coordinator_id,
                 "street_address": clean_str(row.get("mailing_address")),
@@ -1125,6 +1148,8 @@ def update_client(client_id: str, payload: dict, request: Request):
                 media_consent = :media_consent,
                 tags = :tags,
                 risks = :risks,
+                sports = :sports,
+                schools = :schools,
                 updated = :updated,
                 program_coordinator_id = :program_coordinator_id,
                 street_address = :street_address,
@@ -1149,6 +1174,8 @@ def update_client(client_id: str, payload: dict, request: Request):
                 "media_consent": payload.get("mediaConsent"),
                 "tags": str(payload.get("tags", [])).replace("'", '"'),
                 "risks": str(payload.get("risks", [])).replace("'", '"'),
+                "sports": str(payload.get("sports", [])).replace("'", '"'),
+                "schools": str(payload.get("schools", [])).replace("'", '"'),
                 "updated": payload.get("updated"),
                 "program_coordinator_id": payload.get("programCoordinatorId"),
                 "street_address": payload.get("address", {}).get("street"),
