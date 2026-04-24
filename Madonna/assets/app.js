@@ -371,11 +371,12 @@ function renderTags(tagCodes = []) {
   `;
 }
 
-// Render editable tag checkboxes on the profile page
+// Render editable tag checkboxes on the profile page (hides admin-hidden items unless already selected)
 function renderTagCheckboxes(container, selectedTags = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(tag_definitions)
+    .filter(([code, tag]) => !tag._hidden || selectedTags.includes(code))
     .map(
       ([code, tag]) => `
       <label class="tag-checkbox-item">
@@ -412,11 +413,12 @@ function renderRiskBadges(riskCodes = []) {
   `;
 }
 
-// Render editable risk/support checkboxes on the profile page
+// Render editable risk/support checkboxes on the profile page (hides admin-hidden items unless already selected)
 function renderRiskCheckboxes(container, selectedRisks = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(risk_definitions)
+    .filter(([code, risk]) => !risk._hidden || selectedRisks.includes(code))
     .map(
       ([code, risk]) => `
       <label class="tag-checkbox-item">
@@ -435,11 +437,12 @@ function renderRiskCheckboxes(container, selectedRisks = [], disabled = false) {
     .join("");
 }
 
-// Render editable Special Olympics sport checkboxes on the profile page
+// Render editable Special Olympics sport checkboxes on the profile page (hides admin-hidden items unless already selected)
 function renderSportCheckboxes(container, selectedSports = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(sport_definitions)
+    .filter(([code, sport]) => !sport._hidden || selectedSports.includes(code))
     .map(
       ([code, sport]) => `
       <label class="tag-checkbox-item">
@@ -458,11 +461,12 @@ function renderSportCheckboxes(container, selectedSports = [], disabled = false)
     .join("");
 }
 
-// Render editable Elementary partner-school checkboxes on the profile page
+// Render editable Elementary partner-school checkboxes on the profile page (hides admin-hidden items unless already selected)
 function renderSchoolCheckboxes(container, selectedSchools = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(school_definitions)
+    .filter(([code, school]) => !school._hidden || selectedSchools.includes(code))
     .map(
       ([code, school]) => `
       <label class="tag-checkbox-item">
@@ -2072,36 +2076,147 @@ function saveAdminDefinitions(storageKey, defs) {
   localStorage.setItem(storageKey, JSON.stringify(defs));
 }
 
-function renderAdminList(containerId, countId, defs, storageKey, labelField) {
+// --- Render the list of items with Hide/Show + Delete ---
+function renderAdminList(containerId, defs, storageKey, labelField, rerender) {
   const container = document.getElementById(containerId);
-  const countEl = document.getElementById(countId);
   if (!container) return;
 
   const keys = Object.keys(defs);
-  countEl.textContent = `${keys.length} item${keys.length !== 1 ? "s" : ""}`;
 
   container.innerHTML = keys.map(key => {
     const item = defs[key];
+    const hidden = item._hidden === true;
     const display = labelField === "tag"
       ? `${item.text} — ${item.label}`
       : item.label;
+    const visCls = hidden ? "is-hidden" : "is-visible";
+    const visText = hidden ? "Hidden" : "Visible";
     return `
-      <div class="admin-option-item">
+      <div class="admin-option-item ${hidden ? "hidden-item" : ""}">
         <div>
           <span class="admin-option-label">${display}</span>
           <span class="admin-option-key">${key}</span>
         </div>
-        <button class="admin-option-remove" data-key="${key}">Remove</button>
+        <div class="admin-option-actions">
+          <button class="admin-option-visibility ${visCls}" data-key="${key}">${visText}</button>
+          <button class="admin-option-remove" data-key="${key}">Delete</button>
+        </div>
       </div>`;
   }).join("");
 
+  // Visibility toggle
+  container.querySelectorAll(".admin-option-visibility").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const k = btn.dataset.key;
+      const item = defs[k];
+      const toggling = item._hidden ? "visible" : "hidden";
+      if (!confirm(`Set "${item.label || item.text || k}" to ${toggling}? This changes what users see across the portal.`)) return;
+      item._hidden = !item._hidden;
+      saveAdminDefinitions(storageKey, defs);
+      rerender();
+    });
+  });
+
+  // Delete with confirmation — marks as _deleted + _hidden, keeps in object
   container.querySelectorAll(".admin-option-remove").forEach(btn => {
     btn.addEventListener("click", () => {
       const k = btn.dataset.key;
-      delete defs[k];
+      const item = defs[k];
+      const name = item.label || item.text || k;
+      if (!confirm(
+        `Are you sure you want to delete "${name}"?\n\nThis will hide it from all users. ` +
+        `Existing records that reference this option will be preserved in the database.`
+      )) return;
+      item._hidden = true;
+      item._deleted = true;
       saveAdminDefinitions(storageKey, defs);
-      renderAdminList(containerId, countId, defs, storageKey, labelField);
+      rerender();
     });
+  });
+}
+
+// --- Live preview that mirrors input fields ---
+function initAdminPreview(previewId, inputIds) {
+  const preview = document.getElementById(previewId);
+  if (!preview) return;
+
+  const inputs = inputIds.map(id => document.getElementById(id)).filter(Boolean);
+  const placeholder = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+
+  function update() {
+    const vals = inputs.map(el => el.value.trim()).filter(Boolean);
+    if (!vals.length) {
+      preview.innerHTML = placeholder;
+      return;
+    }
+    // For tags: show "TEXT — Label (key)"
+    if (inputIds.length === 3) {
+      const key = inputs[0].value.trim().toLowerCase().replace(/\s+/g, "_");
+      const text = inputs[1].value.trim().toUpperCase();
+      const label = inputs[2].value.trim();
+      preview.innerHTML = `
+        <span class="admin-preview-label">${text || "?"} — ${label || "?"}</span>
+        <span class="admin-preview-key">${key || "?"}</span>`;
+    } else {
+      const key = inputs[0].value.trim().toLowerCase().replace(/\s+/g, "_");
+      const label = inputs[1].value.trim();
+      preview.innerHTML = `
+        <span class="admin-preview-label">${label || "?"}</span>
+        <span class="admin-preview-key">${key || "?"}</span>`;
+    }
+  }
+
+  inputs.forEach(el => el.addEventListener("input", update));
+  update();
+}
+
+// --- Add-option modal ---
+function showAddModal(fields, onConfirm) {
+  const backdrop = document.getElementById("adminAddModal");
+  const fieldsEl = document.getElementById("adminAddModalFields");
+  const visToggle = document.getElementById("adminAddModalVisToggle");
+  const submitBtn = document.getElementById("adminAddModalSubmit");
+  const cancelBtn = document.getElementById("adminAddModalCancel");
+
+  let startVisible = false;
+  visToggle.className = "admin-option-visibility is-hidden";
+  visToggle.textContent = "Hidden";
+
+  fieldsEl.innerHTML = fields.map(f =>
+    `<div class="admin-modal-field">
+       <div class="portal-label">${f.label}</div>
+       <div class="admin-modal-value">${f.value}</div>
+     </div>`
+  ).join("");
+
+  backdrop.style.display = "flex";
+
+  function cleanup() {
+    backdrop.style.display = "none";
+    visToggle.replaceWith(visToggle.cloneNode(true));
+    submitBtn.replaceWith(submitBtn.cloneNode(true));
+    cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+  }
+
+  // Re-grab after clone to attach fresh listeners
+  const visToggle2 = document.getElementById("adminAddModalVisToggle");
+  const submitBtn2 = document.getElementById("adminAddModalSubmit");
+  const cancelBtn2 = document.getElementById("adminAddModalCancel");
+
+  visToggle2.addEventListener("click", () => {
+    startVisible = !startVisible;
+    visToggle2.className = startVisible
+      ? "admin-option-visibility is-visible"
+      : "admin-option-visibility is-hidden";
+    visToggle2.textContent = startVisible ? "Visible" : "Hidden";
+  });
+
+  cancelBtn2.addEventListener("click", cleanup);
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) cleanup(); });
+
+  submitBtn2.addEventListener("click", () => {
+    onConfirm(startVisible);
+    cleanup();
   });
 }
 
@@ -2113,30 +2228,68 @@ function initAdminPage() {
     return;
   }
 
+  // --- Tabs ---
+  document.querySelectorAll(".admin-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".admin-tab-panel").forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById(`tab-${tab.dataset.tab}`)?.classList.add("active");
+    });
+  });
+
+  // --- Collapsible cards ---
+  document.querySelectorAll(".admin-collapsible-head").forEach(head => {
+    head.addEventListener("click", () => {
+      head.classList.toggle("open");
+      const body = head.nextElementSibling;
+      if (body) body.classList.toggle("open");
+    });
+  });
+
   // --- Storage keys ---
   const SPORT_KEY = "maap_sport_definitions";
   const RISK_KEY = "maap_risk_definitions";
   const SCHOOL_KEY = "maap_school_definitions";
   const TAG_KEY = "maap_tag_definitions";
 
-  // --- Render all lists (using the live module-level definition objects) ---
-  renderAdminList("adminSportList", "sportCount", sport_definitions, SPORT_KEY, "label");
-  renderAdminList("adminRiskList", "riskCount", risk_definitions, RISK_KEY, "label");
-  renderAdminList("adminSchoolList", "schoolCount", school_definitions, SCHOOL_KEY, "label");
-  renderAdminList("adminTagList", "tagCount", tag_definitions, TAG_KEY, "tag");
+  // Rerender helpers (closures so renderAdminList can call back)
+  function rerenderSports() { renderAdminList("adminSportList", sport_definitions, SPORT_KEY, "label", rerenderSports); }
+  function rerenderRisks() { renderAdminList("adminRiskList", risk_definitions, RISK_KEY, "label", rerenderRisks); }
+  function rerenderSchools() { renderAdminList("adminSchoolList", school_definitions, SCHOOL_KEY, "label", rerenderSchools); }
+  function rerenderTags() { renderAdminList("adminTagList", tag_definitions, TAG_KEY, "tag", rerenderTags); }
 
-  // --- Add handlers ---
+  // --- Initial render ---
+  rerenderSports();
+  rerenderRisks();
+  rerenderSchools();
+  rerenderTags();
+
+  // --- Live previews ---
+  initAdminPreview("adminSportPreview", ["adminSportKey", "adminSportLabel"]);
+  initAdminPreview("adminRiskPreview", ["adminRiskKey", "adminRiskLabel"]);
+  initAdminPreview("adminSchoolPreview", ["adminSchoolKey", "adminSchoolLabel"]);
+  initAdminPreview("adminTagPreview", ["adminTagKey", "adminTagText", "adminTagLabel"]);
+
+  // --- Add handlers (open modal) ---
   document.getElementById("addSportBtn")?.addEventListener("click", () => {
     const keyEl = document.getElementById("adminSportKey");
     const labelEl = document.getElementById("adminSportLabel");
     const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
     const label = labelEl.value.trim();
     if (!key || !label) return;
-    sport_definitions[key] = { label };
-    saveAdminDefinitions(SPORT_KEY, sport_definitions);
-    renderAdminList("adminSportList", "sportCount", sport_definitions, SPORT_KEY, "label");
-    keyEl.value = "";
-    labelEl.value = "";
+
+    showAddModal(
+      [{ label: "Key", value: key }, { label: "Label", value: label }],
+      (visible) => {
+        sport_definitions[key] = { label, _hidden: !visible };
+        saveAdminDefinitions(SPORT_KEY, sport_definitions);
+        rerenderSports();
+        keyEl.value = "";
+        labelEl.value = "";
+        document.getElementById("adminSportPreview").innerHTML = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+      }
+    );
   });
 
   document.getElementById("addRiskBtn")?.addEventListener("click", () => {
@@ -2145,11 +2298,18 @@ function initAdminPage() {
     const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
     const label = labelEl.value.trim();
     if (!key || !label) return;
-    risk_definitions[key] = { label };
-    saveAdminDefinitions(RISK_KEY, risk_definitions);
-    renderAdminList("adminRiskList", "riskCount", risk_definitions, RISK_KEY, "label");
-    keyEl.value = "";
-    labelEl.value = "";
+
+    showAddModal(
+      [{ label: "Key", value: key }, { label: "Label", value: label }],
+      (visible) => {
+        risk_definitions[key] = { label, _hidden: !visible };
+        saveAdminDefinitions(RISK_KEY, risk_definitions);
+        rerenderRisks();
+        keyEl.value = "";
+        labelEl.value = "";
+        document.getElementById("adminRiskPreview").innerHTML = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+      }
+    );
   });
 
   document.getElementById("addSchoolBtn")?.addEventListener("click", () => {
@@ -2158,11 +2318,18 @@ function initAdminPage() {
     const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
     const label = labelEl.value.trim();
     if (!key || !label) return;
-    school_definitions[key] = { label };
-    saveAdminDefinitions(SCHOOL_KEY, school_definitions);
-    renderAdminList("adminSchoolList", "schoolCount", school_definitions, SCHOOL_KEY, "label");
-    keyEl.value = "";
-    labelEl.value = "";
+
+    showAddModal(
+      [{ label: "Key", value: key }, { label: "Label", value: label }],
+      (visible) => {
+        school_definitions[key] = { label, _hidden: !visible };
+        saveAdminDefinitions(SCHOOL_KEY, school_definitions);
+        rerenderSchools();
+        keyEl.value = "";
+        labelEl.value = "";
+        document.getElementById("adminSchoolPreview").innerHTML = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+      }
+    );
   });
 
   document.getElementById("addTagBtn")?.addEventListener("click", () => {
@@ -2173,18 +2340,27 @@ function initAdminPage() {
     const text = textEl.value.trim().toUpperCase();
     const label = labelEl.value.trim();
     if (!key || !text || !label) return;
-    tag_definitions[key] = { text, className: `tag-${key}`, label };
-    saveAdminDefinitions(TAG_KEY, tag_definitions);
-    renderAdminList("adminTagList", "tagCount", tag_definitions, TAG_KEY, "tag");
-    keyEl.value = "";
-    textEl.value = "";
-    labelEl.value = "";
+
+    showAddModal(
+      [{ label: "Key", value: key }, { label: "Short text", value: text }, { label: "Label", value: label }],
+      (visible) => {
+        tag_definitions[key] = { text, className: `tag-${key}`, label, _hidden: !visible };
+        saveAdminDefinitions(TAG_KEY, tag_definitions);
+        rerenderTags();
+        keyEl.value = "";
+        textEl.value = "";
+        labelEl.value = "";
+        document.getElementById("adminTagPreview").innerHTML = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+      }
+    );
   });
 
   // --- Import Data (director only) ---
   const importCard = document.getElementById("adminImportCard");
-  if (importCard && canImportData(s.role)) {
-    importCard.style.display = "";
+  const noAccessCard = document.getElementById("adminImportNoAccess");
+  if (canImportData(s.role)) {
+    if (importCard) importCard.style.display = "";
+    if (noAccessCard) noAccessCard.style.display = "none";
     const fileInput = document.getElementById("adminExcelUpload");
     const status = document.getElementById("adminUploadStatus");
 
