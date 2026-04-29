@@ -264,7 +264,8 @@ let announcements = getStoredAnnouncements();
 let backendHydrated = false;
 
 // Tag definitions used across the dashboard and profile editor
-const tag_definitions = {
+// These serve as defaults — admin overrides are loaded from localStorage at boot.
+const DEFAULT_TAG_DEFINITIONS = {
   so: { text: "SO", className: "tag-so", label: "Special Olympics" },
   e: { text: "E", className: "tag-e", label: "Elementary" },
   s: { text: "S", className: "tag-s", label: "Secondary" },
@@ -277,8 +278,7 @@ const tag_definitions = {
   a: { text: "A", className: "tag-a", label: "Administrator" }
 };
 
-// Risk / support definitions used for badges and profile editing
-const risk_definitions = {
+const DEFAULT_RISK_DEFINITIONS = {
   allergy: { label: "Allergy" },
   seizure: { label: "Seizure" },
   fall: { label: "Fall Risk" },
@@ -291,14 +291,10 @@ const risk_definitions = {
   medication: { label: "Medication Alert" }
 };
 
-// Sport definitions shown only when a client is flagged Special Olympics.
-// Source: https://www.madonnaalliance.org/special-olympics-and-unified-sports
-const sport_definitions = {
-  // Traditional Special Olympics
+const DEFAULT_SPORT_DEFINITIONS = {
   powerlifting: { label: "Powerlifting (Traditional · Winter)" },
   swimming:     { label: "Swimming (Traditional · Spring)" },
   track:        { label: "Track (Traditional · Spring)" },
-  // Unified Sports
   basketball:    { label: "Basketball (Unified · Winter)" },
   bowling:       { label: "Bowling (Unified · Fall)" },
   cornhole:      { label: "Cornhole (Unified · Fall)" },
@@ -307,13 +303,25 @@ const sport_definitions = {
   volleyball:    { label: "Volleyball (Unified · Spring)" }
 };
 
-// Elementary partner schools, shown only when a client is flagged Elementary ('e').
-// Source: https://www.madonnaalliance.org/elementary-program
-const school_definitions = {
+const DEFAULT_SCHOOL_DEFINITIONS = {
   holy_name:           { label: "Holy Name" },
   st_pius_st_leo:      { label: "St. Pius X / St. Leo" },
   st_robert_bellarmine:{ label: "St. Robert Bellarmine Catholic Schools" }
 };
+
+// Live definitions — hydrated from localStorage (admin overrides) or defaults
+function loadDefinitionsFromStorage(key, defaults) {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) return JSON.parse(stored);
+  } catch (_) { /* fall through */ }
+  return structuredClone(defaults);
+}
+
+let tag_definitions = loadDefinitionsFromStorage("maap_tag_definitions", DEFAULT_TAG_DEFINITIONS);
+let risk_definitions = loadDefinitionsFromStorage("maap_risk_definitions", DEFAULT_RISK_DEFINITIONS);
+let sport_definitions = loadDefinitionsFromStorage("maap_sport_definitions", DEFAULT_SPORT_DEFINITIONS);
+let school_definitions = loadDefinitionsFromStorage("maap_school_definitions", DEFAULT_SCHOOL_DEFINITIONS);
 
 function normalizeRole(role) {
   const normalized = LEGACY_ROLE_MAP[String(role || "").toLowerCase()] || String(role || "").toLowerCase();
@@ -363,11 +371,12 @@ function renderTags(tagCodes = []) {
   `;
 }
 
-// Render editable tag checkboxes on the profile page
+// Render editable tag checkboxes on the profile page (hides admin-hidden items unless already selected)
 function renderTagCheckboxes(container, selectedTags = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(tag_definitions)
+    .filter(([code, tag]) => !tag._hidden)
     .map(
       ([code, tag]) => `
       <label class="tag-checkbox-item">
@@ -404,11 +413,12 @@ function renderRiskBadges(riskCodes = []) {
   `;
 }
 
-// Render editable risk/support checkboxes on the profile page
+// Render editable risk/support checkboxes on the profile page (hides admin-hidden items unless already selected)
 function renderRiskCheckboxes(container, selectedRisks = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(risk_definitions)
+    .filter(([code, risk]) => !risk._hidden)
     .map(
       ([code, risk]) => `
       <label class="tag-checkbox-item">
@@ -427,11 +437,12 @@ function renderRiskCheckboxes(container, selectedRisks = [], disabled = false) {
     .join("");
 }
 
-// Render editable Special Olympics sport checkboxes on the profile page
+// Render editable Special Olympics sport checkboxes on the profile page (hides admin-hidden items unless already selected)
 function renderSportCheckboxes(container, selectedSports = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(sport_definitions)
+    .filter(([code, sport]) => !sport._hidden)
     .map(
       ([code, sport]) => `
       <label class="tag-checkbox-item">
@@ -450,11 +461,12 @@ function renderSportCheckboxes(container, selectedSports = [], disabled = false)
     .join("");
 }
 
-// Render editable Elementary partner-school checkboxes on the profile page
+// Render editable Elementary partner-school checkboxes on the profile page (hides admin-hidden items unless already selected)
 function renderSchoolCheckboxes(container, selectedSchools = [], disabled = false) {
   if (!container) return;
 
   container.innerHTML = Object.entries(school_definitions)
+    .filter(([code, school]) => !school._hidden)
     .map(
       ([code, school]) => `
       <label class="tag-checkbox-item">
@@ -739,6 +751,10 @@ function canDeleteRecords(role) {
   return ["director", "head_coordinator"].includes(normalizeRole(role));
 }
 
+function canAccessAdmin(role) {
+  return ["director", "head_coordinator", "program_coordinator"].includes(normalizeRole(role));
+}
+
 function isAssignedToProfile(session, profile) {
   if (!session || !profile) return false;
 
@@ -873,12 +889,14 @@ function initNavAuthUI() {
   } else {
     const announcementLink = `<a class="btn-maap blue" href="announcements.html">Announcements</a>`;
     const staffLink = `<a class="btn-maap blue" href="staff.html">Staff</a>`;
+    const adminLink = canAccessAdmin(s.role) ? `<a class="btn-maap blue" href="admin.html">Admin</a>` : ``;
     const importButton = canImportData(s.role) ? `<button class="btn-maap orange" id="uploadBtn">Import Data</button>` : ``;
 
     el.innerHTML = `
       <span class="badge blue">${getRoleLabel(s.role).toUpperCase()}</span>
       ${announcementLink}
       ${staffLink}
+      ${adminLink}
       ${importButton}
       <button class="btn-maap orange" id="logoutBtn">Log Out</button>
     `;
@@ -1300,13 +1318,17 @@ async function initProfilePage() {
         return alert("Profile not found.");
       }
 
-      const selectedTags = canEditFull && tagEditor
+      const visibleCheckedTags = canEditFull && tagEditor
         ? [...tagEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value)
         : prof.tags || [];
+      const hiddenTags = (prof.tags || []).filter(code => tag_definitions[code]?._hidden);
+      const selectedTags = [...new Set([...visibleCheckedTags, ...hiddenTags])];
 
-      const selectedRisks = canEditRisks && riskEditor
+      const visibleCheckedRisks = canEditRisks && riskEditor
         ? [...riskEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value)
         : prof.risks || [];
+      const hiddenRisks = (prof.risks || []).filter(code => risk_definitions[code]?._hidden);
+      const selectedRisks = [...new Set([...visibleCheckedRisks, ...hiddenRisks])];
 
       prof.tags = selectedTags;
       prof.risks = selectedRisks;
@@ -1314,19 +1336,21 @@ async function initProfilePage() {
 
       // Persist Special Olympics sports selection (local-only quick view)
       if (canEditFull && sportEditor && prof.tags.includes("so")) {
-        const selectedSports = [...sportEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
-        localStorage.setItem(sportKey, JSON.stringify(selectedSports));
+        const visibleCheckedSports = [...sportEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
+        const storedSports = JSON.parse(localStorage.getItem(sportKey) || "[]");
+        const hiddenSports = storedSports.filter(code => sport_definitions[code]?._hidden);
+        localStorage.setItem(sportKey, JSON.stringify([...new Set([...visibleCheckedSports, ...hiddenSports])]));
       } else if (!prof.tags.includes("so")) {
-        // No longer a Special Olympics client — clear any stale sports picks
         localStorage.removeItem(sportKey);
       }
 
       // Persist Elementary schools selection (local-only quick view)
       if (canEditFull && schoolEditor && prof.tags.includes("e")) {
-        const selectedSchools = [...schoolEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
-        localStorage.setItem(schoolKey, JSON.stringify(selectedSchools));
+        const visibleCheckedSchools = [...schoolEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
+        const storedSchools = JSON.parse(localStorage.getItem(schoolKey) || "[]");
+        const hiddenSchools = storedSchools.filter(code => school_definitions[code]?._hidden);
+        localStorage.setItem(schoolKey, JSON.stringify([...new Set([...visibleCheckedSchools, ...hiddenSchools])]));
       } else if (!prof.tags.includes("e")) {
-        // No longer an Elementary client — clear any stale school picks
         localStorage.removeItem(schoolKey);
       }
 
@@ -2050,6 +2074,367 @@ async function initStaffProfilePage() {
   }
 }
 
+// ==================================================
+// Admin Control Page
+// ==================================================
+
+function saveAdminDefinitions(storageKey, defs) {
+  localStorage.setItem(storageKey, JSON.stringify(defs));
+}
+
+// --- Render active (non-retired) items with a Retire button ---
+function renderAdminList(containerId, defs, storageKey, labelField, rerender, retiredRerender) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const activeKeys = Object.keys(defs).filter(k => !defs[k]._hidden);
+
+  container.innerHTML = activeKeys.map(key => {
+    const item = defs[key];
+    const display = labelField === "tag"
+      ? `${item.text} — ${item.label}`
+      : item.label;
+    return `
+      <div class="admin-option-item">
+        <div>
+          <span class="admin-option-label">${display}</span>
+          <span class="admin-option-key">${key}</span>
+        </div>
+        <div class="admin-option-actions">
+          <button class="admin-option-retire" data-key="${key}">Retire</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  if (!activeKeys.length) {
+    container.innerHTML = '<p class="admin-retired-empty">No active options. Check the Retired Options tab.</p>';
+  }
+
+  container.querySelectorAll(".admin-option-retire").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const k = btn.dataset.key;
+      const item = defs[k];
+      const name = item.label || item.text || k;
+      if (!confirm(
+        `Retire "${name}"?\n\nThis will hide it from all users and move it to the Retired Options tab. ` +
+        `Existing records that reference this option will not be affected.`
+      )) return;
+      item._hidden = true;
+      saveAdminDefinitions(storageKey, defs);
+      rerender();
+      if (retiredRerender) retiredRerender();
+    });
+  });
+}
+
+// --- Render retired (hidden) items with a Restore button ---
+function renderRetiredList(containerId, emptyId, defs, storageKey, labelField, rerender, activeRerender) {
+  const container = document.getElementById(containerId);
+  const emptyMsg = document.getElementById(emptyId);
+  if (!container) return;
+
+  const retiredKeys = Object.keys(defs).filter(k => defs[k]._hidden === true);
+
+  container.innerHTML = retiredKeys.map(key => {
+    const item = defs[key];
+    const display = labelField === "tag"
+      ? `${item.text} — ${item.label}`
+      : item.label;
+    return `
+      <div class="admin-option-item retired-item">
+        <div>
+          <span class="admin-option-label">${display}</span>
+          <span class="admin-option-key">${key}</span>
+        </div>
+        <div class="admin-option-actions">
+          <button class="admin-option-restore" data-key="${key}">Restore</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  if (emptyMsg) emptyMsg.style.display = retiredKeys.length ? "none" : "block";
+
+  container.querySelectorAll(".admin-option-restore").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const k = btn.dataset.key;
+      const item = defs[k];
+      const name = item.label || item.text || k;
+      if (!confirm(`Restore "${name}"? It will become visible to users again.`)) return;
+      item._hidden = false;
+      delete item._deleted;
+      saveAdminDefinitions(storageKey, defs);
+      rerender();
+      if (activeRerender) activeRerender();
+    });
+  });
+}
+
+// --- Live preview that mirrors input fields ---
+function initAdminPreview(previewId, inputIds) {
+  const preview = document.getElementById(previewId);
+  if (!preview) return;
+
+  const inputs = inputIds.map(id => document.getElementById(id)).filter(Boolean);
+  const placeholder = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+
+  function update() {
+    const vals = inputs.map(el => el.value.trim()).filter(Boolean);
+    if (!vals.length) {
+      preview.innerHTML = placeholder;
+      return;
+    }
+    // For tags: show "TEXT — Label (key)"
+    if (inputIds.length === 3) {
+      const key = inputs[0].value.trim().toLowerCase().replace(/\s+/g, "_");
+      const text = inputs[1].value.trim().toUpperCase();
+      const label = inputs[2].value.trim();
+      preview.innerHTML = `
+        <span class="admin-preview-label">${text || "?"} — ${label || "?"}</span>
+        <span class="admin-preview-key">${key || "?"}</span>`;
+    } else {
+      const key = inputs[0].value.trim().toLowerCase().replace(/\s+/g, "_");
+      const label = inputs[1].value.trim();
+      preview.innerHTML = `
+        <span class="admin-preview-label">${label || "?"}</span>
+        <span class="admin-preview-key">${key || "?"}</span>`;
+    }
+  }
+
+  inputs.forEach(el => el.addEventListener("input", update));
+  update();
+}
+
+// --- Add-option modal ---
+function showAddModal(fields, onConfirm) {
+  const backdrop = document.getElementById("adminAddModal");
+  const fieldsEl = document.getElementById("adminAddModalFields");
+  const visToggle = document.getElementById("adminAddModalVisToggle");
+  const submitBtn = document.getElementById("adminAddModalSubmit");
+  const cancelBtn = document.getElementById("adminAddModalCancel");
+
+  let startVisible = false;
+  visToggle.className = "admin-option-visibility is-hidden";
+  visToggle.textContent = "Hidden";
+
+  fieldsEl.innerHTML = fields.map(f =>
+    `<div class="admin-modal-field">
+       <div class="portal-label">${f.label}</div>
+       <div class="admin-modal-value">${f.value}</div>
+     </div>`
+  ).join("");
+
+  backdrop.style.display = "flex";
+
+  function cleanup() {
+    backdrop.style.display = "none";
+    visToggle.replaceWith(visToggle.cloneNode(true));
+    submitBtn.replaceWith(submitBtn.cloneNode(true));
+    cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+  }
+
+  // Re-grab after clone to attach fresh listeners
+  const visToggle2 = document.getElementById("adminAddModalVisToggle");
+  const submitBtn2 = document.getElementById("adminAddModalSubmit");
+  const cancelBtn2 = document.getElementById("adminAddModalCancel");
+
+  visToggle2.addEventListener("click", () => {
+    startVisible = !startVisible;
+    visToggle2.className = startVisible
+      ? "admin-option-visibility is-visible"
+      : "admin-option-visibility is-hidden";
+    visToggle2.textContent = startVisible ? "Visible" : "Hidden";
+  });
+
+  cancelBtn2.addEventListener("click", cleanup);
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) cleanup(); });
+
+  submitBtn2.addEventListener("click", () => {
+    onConfirm(startVisible);
+    cleanup();
+  });
+}
+
+function initAdminPage() {
+  const s = requireAuth();
+  if (!canAccessAdmin(s.role)) {
+    alert("You do not have permission to access the admin page.");
+    window.location.href = "dashboard.html";
+    return;
+  }
+
+  // --- Tabs ---
+  document.querySelectorAll(".admin-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".admin-tab-panel").forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById(`tab-${tab.dataset.tab}`)?.classList.add("active");
+    });
+  });
+
+  // --- Collapsible cards ---
+  document.querySelectorAll(".admin-collapsible-head").forEach(head => {
+    head.addEventListener("click", () => {
+      head.classList.toggle("open");
+      const body = head.nextElementSibling;
+      if (body) body.classList.toggle("open");
+    });
+  });
+
+  // --- Storage keys ---
+  const SPORT_KEY = "maap_sport_definitions";
+  const RISK_KEY = "maap_risk_definitions";
+  const SCHOOL_KEY = "maap_school_definitions";
+  const TAG_KEY = "maap_tag_definitions";
+
+  // Rerender helpers — active and retired lists cross-update each other
+  function rerenderRetiredSports() { renderRetiredList("retiredSportList", "retiredSportEmpty", sport_definitions, SPORT_KEY, "label", rerenderRetiredSports, rerenderSports); }
+  function rerenderRetiredRisks() { renderRetiredList("retiredRiskList", "retiredRiskEmpty", risk_definitions, RISK_KEY, "label", rerenderRetiredRisks, rerenderRisks); }
+  function rerenderRetiredSchools() { renderRetiredList("retiredSchoolList", "retiredSchoolEmpty", school_definitions, SCHOOL_KEY, "label", rerenderRetiredSchools, rerenderSchools); }
+  function rerenderRetiredTags() { renderRetiredList("retiredTagList", "retiredTagEmpty", tag_definitions, TAG_KEY, "tag", rerenderRetiredTags, rerenderTags); }
+
+  function rerenderSports() { renderAdminList("adminSportList", sport_definitions, SPORT_KEY, "label", rerenderSports, rerenderRetiredSports); }
+  function rerenderRisks() { renderAdminList("adminRiskList", risk_definitions, RISK_KEY, "label", rerenderRisks, rerenderRetiredRisks); }
+  function rerenderSchools() { renderAdminList("adminSchoolList", school_definitions, SCHOOL_KEY, "label", rerenderSchools, rerenderRetiredSchools); }
+  function rerenderTags() { renderAdminList("adminTagList", tag_definitions, TAG_KEY, "tag", rerenderTags, rerenderRetiredTags); }
+
+  // --- Initial render ---
+  rerenderSports();
+  rerenderRisks();
+  rerenderSchools();
+  rerenderTags();
+  rerenderRetiredSports();
+  rerenderRetiredRisks();
+  rerenderRetiredSchools();
+  rerenderRetiredTags();
+
+  // --- Live previews ---
+  initAdminPreview("adminSportPreview", ["adminSportKey", "adminSportLabel"]);
+  initAdminPreview("adminRiskPreview", ["adminRiskKey", "adminRiskLabel"]);
+  initAdminPreview("adminSchoolPreview", ["adminSchoolKey", "adminSchoolLabel"]);
+  initAdminPreview("adminTagPreview", ["adminTagKey", "adminTagText", "adminTagLabel"]);
+
+  // --- Add handlers (open modal) ---
+  document.getElementById("addSportBtn")?.addEventListener("click", () => {
+    const keyEl = document.getElementById("adminSportKey");
+    const labelEl = document.getElementById("adminSportLabel");
+    const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
+    const label = labelEl.value.trim();
+    if (!key || !label) return;
+
+    showAddModal(
+      [{ label: "Key", value: key }, { label: "Label", value: label }],
+      (visible) => {
+        sport_definitions[key] = { label, _hidden: !visible };
+        saveAdminDefinitions(SPORT_KEY, sport_definitions);
+        rerenderSports();
+        keyEl.value = "";
+        labelEl.value = "";
+        document.getElementById("adminSportPreview").innerHTML = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+      }
+    );
+  });
+
+  document.getElementById("addRiskBtn")?.addEventListener("click", () => {
+    const keyEl = document.getElementById("adminRiskKey");
+    const labelEl = document.getElementById("adminRiskLabel");
+    const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
+    const label = labelEl.value.trim();
+    if (!key || !label) return;
+
+    showAddModal(
+      [{ label: "Key", value: key }, { label: "Label", value: label }],
+      (visible) => {
+        risk_definitions[key] = { label, _hidden: !visible };
+        saveAdminDefinitions(RISK_KEY, risk_definitions);
+        rerenderRisks();
+        keyEl.value = "";
+        labelEl.value = "";
+        document.getElementById("adminRiskPreview").innerHTML = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+      }
+    );
+  });
+
+  document.getElementById("addSchoolBtn")?.addEventListener("click", () => {
+    const keyEl = document.getElementById("adminSchoolKey");
+    const labelEl = document.getElementById("adminSchoolLabel");
+    const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
+    const label = labelEl.value.trim();
+    if (!key || !label) return;
+
+    showAddModal(
+      [{ label: "Key", value: key }, { label: "Label", value: label }],
+      (visible) => {
+        school_definitions[key] = { label, _hidden: !visible };
+        saveAdminDefinitions(SCHOOL_KEY, school_definitions);
+        rerenderSchools();
+        keyEl.value = "";
+        labelEl.value = "";
+        document.getElementById("adminSchoolPreview").innerHTML = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+      }
+    );
+  });
+
+  document.getElementById("addTagBtn")?.addEventListener("click", () => {
+    const keyEl = document.getElementById("adminTagKey");
+    const textEl = document.getElementById("adminTagText");
+    const labelEl = document.getElementById("adminTagLabel");
+    const key = keyEl.value.trim().toLowerCase().replace(/\s+/g, "_");
+    const text = textEl.value.trim().toUpperCase();
+    const label = labelEl.value.trim();
+    if (!key || !text || !label) return;
+
+    showAddModal(
+      [{ label: "Key", value: key }, { label: "Short text", value: text }, { label: "Label", value: label }],
+      (visible) => {
+        tag_definitions[key] = { text, className: `tag-${key}`, label, _hidden: !visible };
+        saveAdminDefinitions(TAG_KEY, tag_definitions);
+        rerenderTags();
+        keyEl.value = "";
+        textEl.value = "";
+        labelEl.value = "";
+        document.getElementById("adminTagPreview").innerHTML = '<span class="admin-preview-placeholder">Type below to preview...</span>';
+      }
+    );
+  });
+
+  // --- Export / Import Data (director only) ---
+  const exportCard = document.getElementById("adminExportCard");
+  const importCard = document.getElementById("adminImportCard");
+  const noAccessCard = document.getElementById("adminImportNoAccess");
+  if (canImportData(s.role)) {
+    if (exportCard) exportCard.style.display = "";
+    if (importCard) importCard.style.display = "";
+    if (noAccessCard) noAccessCard.style.display = "none";
+    const fileInput = document.getElementById("adminExcelUpload");
+    const status = document.getElementById("adminUploadStatus");
+
+    fileInput?.addEventListener("change", async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      status.textContent = `Uploading ${file.name}...`;
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const headers = buildSessionHeaders();
+        const res = await fetch("/api/import/excel", {
+          method: "POST",
+          headers,
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Import failed");
+        status.textContent = `Import complete — ${data.clients_inserted ?? 0} clients, ${data.staff_inserted ?? 0} staff inserted.`;
+      } catch (err) {
+        status.textContent = `Error: ${err.message}`;
+      }
+      fileInput.value = "";
+    });
+  }
+}
+
 // Boot the correct page logic after the DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
   initNavAuthUI();
@@ -2060,6 +2445,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (document.body.dataset.page === "profile") await initProfilePage();
   if (document.body.dataset.page === "staff") await initStaffDirectory();
   if (document.body.dataset.page === "staff_profile") await initStaffProfilePage();
+  if (document.body.dataset.page === "admin") initAdminPage();
 
   initExcelUpload();
 });

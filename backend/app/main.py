@@ -43,6 +43,11 @@ app = FastAPI(root_path="/api")
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_ROOT)), name="uploads")
 
 
+@app.on_event("startup")
+def on_startup():
+    ensure_option_definitions_table()
+
+
 # --------------------------------------------------
 # Small helpers
 # --------------------------------------------------
@@ -78,6 +83,8 @@ CLIENT_SELECT_COLUMNS = [
     "media_consent",
     "tags",
     "risks",
+    "sports",
+    "schools",
     "updated",
     "program_coordinator_id",
     "street_address",
@@ -154,6 +161,8 @@ def fetch_existing_client(client_id: str):
             media_consent,
             tags,
             risks,
+            sports,
+            schools,
             updated,
             program_coordinator_id,
             street_address,
@@ -227,6 +236,8 @@ def merged_payload_for_role(existing_client: dict, payload: dict, role: str):
         "group": existing_client.get("group_name"),
         "mediaConsent": existing_client.get("media_consent"),
         "tags": json.loads(existing_client.get("tags") or "[]"),
+        "sports": json.loads(existing_client.get("sports") or "[]"),
+        "schools": json.loads(existing_client.get("schools") or "[]"),
         "programCoordinatorId": existing_client.get("program_coordinator_id"),
         "address": {
             "street": existing_client.get("street_address"),
@@ -278,6 +289,8 @@ def ensure_clients_table():
             media_consent VARCHAR(10) NULL,
             tags TEXT NULL,
             risks TEXT NULL,
+            sports TEXT NULL,
+            schools TEXT NULL,
             updated DATE NULL,
             program_coordinator_id VARCHAR(50) NULL,
             street_address VARCHAR(255) NULL,
@@ -295,6 +308,15 @@ def ensure_clients_table():
         """
     )
     db_client.send_query(query)
+    # Add columns if table already existed without them
+    for col_sql in [
+        "ALTER TABLE clients ADD COLUMN sports TEXT NULL",
+        "ALTER TABLE clients ADD COLUMN schools TEXT NULL",
+    ]:
+        try:
+            db_client.send_query(text(col_sql))
+        except Exception:
+            pass  # column already exists
 
 
 def ensure_announcements_table():
@@ -327,6 +349,84 @@ def ensure_announcements_table():
             db_client.send_query(text(col_sql))
         except Exception:
             pass  # column already exists
+
+
+def ensure_option_definitions_table():
+    query = text(
+        """
+        CREATE TABLE IF NOT EXISTS option_definitions (
+            option_id INT AUTO_INCREMENT PRIMARY KEY,
+            category ENUM('sport', 'risk', 'school', 'tag') NOT NULL,
+            option_key VARCHAR(50) NOT NULL,
+            label VARCHAR(150) NOT NULL,
+            short_text VARCHAR(20) NULL,
+            css_class VARCHAR(50) NULL,
+            is_hidden BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_category_key (category, option_key)
+        )
+        """
+    )
+    db_client.send_query(query)
+
+    # Seed defaults if table is empty
+    count_result = db_client.send_query(text("SELECT COUNT(*) AS cnt FROM option_definitions"))
+    if count_result and count_result[0]["cnt"] == 0:
+        seed_data = [
+            # Tags
+            ("tag", "so", "Special Olympics", "SO", "tag-so"),
+            ("tag", "e", "Elementary", "E", "tag-e"),
+            ("tag", "s", "Secondary", "S", "tag-s"),
+            ("tag", "ya", "Young Adult", "YA", "tag-ya"),
+            ("tag", "ds", "Day Services", "DS", "tag-ds"),
+            ("tag", "se", "Supported Employment", "SE", "tag-se"),
+            ("tag", "vr", "Voc Rehab", "VR", "tag-vr"),
+            ("tag", "sfl", "Supported Family Living", "SFL", "tag-sfl"),
+            ("tag", "il", "Independent Living", "IL", "tag-il"),
+            ("tag", "a", "Administrator", "A", "tag-a"),
+            # Risks
+            ("risk", "allergy", "Allergy", None, None),
+            ("risk", "seizure", "Seizure", None, None),
+            ("risk", "fall", "Fall Risk", None, None),
+            ("risk", "elopement", "Elopement", None, None),
+            ("risk", "wheelchair", "Wheelchair", None, None),
+            ("risk", "mobility", "Mobility Support", None, None),
+            ("risk", "communication", "Communication Support", None, None),
+            ("risk", "behavioral", "Behavioral Support", None, None),
+            ("risk", "sensory", "Sensory Support", None, None),
+            ("risk", "medication", "Medication Alert", None, None),
+            # Sports
+            ("sport", "powerlifting", "Powerlifting (Traditional - Winter)", None, None),
+            ("sport", "swimming", "Swimming (Traditional - Spring)", None, None),
+            ("sport", "track", "Track (Traditional - Spring)", None, None),
+            ("sport", "basketball", "Basketball (Unified - Winter)", None, None),
+            ("sport", "bowling", "Bowling (Unified - Fall)", None, None),
+            ("sport", "cornhole", "Cornhole (Unified - Fall)", None, None),
+            ("sport", "esports", "E-Sports (Unified - Spring)", None, None),
+            ("sport", "flag_football", "Flag Football (Unified - Fall)", None, None),
+            ("sport", "volleyball", "Volleyball (Unified - Spring)", None, None),
+            # Schools
+            ("school", "holy_name", "Holy Name", None, None),
+            ("school", "st_pius_st_leo", "St. Pius X / St. Leo", None, None),
+            ("school", "st_robert_bellarmine", "St. Robert Bellarmine Catholic Schools", None, None),
+        ]
+        insert_query = text(
+            """
+            INSERT INTO option_definitions (category, option_key, label, short_text, css_class)
+            VALUES (:category, :option_key, :label, :short_text, :css_class)
+            """
+        )
+        for category, option_key, label, short_text, css_class in seed_data:
+            db_client.send_query(
+                insert_query,
+                {
+                    "category": category,
+                    "option_key": option_key,
+                    "label": label,
+                    "short_text": short_text,
+                    "css_class": css_class,
+                },
+            )
 
 
 def normalize_attachment_payload(item):
@@ -707,6 +807,98 @@ def toggle_announcement_like(announcement_id: str, request: Request):
 
 
 # --------------------------------------------------
+# Admin option-definitions routes
+# --------------------------------------------------
+ADMIN_ROLES = {"director", "head_coordinator", "program_coordinator"}
+VALID_CATEGORIES = {"sport", "risk", "school", "tag"}
+
+
+@app.get("/admin/options", tags=["Admin"])
+async def get_option_definitions(request: Request, category: str = None):
+    role = get_request_role(request)
+    if role not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    if category:
+        if category not in VALID_CATEGORIES:
+            raise HTTPException(status_code=400, detail=f"Invalid category: {category}")
+        query = text(
+            "SELECT option_id, category, option_key, label, short_text, css_class, is_hidden "
+            "FROM option_definitions WHERE category = :category ORDER BY option_id"
+        )
+        rows = db_client.send_query(query, {"category": category})
+    else:
+        query = text(
+            "SELECT option_id, category, option_key, label, short_text, css_class, is_hidden "
+            "FROM option_definitions ORDER BY category, option_id"
+        )
+        rows = db_client.send_query(query)
+
+    return [dict(r) for r in (rows or [])]
+
+
+@app.post("/admin/options", tags=["Admin"])
+async def add_option_definition(request: Request):
+    role = get_request_role(request)
+    if role not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    body = await request.json()
+    category = clean_str(body.get("category")).lower()
+    option_key = clean_str(body.get("option_key")).lower().replace(" ", "_")
+    label = clean_str(body.get("label"))
+    short_text = body.get("short_text") or None
+    css_class = body.get("css_class") or None
+    is_hidden = bool(body.get("is_hidden", False))
+
+    if category not in VALID_CATEGORIES:
+        raise HTTPException(status_code=400, detail=f"Invalid category: {category}")
+    if not option_key or not label:
+        raise HTTPException(status_code=400, detail="option_key and label are required")
+
+    try:
+        insert_query = text(
+            """
+            INSERT INTO option_definitions (category, option_key, label, short_text, css_class, is_hidden)
+            VALUES (:category, :option_key, :label, :short_text, :css_class, :is_hidden)
+            """
+        )
+        db_client.send_query(insert_query, {
+            "category": category,
+            "option_key": option_key,
+            "label": label,
+            "short_text": short_text,
+            "css_class": css_class,
+            "is_hidden": is_hidden,
+        })
+    except Exception as e:
+        if "Duplicate" in str(e):
+            raise HTTPException(status_code=409, detail=f"Option '{option_key}' already exists in '{category}'")
+        raise
+
+    return {"status": "created", "category": category, "option_key": option_key}
+
+
+@app.put("/admin/options/{option_id}", tags=["Admin"])
+async def update_option_definition(option_id: int, request: Request):
+    role = get_request_role(request)
+    if role not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    body = await request.json()
+    is_hidden = body.get("is_hidden")
+    if is_hidden is None:
+        raise HTTPException(status_code=400, detail="is_hidden is required")
+
+    update_query = text(
+        "UPDATE option_definitions SET is_hidden = :is_hidden WHERE option_id = :option_id"
+    )
+    db_client.send_query(update_query, {"is_hidden": bool(is_hidden), "option_id": option_id})
+
+    return {"status": "updated", "option_id": option_id, "is_hidden": bool(is_hidden)}
+
+
+# --------------------------------------------------
 # Excel / CSV import route
 # --------------------------------------------------
 @app.post("/import/excel", tags=["Database"])
@@ -745,6 +937,7 @@ async def import_excel(file: UploadFile = File(...)):
         # Ensure tables exist
         ensure_staff_table()
         ensure_clients_table()
+        ensure_option_definitions_table()
 
         # For now the spreadsheet is the source of truth, so replace imported rows each upload
         db_client.send_query("DELETE FROM clients")
@@ -816,6 +1009,8 @@ async def import_excel(file: UploadFile = File(...)):
                 media_consent,
                 tags,
                 risks,
+                sports,
+                schools,
                 updated,
                 program_coordinator_id,
                 street_address,
@@ -835,6 +1030,8 @@ async def import_excel(file: UploadFile = File(...)):
                 :media_consent,
                 :tags,
                 :risks,
+                :sports,
+                :schools,
                 :updated,
                 :program_coordinator_id,
                 :street_address,
@@ -869,6 +1066,8 @@ async def import_excel(file: UploadFile = File(...)):
                 "media_consent": normalize_media_consent(row.get("media_consent")),
                 "tags": build_tag_json(row),
                 "risks": "[]",
+                "sports": "[]",
+                "schools": "[]",
                 "updated": clean_date(row.get("start_date")),
                 "program_coordinator_id": coordinator_id,
                 "street_address": clean_str(row.get("mailing_address")),
@@ -949,6 +1148,8 @@ def update_client(client_id: str, payload: dict, request: Request):
                 media_consent = :media_consent,
                 tags = :tags,
                 risks = :risks,
+                sports = :sports,
+                schools = :schools,
                 updated = :updated,
                 program_coordinator_id = :program_coordinator_id,
                 street_address = :street_address,
@@ -973,6 +1174,8 @@ def update_client(client_id: str, payload: dict, request: Request):
                 "media_consent": payload.get("mediaConsent"),
                 "tags": str(payload.get("tags", [])).replace("'", '"'),
                 "risks": str(payload.get("risks", [])).replace("'", '"'),
+                "sports": str(payload.get("sports", [])).replace("'", '"'),
+                "schools": str(payload.get("schools", [])).replace("'", '"'),
                 "updated": payload.get("updated"),
                 "program_coordinator_id": payload.get("programCoordinatorId"),
                 "street_address": payload.get("address", {}).get("street"),

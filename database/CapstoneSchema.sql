@@ -129,7 +129,20 @@ CREATE TABLE PersonService (
     FOREIGN KEY (service_id) REFERENCES Service(service_id)
 );
 
--- 12. ANNOUNCEMENTS
+-- 13. OPTION DEFINITIONS (admin-managed field options)
+CREATE TABLE OptionDefinition (
+    option_id INT AUTO_INCREMENT PRIMARY KEY,
+    category ENUM('sport', 'risk', 'school', 'tag') NOT NULL,
+    option_key VARCHAR(50) NOT NULL,     -- e.g. 'soccer', 'allergy', 'st_marys', 'ds'
+    label VARCHAR(150) NOT NULL,         -- e.g. 'Soccer (Unified)', 'Allergy', 'St. Mary''s'
+    short_text VARCHAR(20) NULL,         -- tags only, e.g. 'SO', 'DS'
+    css_class VARCHAR(50) NULL,          -- tags only, e.g. 'tag-so'
+    is_hidden BOOLEAN DEFAULT FALSE,     -- TRUE = retired, hidden from users
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (category, option_key)
+);
+
+-- 14. ANNOUNCEMENTS
 CREATE TABLE Announcements (
     announcement_id VARCHAR(64) PRIMARY KEY,
     author_name VARCHAR(255) NOT NULL,
