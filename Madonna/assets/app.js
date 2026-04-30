@@ -1007,9 +1007,14 @@ async function initDashboard() {
 
   const uploadTile = document.getElementById("uploadTile");
   if (uploadTile) uploadTile.style.display = canImportData(s.role) ? "" : "none";
+
+  const addUserTile = document.getElementById("addUserTile");
+  if (addUserTile) addUserTile.style.display = canAccessAdmin(s.role) ? "" : "none";
+
   if (who) who.textContent = `${s.name} • ${s.role}`;
 
   if (who) who.textContent = `${s.name} | ${getRoleLabel(s.role)}`;
+
 
   const tbody = document.getElementById("profilesBody");
   if (tbody) {
