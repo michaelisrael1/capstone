@@ -35,7 +35,7 @@ CREATE TABLE PersonAddress (
 
 -- 4. PHONE
 CREATE TABLE Phone (
-    phone_id SERIAL PRIMARY KEY,
+    phone_id INT PRIMARY KEY,
     person_id INT,
     phone_number VARCHAR(20),
     phone_type VARCHAR(50), -- personal, work, contact
@@ -44,7 +44,7 @@ CREATE TABLE Phone (
 
 -- 5. EMAIL
 CREATE TABLE Email (
-    email_id SERIAL PRIMARY KEY,
+    email_id INT PRIMARY KEY,
     person_id INT,
     email_address VARCHAR(150),
     email_type VARCHAR(50),
@@ -64,7 +64,7 @@ CREATE TABLE ContactRelationship (
 
 -- 7. USER ACCOUNT
 CREATE TABLE UserAccount (
-    user_id SERIAL PRIMARY KEY,
+    user_id INT PRIMARY KEY,
 
     person_id INT NOT NULL,
     email_id INT NOT NULL,
