@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Admin Control | MAAP</title>
+    <link rel="stylesheet" href="assets/styles.css"/>
+    <link rel="stylesheet" href="assets/tags.css"/>
+</head>
+
+<body class="portal-body" data-page="admin">
+<header class="portal-header">
+    <div class="container portal-nav">
+        <a class="portal-brand" href="dashboard.html">
+            <img src="assets/logo-mark.jpg" alt="MAAP" class="portal-logo"/>
+            <div class="portal-brand-text">
+                <div class="portal-org">Madonna Ability Alliance Portal</div>
+                <div class="portal-title">MAAP</div>
+            </div>
+        </a>
+        <div class="portal-right" data-auth></div>
+    </div>
+</header>
+
+<main class="portal-page">
+    <div class="container">
+        <div class="portal-heading">
+            <div>
+                <h1 class="portal-h1">Admin Control</h1>
+                <p class="portal-sub">
+                    Manage field options for client profiles and import data.
+                </p>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <a class="btn-maap primary" href="dashboard.html">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Sub-tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab" data-tab="overview">Overview</button>
+            <button class="admin-tab active" data-tab="options">Edit Options</button>
+            <button class="admin-tab" data-tab="retired">Retired Options</button>
+            <button class="admin-tab" data-tab="importexport">Import / Export</button>
+        </div>
+
+        <!-- Tab: Overview -->
+        <div class="admin-tab-panel" id="tab-overview">
+            <div class="portal-grid">
+                <section class="portal-main">
+                    <div class="portal-card">
+                        <div class="portal-card-head">
+                            <h2 class="portal-h2">Admin Overview</h2>
+                            <p class="portal-muted">
+                                Use the tabs above to manage profile field options or import/export data.
+                            </p>
+                        </div>
+                        <div style="padding: 0 16px 16px;">
+                            <p style="line-height:1.7; color: var(--maa-text);">
+                                The <strong>Edit Options</strong> tab lets you add new choices or retire existing ones for
+                                Sports, Risks, Elementary Schools, and Program Tags that appear on client profiles.
+                            </p>
+                            <p style="line-height:1.7; color: var(--maa-text); margin-top:10px;">
+                                The <strong>Retired Options</strong> tab shows options that have been retired.
+                                Retired options are hidden from users but preserved in the system, and can be restored at any time.
+                            </p>
+                            <p style="line-height:1.7; color: var(--maa-text); margin-top:10px;">
+                                The <strong>Import / Export</strong> tab lets authorized users export staff or patient
+                                records as a spreadsheet, or upload a file to replace all records.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+                <aside class="portal-side">
+                    <div class="portal-card">
+                        <div class="portal-card-head">
+                            <h2 class="portal-h2">Access</h2>
+                            <p class="portal-muted">
+                                Only Directors, Head Coordinators, and Program Coordinators can access this page.
+                                Data import is restricted to Directors.
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <!-- Tab: Edit Options -->
+        <div class="admin-tab-panel active" id="tab-options">
+            <div class="portal-grid">
+                <section class="portal-main">
+                    <!-- Sports -->
+                    <div class="portal-card" id="adminSportCard">
+                        <div class="portal-card-head admin-collapsible-head" data-collapse="sport">
+                            <h2 class="portal-h2">
+                                <span class="admin-toggle-arrow">&#9654;</span>
+                                Edit Current Sport Options
+                            </h2>
+                        </div>
+                        <div class="admin-collapsible-body" id="adminSportBody">
+                            <div class="portal-form">
+                                <div id="adminSportList" class="admin-option-list"></div>
+
+                                <label class="portal-label">Preview</label>
+                                <div class="admin-preview" id="adminSportPreview">
+                                    <span class="admin-preview-placeholder">Type below to preview...</span>
+                                </div>
+
+                                <div class="admin-add-row">
+                                    <input id="adminSportKey" class="portal-input" placeholder="Key — used as spreadsheet header (e.g. soccer)"/>
+                                    <input id="adminSportLabel" class="portal-input" placeholder="Label — display name shown to users (e.g. Soccer (Unified))"/>
+                                    <button class="portal-btn-orange" id="addSportBtn" type="button">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risks -->
+                    <div class="portal-card" id="adminRiskCard">
+                        <div class="portal-card-head admin-collapsible-head" data-collapse="risk">
+                            <h2 class="portal-h2">
+                                <span class="admin-toggle-arrow">&#9654;</span>
+                                Edit Current Risk / Support Options
+                            </h2>
+                        </div>
+                        <div class="admin-collapsible-body" id="adminRiskBody">
+                            <div class="portal-form">
+                                <div id="adminRiskList" class="admin-option-list"></div>
+
+                                <label class="portal-label">Preview</label>
+                                <div class="admin-preview" id="adminRiskPreview">
+                                    <span class="admin-preview-placeholder">Type below to preview...</span>
+                                </div>
+
+                                <div class="admin-add-row">
+                                    <input id="adminRiskKey" class="portal-input" placeholder="Key — used as spreadsheet header (e.g. diabetes)"/>
+                                    <input id="adminRiskLabel" class="portal-input" placeholder="Label — display name shown to users (e.g. Diabetes)"/>
+                                    <button class="portal-btn-orange" id="addRiskBtn" type="button">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schools -->
+                    <div class="portal-card" id="adminSchoolCard">
+                        <div class="portal-card-head admin-collapsible-head" data-collapse="school">
+                            <h2 class="portal-h2">
+                                <span class="admin-toggle-arrow">&#9654;</span>
+                                Edit Current School Options
+                            </h2>
+                        </div>
+                        <div class="admin-collapsible-body" id="adminSchoolBody">
+                            <div class="portal-form">
+                                <div id="adminSchoolList" class="admin-option-list"></div>
+
+                                <label class="portal-label">Preview</label>
+                                <div class="admin-preview" id="adminSchoolPreview">
+                                    <span class="admin-preview-placeholder">Type below to preview...</span>
+                                </div>
+
+                                <div class="admin-add-row">
+                                    <input id="adminSchoolKey" class="portal-input" placeholder="Key — used as spreadsheet header (e.g. st_marys)"/>
+                                    <input id="adminSchoolLabel" class="portal-input" placeholder="Label — display name shown to users (e.g. St. Mary's)"/>
+                                    <button class="portal-btn-orange" id="addSchoolBtn" type="button">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="portal-card" id="adminTagCard">
+                        <div class="portal-card-head admin-collapsible-head" data-collapse="tag">
+                            <h2 class="portal-h2">
+                                <span class="admin-toggle-arrow">&#9654;</span>
+                                Edit Current Tag Options
+                            </h2>
+                        </div>
+                        <div class="admin-collapsible-body" id="adminTagBody">
+                            <div class="portal-form">
+                                <div id="adminTagList" class="admin-option-list"></div>
+
+                                <label class="portal-label">Preview</label>
+                                <div class="admin-preview" id="adminTagPreview">
+                                    <span class="admin-preview-placeholder">Type below to preview...</span>
+                                </div>
+
+                                <div class="admin-add-row">
+                                    <input id="adminTagKey" class="portal-input" placeholder="Key — used as spreadsheet header (e.g. pr)"/>
+                                    <input id="adminTagText" class="portal-input" placeholder="Short text — badge abbreviation (e.g. PR)"/>
+                                    <input id="adminTagLabel" class="portal-input" placeholder="Label — full program name (e.g. Pre-Vocational)"/>
+                                    <button class="portal-btn-orange" id="addTagBtn" type="button">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="portal-side">
+                    <div class="portal-card">
+                        <div class="portal-card-head">
+                            <h2 class="portal-h2">About This Page</h2>
+                            <p class="portal-muted">
+                                Changes made here update the field options available across the portal.
+                                Retired options are preserved in the system but hidden from users.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="portal-card">
+                        <div class="portal-card-head">
+                            <h2 class="portal-h2">Access</h2>
+                            <p class="portal-muted">
+                                Only Directors, Head Coordinators, and Program Coordinators can access this page.
+                                Data import is restricted to Directors.
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <!-- Tab: Retired Options -->
+        <div class="admin-tab-panel" id="tab-retired">
+            <div class="portal-grid">
+                <section class="portal-main">
+                    <!-- Retired Sports -->
+                    <div class="portal-card" id="retiredSportCard">
+                        <div class="portal-card-head admin-collapsible-head" data-collapse="retiredSport">
+                            <h2 class="portal-h2">
+                                <span class="admin-toggle-arrow">&#9654;</span>
+                                Retired Sport Options
+                            </h2>
+                        </div>
+                        <div class="admin-collapsible-body" id="retiredSportBody">
+                            <div id="retiredSportList" class="admin-option-list"></div>
+                            <p class="admin-retired-empty" id="retiredSportEmpty">No retired sport options.</p>
+                        </div>
+                    </div>
+
+                    <!-- Retired Risks -->
+                    <div class="portal-card" id="retiredRiskCard">
+                        <div class="portal-card-head admin-collapsible-head" data-collapse="retiredRisk">
+                            <h2 class="portal-h2">
+                                <span class="admin-toggle-arrow">&#9654;</span>
+                                Retired Risk / Support Options
+                            </h2>
+                        </div>
+                        <div class="admin-collapsible-body" id="retiredRiskBody">
+                            <div id="retiredRiskList" class="admin-option-list"></div>
+                            <p class="admin-retired-empty" id="retiredRiskEmpty">No retired risk options.</p>
+                        </div>
+                    </div>
+
+                    <!-- Retired Schools -->
+                    <div class="portal-card" id="retiredSchoolCard">
+                        <div class="portal-card-head admin-collapsible-head" data-collapse="retiredSchool">
+                            <h2 class="portal-h2">
+                                <span class="admin-toggle-arrow">&#9654;</span>
+                                Retired School Options
+                            </h2>
+                        </div>
+                        <div class="admin-collapsible-body" id="retiredSchoolBody">
+                            <div id="retiredSchoolList" class="admin-option-list"></div>
+                            <p class="admin-retired-empty" id="retiredSchoolEmpty">No retired school options.</p>
+                        </div>
+                    </div>
+
+                    <!-- Retired Tags -->
+                    <div class="portal-card" id="retiredTagCard">
+                        <div class="portal-card-head admin-collapsible-head" data-collapse="retiredTag">
+                            <h2 class="portal-h2">
+                                <span class="admin-toggle-arrow">&#9654;</span>
+                                Retired Tag Options
+                            </h2>
+                        </div>
+                        <div class="admin-collapsible-body" id="retiredTagBody">
+                            <div id="retiredTagList" class="admin-option-list"></div>
+                            <p class="admin-retired-empty" id="retiredTagEmpty">No retired tag options.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="portal-side">
+                    <div class="portal-card">
+                        <div class="portal-card-head">
+                            <h2 class="portal-h2">About Retired Options</h2>
+                            <p class="portal-muted">
+                                Retired options are hidden from users but preserved in the system.
+                                Existing records that reference these options are not affected.
+                                You can restore any retired option at any time.
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <!-- Tab: Import / Export -->
+        <div class="admin-tab-panel" id="tab-importexport">
+            <div class="portal-grid">
+                <section class="portal-main">
+                    <!-- Export Data -->
+                    <div class="portal-card" id="adminExportCard" style="display:none;">
+                        <div class="portal-card-head row-split">
+                            <div>
+                                <h2 class="portal-h2">Export Data</h2>
+                                <p class="portal-muted">
+                                    Download records from the database as a spreadsheet file.
+                                </p>
+                            </div>
+                            <span class="pill-label blue">Director Only</span>
+                        </div>
+
+                        <div class="portal-form">
+                            <label class="portal-label" for="exportFormat">File format</label>
+                            <select id="exportFormat" class="portal-input">
+                                <option value="xlsx">Excel (.xlsx)</option>
+                                <option value="csv">CSV (.csv)</option>
+                            </select>
+
+                            <div class="admin-export-actions">
+                                <button class="btn-maap primary" id="exportStaffBtn" type="button" disabled>Export Staff</button>
+                                <button class="btn-maap primary" id="exportPatientsBtn" type="button" disabled>Export Patients</button>
+                                <button class="btn-maap primary" id="exportAllBtn" type="button" disabled>Export All</button>
+                            </div>
+                            <p class="portal-muted" style="margin-top:8px; font-size:13px;">
+                                Export functionality is coming soon.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Import Data -->
+                    <div class="portal-card" id="adminImportCard" style="display:none;">
+                        <div class="portal-card-head row-split">
+                            <div>
+                                <h2 class="portal-h2">Import Data</h2>
+                                <p class="portal-muted">
+                                    Upload an Excel or CSV file to replace all client and staff records.
+                                </p>
+                            </div>
+                            <span class="pill-label orange">Director Only</span>
+                        </div>
+
+                        <div class="portal-form">
+                            <label class="portal-label" for="adminExcelUpload">Select file (.xlsx, .xls, .csv)</label>
+                            <input
+                                    id="adminExcelUpload"
+                                    class="portal-input"
+                                    type="file"
+                                    accept=".xlsx,.xls,.csv"
+                            />
+                            <div id="adminUploadStatus" class="portal-muted" style="margin-top:10px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="portal-card" id="adminImportNoAccess">
+                        <div class="portal-card-head">
+                            <h2 class="portal-h2">Import / Export</h2>
+                            <p class="portal-muted">
+                                Import and export are restricted to Director accounts.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+                <aside class="portal-side">
+                    <div class="portal-card">
+                        <div class="portal-card-head">
+                            <h2 class="portal-h2">About Export</h2>
+                            <p class="portal-muted">
+                                Export downloads the selected records from the database into your chosen file format.
+                                Staff exports staff records, Patients exports client records, and All exports both.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="portal-card">
+                        <div class="portal-card-head">
+                            <h2 class="portal-h2">About Import</h2>
+                            <p class="portal-muted">
+                                Uploading a file will replace all existing client and staff records
+                                with the contents of the spreadsheet. This action cannot be undone.
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Add-option confirmation modal -->
+<div class="admin-modal-backdrop" id="adminAddModal" style="display:none;">
+    <div class="admin-modal">
+        <h3>Confirm New Option</h3>
+        <div id="adminAddModalFields"></div>
+        <div class="admin-modal-toggle">
+            <label style="font-weight:700; font-size:14px;">Visibility:</label>
+            <button class="admin-option-visibility is-hidden" id="adminAddModalVisToggle" type="button">Hidden</button>
+        </div>
+        <p class="admin-modal-note">
+            New options start <strong>hidden</strong> and will not be visible to users until you choose to show them.
+        </p>
+        <div class="admin-modal-actions">
+            <button class="btn-maap ghost" id="adminAddModalCancel" type="button">Cancel</button>
+            <button class="portal-btn-orange" id="adminAddModalSubmit" type="button">Add Option</button>
+        </div>
+    </div>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
