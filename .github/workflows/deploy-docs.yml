@@ -1,4 +1,4 @@
-name: Deploy JSDoc to GitHub Pages
+name: Deploy JSDoc and Doxygen to GitHub Pages
 
 on:
   push:
@@ -13,10 +13,20 @@ jobs:
       - name: Checkout 
         uses: actions/checkout@v4
 
-      - name: Install and Generate 
+      - name: Install and Generate Doxygen and JSDoc
         run: |
-          npx jsdoc -r Madonna/ -d ./docs # Generate docs into a 'docs' folder
-          touch ./docs/.nojekyll
+          npm install -g jsdoc
+          sudo apt-get update
+          sudo apt-get install -y doxygen
+
+      - name: Generate Frontend Docs
+        run: npx jsdoc -r Madonna/ -d ./docs/frontend
+
+      - name: Generate Backend Docs
+        run: doxygen Doxyfile
+
+      - name: add .nojekyll file
+        run: touch ./docs/.nojekyll
 
       - name: Deploy 
         uses: JamesIves/github-pages-deploy-action@v4

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Add New User | MAAP</title>
+  <link rel="stylesheet" href="assets/styles.css"/>
+</head>
+
+<body class="portal-body" data-page="new_user">
+<header class="portal-header">
+  <div class="container portal-nav">
+    <a class="portal-brand" href="dashboard.html">
+      <img src="assets/logo-mark.jpg" alt="MAAP" class="portal-logo"/>
+      <div class="portal-brand-text">
+        <div class="portal-org">Madonna Ability Alliance Portal</div>
+        <div class="portal-title">MAAP</div>
+      </div>
+    </a>
+    <div class="portal-right" data-auth></div>
+  </div>
+</header>
+
+<main class="portal-page">
+  <div class="container" style="max-width: 600px;">
+    <div class="portal-heading">
+      <div>
+        <h1 class="portal-h1">Enroll New User</h1>
+        <p class="portal-sub">
+          Send an invitation email to allow a new member to create their account.
+        </p>
+      </div>
+      <a class="btn-maap primary" href="dashboard.html">Back to Dashboard</a>
+    </div>
+
+    <div class="portal-card">
+      <form id="enrollmentForm">
+        <div style="margin-bottom: 20px;">
+          <label for="userName" class="portal-label">Full Name</label>
+          <input type="text" id="userName" name="name" class="portal-input" placeholder="e.g. Jane Doe" required />
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <label for="userEmail" class="portal-label">Email Address</label>
+          <input type="email" id="userEmail" name="email" class="portal-input" placeholder="jane.doe@example.com" required />
+        </div>
+
+        <div id="enrollmentStatus" style="margin-bottom: 15px; font-size: 14px; display: none;"></div>
+
+        <button type="submit" class="btn-maap blue" style="width: 100%; justify-content: center;">
+          Send Enrollment Email
+        </button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+  // Specific logic for this page's submission
+  document.getElementById('enrollmentForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const status = document.getElementById('enrollmentStatus');
+    const name = document.getElementById('userName').value;
+    const email = document.getElementById('userEmail').value;
+
+    status.style.display = 'block';
+    status.className = 'portal-muted';
+    status.textContent = 'Sending invitation...';
+
+    try {
+      // Note: Update this endpoint to match your actual backend enrollment API
+      const response = await fetch('/api/users/enroll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      });
+
+      if (response.ok) {
+        status.style.color = 'green';
+        status.textContent = 'Success! An enrollment email has been sent.';
+        e.target.reset();
+      } else {
+        // FIX: Handle API errors directly instead of throwing an exception
+        status.style.color = 'red';
+        status.textContent = 'Error: The server rejected the enrollment. Please try again.';
+      }
+    } catch (err) {
+      // Catch only handles actual network/connection failures now
+      status.style.color = 'red';
+      status.textContent = 'Network Error: Could not connect to the server. Please check your connection.';
+    }
+  });
+</script>
+</body>
+</html>
