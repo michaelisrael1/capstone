@@ -599,6 +599,38 @@ async function hydrateDataFromBackend() {
   backendHydrated = true;
 }
 
+//Login helper
+async function loginUser(email, password) {
+  const payload = {
+    email,
+    password
+  };
+
+  const res = await fetch(`/api/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data.detail || "Login failed");
+  }
+
+  // ------------------------------------
+  // Store JWT for later requests
+  // ------------------------------------
+  if (data.token) {
+    localStorage.setItem("auth_token", data.token);
+    localStorage.setItem("role", data.role);
+  }
+
+  return data;
+}
+
 // Save a profile edit to the backend
 async function saveProfileToBackend(profile) {
   const payload = {
@@ -902,16 +934,16 @@ function initLoginForm() {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const email = form.email.value.trim().toLowerCase();
+    const password = form.password.value;
 
-    if (!demoUsers[email]) {
-      alert(
-        "Demo login: use director@madonna.local, head.coordinator@madonna.local, coordinator@madonna.local, staff@madonna.local, guardian@madonna.local, or student@madonna.local."
-      );
-      return;
-    }
-
-    setSession(buildSession(demoUsers[email], email));
-    window.location.href = "dashboard.html";
+    loginUser(email, password)
+      .then((data) => {
+        setSession(buildSession(data, email));
+        window.location.href = "dashboard.html";
+      })
+      .catch((err) => {
+        alert(`Login failed: ${err.message}`);
+      });
   });
 }
 
