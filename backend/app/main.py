@@ -6,6 +6,10 @@ import os
 import sys
 import tempfile
 import uuid
+import bcrypt
+import jwt
+import os
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -1117,6 +1121,93 @@ async def import_excel(file: UploadFile = File(...)):
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
 
+# ----------------------------------------
+# Authentication route (simple email + password, returns JWT with role and user_id)
+# ----------------------------------------
+@app.post("/login", tags=["Auth"])
+def user_login(payload: dict):
+    try:
+        email = payload.get("email")
+        password = payload.get("password")
+
+        if not email or not password:
+            raise HTTPException(status_code=400, detail="Email and password required")
+        
+        query = text(
+            """
+            SELECT ua.user_id, ua.password_hash, ua.role, ua.is_active, ua.is_locked
+            FROM UserAccount ua
+            JOIN Email e ON ua.email_id = e.email_id
+            WHERE e.email_address = :email
+            """
+        )
+
+        result = db_client.send_query(query, {"email": email})
+
+        if not result or len(result) == 0:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        user = result[0]
+
+        # ----------------------------------------
+        # Check account status
+        # ----------------------------------------
+        if not user["is_active"]:
+            raise HTTPException(status_code=403, detail="Account inactive")
+
+        if user["is_locked"]:
+            raise HTTPException(status_code=403, detail="Account locked")
+
+        # ----------------------------------------
+        # Verify password (bcrypt)
+        # ----------------------------------------
+        stored_hash = user["password_hash"]
+
+        #if not bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8")):
+        if not password == stored_hash:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        # ----------------------------------------
+        # Update last login
+        # ----------------------------------------
+        update_login_query = text(
+            """
+            UPDATE UserAccount
+            SET last_login = :last_login
+            WHERE user_id = :user_id
+            """
+        )
+
+        db_client.send_query(
+            update_login_query,
+            {
+                "user_id": user["user_id"],
+                "last_login": datetime.utcnow(),
+            },
+        )
+
+        # ----------------------------------------
+        # Generate JWT
+        # ----------------------------------------
+        token_payload = {
+            "user_id": user["user_id"],
+            "role": user["role"],
+            "exp": datetime.utcnow() + timedelta(hours=8),
+        }
+
+        token = jwt.encode(token_payload, os.getenv("JWT_SECRET"), algorithm="HS256")
+
+        return {
+            "status": "success",
+            "token": token,
+            "role": user["role"],
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("login_failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Login failed")
 
 # --------------------------------------------------
 # Update client profile (used by frontend edits)
