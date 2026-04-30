@@ -28,7 +28,7 @@ jobs:
       - name: add .nojekyll file
         run: |
           touch ./docs/.nojekyll
-          cp doc-home.html ./docs/index.html
+          cp docs/doc-home.html ./docs/index.html
 
       - name: Deploy 
         uses: JamesIves/github-pages-deploy-action@v4
