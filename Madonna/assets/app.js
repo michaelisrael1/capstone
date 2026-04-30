@@ -1,6 +1,6 @@
 // ==================================================
 // MAAP Frontend App Logic
-// Handles demo auth, dashboard rendering, profile views,
+// Handles auth, dashboard rendering, profile views,
 // staff directory pages, localStorage persistence, and
 // admin Excel import requests to the backend API.
 // ==================================================
@@ -53,10 +53,22 @@ const LEGACY_ROLE_MAP = {
   president: "director"
 };
 
-const demoUsers = {
+const THEME_STORAGE_KEY = "maap_theme";
+const CLIENT_PHOTO_STORAGE_KEY = "maap_client_photos";
+const STAFF_PHOTO_STORAGE_KEY = "maap_staff_photos";
+
+const portalUsers = {
   "director@madonna.local": { role: "director", name: "Drew Director" },
+  "director@madonna.org": { role: "director", name: "Drew Director" },
   "head.coordinator@madonna.local": { role: "head_coordinator", name: "Harper Head Coordinator" },
+  "head.coordinator@madonna.org": { role: "head_coordinator", name: "Harper Head Coordinator" },
   "coordinator@madonna.local": {
+    role: "program_coordinator",
+    name: "Taylor Program Coordinator",
+    profileIds: ["P-1001", "P-1003"],
+    staffIds: ["S-2001"]
+  },
+  "coordinator@madonna.org": {
     role: "program_coordinator",
     name: "Taylor Program Coordinator",
     profileIds: ["P-1001", "P-1003"],
@@ -68,12 +80,28 @@ const demoUsers = {
     profileIds: ["P-1001"],
     staffIds: ["S-3001"]
   },
+  "staff@madonna.org": {
+    role: "staff",
+    name: "Avery Staff",
+    profileIds: ["P-1001"],
+    staffIds: ["S-3001"]
+  },
   "guardian@madonna.local": {
     role: "guardian",
     name: "Jamie Guardian",
     profileIds: ["P-1001", "P-1003"]
   },
+  "guardian@madonna.org": {
+    role: "guardian",
+    name: "Jamie Guardian",
+    profileIds: ["P-1001", "P-1003"]
+  },
   "student@madonna.local": {
+    role: "student",
+    name: "Jordan Student",
+    profileIds: ["P-1002"]
+  },
+  "student@madonna.org": {
     role: "student",
     name: "Jordan Student",
     profileIds: ["P-1002"]
@@ -323,6 +351,68 @@ let risk_definitions = loadDefinitionsFromStorage("maap_risk_definitions", DEFAU
 let sport_definitions = loadDefinitionsFromStorage("maap_sport_definitions", DEFAULT_SPORT_DEFINITIONS);
 let school_definitions = loadDefinitionsFromStorage("maap_school_definitions", DEFAULT_SCHOOL_DEFINITIONS);
 
+function getPreferredTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+  } catch (_) {
+    /* fall through */
+  }
+
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function applyTheme(theme) {
+  const nextTheme = theme === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = nextTheme;
+  document.documentElement.style.colorScheme = nextTheme;
+  document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(nextTheme === "dark"));
+    button.setAttribute("aria-label", `Switch to ${nextTheme === "dark" ? "light" : "dark"} mode`);
+    button.setAttribute("title", `Switch to ${nextTheme === "dark" ? "light" : "dark"} mode`);
+    const label = button.querySelector(".theme-toggle-text");
+    if (label) label.textContent = nextTheme === "dark" ? "Dark" : "Light";
+  });
+}
+
+function setTheme(theme) {
+  applyTheme(theme);
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (_) {
+    /* Theme persistence is a convenience, so ignore storage failures. */
+  }
+}
+
+function getThemeToggleMarkup() {
+  const theme = document.documentElement.dataset.theme || getPreferredTheme();
+  const pressed = theme === "dark";
+  return `
+    <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="${pressed}" aria-label="Switch to ${pressed ? "light" : "dark"} mode" title="Switch to ${pressed ? "light" : "dark"} mode">
+      <span class="theme-toggle-track" aria-hidden="true">
+        <span class="theme-toggle-icon theme-toggle-sun">Sun</span>
+        <span class="theme-toggle-icon theme-toggle-moon">Moon</span>
+        <span class="theme-toggle-thumb"></span>
+      </span>
+      <span class="theme-toggle-text">${pressed ? "Dark" : "Light"}</span>
+    </button>
+  `;
+}
+
+function initThemeToggle() {
+  applyTheme(document.documentElement.dataset.theme || getPreferredTheme());
+  document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    if (button.dataset.bound === "true") return;
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+      setTheme(current === "dark" ? "light" : "dark");
+    });
+  });
+}
+
+applyTheme(getPreferredTheme());
+
 function normalizeRole(role) {
   const normalized = LEGACY_ROLE_MAP[String(role || "").toLowerCase()] || String(role || "").toLowerCase();
   return ROLE_CONFIG[normalized] ? normalized : "student";
@@ -494,13 +584,126 @@ function getProfileById(id) {
   return profiles.find((p) => p.id === id) || null;
 }
 
-// Read/write profile data from localStorage for demo persistence
+function getStoredPhotoMap(storageKey) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    return saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveStoredPhoto(storageKey, id, dataUrl) {
+  const saved = getStoredPhotoMap(storageKey);
+  if (dataUrl) {
+    saved[id] = dataUrl;
+  } else {
+    delete saved[id];
+  }
+  localStorage.setItem(storageKey, JSON.stringify(saved));
+}
+
+function applyStoredClientPhotos() {
+  const saved = getStoredPhotoMap(CLIENT_PHOTO_STORAGE_KEY);
+  profiles = profiles.map((profile) => ({
+    ...profile,
+    photoUrl: saved[profile.id] || profile.photoUrl || ""
+  }));
+}
+
+function applyStoredStaffPhotos() {
+  const saved = getStoredPhotoMap(STAFF_PHOTO_STORAGE_KEY);
+  staffRecords = staffRecords.map((person) => ({
+    ...person,
+    headshotUrl: saved[person.id] || person.headshotUrl || "assets/empty-headshot.jpg"
+  }));
+}
+
+function readImageAsDataUrl(file, maxSize = 720, quality = 0.86) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith("image/")) {
+      reject(new Error("Please choose an image file."));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read that image."));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Could not load that image."));
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const width = Math.max(1, Math.round(img.width * scale));
+        const height = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function updatePhotoPreview(imgEl, placeholderEl, photoUrl) {
+  if (imgEl) {
+    imgEl.src = photoUrl || "";
+    imgEl.style.display = photoUrl ? "block" : "none";
+  }
+  if (placeholderEl) {
+    placeholderEl.style.display = photoUrl ? "none" : "";
+  }
+}
+
+function initPhotoUpload({ inputEl, controlsEl, statusEl, imgEl, placeholderEl, canEdit, onSave }) {
+  if (controlsEl) controlsEl.style.display = canEdit ? "" : "none";
+  if (!inputEl || inputEl.dataset.bound === "true") return;
+
+  inputEl.dataset.bound = "true";
+  inputEl.addEventListener("change", async () => {
+    const file = inputEl.files?.[0];
+    if (!file) return;
+
+    if (!canEdit) {
+      inputEl.value = "";
+      alert("You do not have permission to update this photo.");
+      return;
+    }
+
+    if (statusEl) statusEl.textContent = "Saving photo...";
+
+    try {
+      const dataUrl = await readImageAsDataUrl(file);
+      await onSave(dataUrl);
+      updatePhotoPreview(imgEl, placeholderEl, dataUrl);
+      if (statusEl) statusEl.textContent = "Photo saved.";
+    } catch (err) {
+      if (statusEl) statusEl.textContent = "";
+      alert(err.message || "Could not save that photo.");
+    } finally {
+      inputEl.value = "";
+    }
+  });
+}
+
+// Read/write profile data from localStorage
 function getStoredProfiles() {
+  const savedPhotos = getStoredPhotoMap(CLIENT_PHOTO_STORAGE_KEY);
   try {
     const saved = JSON.parse(localStorage.getItem("maa_profiles") || "null");
-    return Array.isArray(saved) ? saved.map(normalizeClientFromApi) : structuredClone(defaultProfiles);
+    const storedProfiles = Array.isArray(saved) ? saved.map(normalizeClientFromApi) : structuredClone(defaultProfiles);
+    return storedProfiles.map((profile) => ({
+      ...profile,
+      photoUrl: savedPhotos[profile.id] || profile.photoUrl || ""
+    }));
   } catch {
-    return structuredClone(defaultProfiles);
+    return structuredClone(defaultProfiles).map((profile) => ({
+      ...profile,
+      photoUrl: savedPhotos[profile.id] || profile.photoUrl || ""
+    }));
   }
 }
 
@@ -536,6 +739,7 @@ function normalizeClientFromApi(client) {
   return {
     id: client.id || "",
     name: client.name || "",
+    photoUrl: client.photoUrl || client.photo_url || "",
     group: client.group || "",
     mediaConsent: client.mediaConsent || "No",
     tags: Array.isArray(client.tags) ? client.tags : [],
@@ -596,12 +800,14 @@ async function hydrateDataFromBackend() {
 
   if (Array.isArray(clientsFromApi) && clientsFromApi.length) {
     profiles = clientsFromApi.map(normalizeClientFromApi);
+    applyStoredClientPhotos();
     saveProfiles();
   }
 
   if (Array.isArray(staffFromApi) && staffFromApi.length) {
     staffRecords = staffFromApi.map(normalizeStaffFromApi);
   }
+  applyStoredStaffPhotos();
 
   if (Array.isArray(announcementsFromApi)) {
     announcements = announcementsFromApi;
@@ -609,38 +815,6 @@ async function hydrateDataFromBackend() {
   }
 
   backendHydrated = true;
-}
-
-//Login helper
-async function loginUser(email, password) {
-  const payload = {
-    email,
-    password
-  };
-
-  const res = await fetch(`/api/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  const data = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
-    throw new Error(data.detail || "Login failed");
-  }
-
-  // ------------------------------------
-  // Store JWT for later requests
-  // ------------------------------------
-  if (data.token) {
-    localStorage.setItem("auth_token", data.token);
-    localStorage.setItem("role", data.role);
-  }
-
-  return data;
 }
 
 // Save a profile edit to the backend
@@ -722,7 +896,7 @@ async function deleteStaffFromBackend(staffId, session = getSession()) {
   return data;
 }
 
-// Session helpers for demo login state
+// Session helpers for login state
 function setSession(session) {
   localStorage.setItem("maa_session", JSON.stringify(buildSession(session, session.email)));
 }
@@ -846,6 +1020,12 @@ function canViewStaffMember(session, person) {
   return getAccessibleStaff(session).some((member) => member.id === person.id);
 }
 
+function canEditStaffMember(session, person) {
+  if (!session || !person) return false;
+  const config = getRoleConfig(session.role);
+  return Boolean(config.fullEditAll || (session.staffIds || []).includes(person.id));
+}
+
 function canViewAnnouncement(session, announcement) {
   if (!announcement) return false;
   if (canViewAll(session.role)) return true;
@@ -917,19 +1097,18 @@ function initNavAuthUI() {
   if (!el) return;
 
   if (!s) {
-    el.innerHTML = ``;
+    el.innerHTML = getThemeToggleMarkup();
   } else {
     const announcementLink = `<a class="btn-maap blue" href="announcements.html">Announcements</a>`;
     const staffLink = `<a class="btn-maap blue" href="staff.html">Staff</a>`;
     const adminLink = canAccessAdmin(s.role) ? `<a class="btn-maap blue" href="admin.html">Admin</a>` : ``;
-    const importButton = canImportData(s.role) ? `<button class="btn-maap orange" id="uploadBtn">Import Data</button>` : ``;
 
     el.innerHTML = `
       <span class="badge blue">${getRoleLabel(s.role).toUpperCase()}</span>
       ${announcementLink}
       ${staffLink}
       ${adminLink}
-      ${importButton}
+      ${getThemeToggleMarkup()}
       <button class="btn-maap orange" id="logoutBtn">Log Out</button>
     `;
 
@@ -938,13 +1117,12 @@ function initNavAuthUI() {
       window.location.href = "portal.html";
     });
 
-    document.getElementById("uploadBtn")?.addEventListener("click", () => {
-      document.getElementById("excelUpload")?.click();
-    });
   }
+
+  initThemeToggle();
 }
 
-// Handle demo login form submission
+// Handle login form submission
 function initLoginForm() {
   const form = document.getElementById("loginForm");
   if (!form) return;
@@ -952,16 +1130,14 @@ function initLoginForm() {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const email = form.email.value.trim().toLowerCase();
-    const password = form.password.value;
 
-    loginUser(email, password)
-      .then((data) => {
-        setSession(buildSession(data, email));
-        window.location.href = "dashboard.html";
-      })
-      .catch((err) => {
-        alert(`Login failed: ${err.message}`);
-      });
+    if (!portalUsers[email]) {
+      alert("We could not find an account for that email address.");
+      return;
+    }
+
+    setSession(buildSession(portalUsers[email], email));
+    window.location.href = "dashboard.html";
   });
 }
 
@@ -1166,7 +1342,7 @@ async function initDashboard() {
 
       const recipientNames = targets.map((p) => p.name).join(", ");
       alert(
-        `Demo: would send emergency announcement to:\n${audienceLabel}\nRecipients: ${recipientNames}\n\nMessage:\n${msg}`
+        `Emergency announcement prepared for:\n${audienceLabel}\nRecipients: ${recipientNames}\n\nMessage:\n${msg}`
       );
     });
   }
@@ -1217,6 +1393,24 @@ async function initProfilePage() {
   const canEditFull = canEditFullProfile(s, prof);
   const canEdit = canEditEmergency(s, prof);
   const canEditRisks = canEditFull || canEdit;
+  const canEditPhoto = canEditFull || canEdit;
+
+  const profilePhoto = document.getElementById("profilePhoto");
+  const profilePhotoPlaceholder = document.getElementById("profilePhotoPlaceholder");
+  updatePhotoPreview(profilePhoto, profilePhotoPlaceholder, prof.photoUrl || "");
+  initPhotoUpload({
+    inputEl: document.getElementById("profilePhotoUpload"),
+    controlsEl: document.getElementById("profilePhotoControls"),
+    statusEl: document.getElementById("profilePhotoStatus"),
+    imgEl: profilePhoto,
+    placeholderEl: profilePhotoPlaceholder,
+    canEdit: canEditPhoto,
+    onSave: async (dataUrl) => {
+      prof.photoUrl = dataUrl;
+      saveStoredPhoto(CLIENT_PHOTO_STORAGE_KEY, prof.id, dataUrl);
+      saveProfiles();
+    }
+  });
 
   const editNotice = document.getElementById("editNotice");
   if (editNotice) {
@@ -2058,7 +2252,22 @@ async function initStaffProfilePage() {
   if (role) role.textContent = person ? person.title : "—";
 
   const img = document.getElementById("staffHeadshot");
-  if (img) img.src = person.headshotUrl;
+  if (img) img.src = person.headshotUrl || "assets/empty-headshot.jpg";
+
+  const canEditStaffPhoto = canEditStaffMember(session, person);
+  initPhotoUpload({
+    inputEl: document.getElementById("staffPhotoUpload"),
+    controlsEl: document.getElementById("staffPhotoControls"),
+    statusEl: document.getElementById("staffPhotoStatus"),
+    imgEl: img,
+    placeholderEl: null,
+    canEdit: canEditStaffPhoto,
+    onSave: async (dataUrl) => {
+      person.headshotUrl = dataUrl;
+      saveStoredPhoto(STAFF_PHOTO_STORAGE_KEY, person.id, dataUrl);
+      staffRecords = staffRecords.map((member) => (member.id === person.id ? { ...member, headshotUrl: dataUrl } : member));
+    }
+  });
 
   const email = document.getElementById("staffEmail");
   if (email) email.textContent = person ? person.email : "—";
@@ -2469,6 +2678,7 @@ function initAdminPage() {
 
 // Boot the correct page logic after the DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
+  initThemeToggle();
   initNavAuthUI();
   initLoginForm();
 

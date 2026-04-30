@@ -55,7 +55,15 @@
 
                     <div class="profile-header">
                         <div class="profile-photo">
-                            <div class="photo-placeholder">Photo</div>
+                            <div class="photo-frame">
+                                <img id="profilePhoto" class="record-photo" alt="Profile photo" style="display:none;"/>
+                                <div id="profilePhotoPlaceholder" class="photo-placeholder">Photo</div>
+                            </div>
+                            <div id="profilePhotoControls" class="photo-controls" style="display:none;">
+                                <label class="btn-maap blue photo-upload-btn" for="profilePhotoUpload">Add photo</label>
+                                <input id="profilePhotoUpload" type="file" accept="image/*" style="display:none;"/>
+                                <div id="profilePhotoStatus" class="portal-footnote"></div>
+                            </div>
                         </div>
 
                         <div class="profile-basic">

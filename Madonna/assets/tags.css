@@ -7,35 +7,34 @@
 
 .tags-form{
     display: inline-flex;
-    align-content: center;
+    align-items: center;
     justify-content: center;
     text-align: center;
     width: 28px;
     height: 28px;
     padding: 0 6px;
-    padding-top: 6px;
     border: 2px solid #4a4a4a;
     box-sizing: border-box;
     font-family: Arial, sans-serif;
     font-size: 14px;
     font-weight: 700;
-    color: #333;
+    color: #111827;
     line-height: 1;
     white-space: nowrap;
 
 
 }
 
-.tag-so {background-color: #ff0000;}
-.tag-e {background-color: #f551d6;}
-.tag-s {background-color: #6fe4f7;}
+.tag-so {background-color: #e00000; color: #fff;}
+.tag-e {background-color: #f551d6; color: #111827;}
+.tag-s {background-color: #6fe4f7; color: #082f49;}
 .tag-ya {background-color: #ffc000;}
 .tag-ds {background-color: #ffff00;}
-.tag-se {background-color: #91cf50;}
+.tag-se {background-color: #91cf50; color: #163300;}
 .tag-vr {background-color: #f8cbad;}
-.tag-sfl {background-color: #5b9bd5;}
+.tag-sfl {background-color: #5b9bd5; color: #071f3a;}
 .tag-il {background-color: #ebd7e1;}
-.tag-a {background-color: #8c19eb; color: #222; }
+.tag-a {background-color: #8c19eb; color: #fff; }
 
 
 /* Tag editor on profile page */
@@ -51,15 +50,23 @@
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    border: 1px solid rgba(0,0,0,.12);
+    border: 1px solid var(--maa-border, rgba(0,0,0,.12));
     border-radius: 12px;
-    background: #fff;
+    background: var(--maa-surface, #fff);
+    color: var(--maa-text, #0f172a);
     cursor: pointer;
+    transition: background-color .28s ease, border-color .28s ease, color .28s ease, box-shadow .18s ease;
+}
+
+.tag-checkbox-item:hover {
+    border-color: color-mix(in srgb, var(--maa-blue, #0b5ea8) 34%, var(--maa-border, rgba(0,0,0,.12)));
+    box-shadow: 0 8px 18px rgba(2, 6, 23, .08);
 }
 
 .tag-checkbox-item input[type="checkbox"] {
     margin: 0;
     flex: 0 0 auto;
+    accent-color: var(--maa-blue, #0b5ea8);
 }
 
 .tag-checkbox-label {
@@ -67,6 +74,13 @@
     align-items: center;
     gap: 10px;
     min-width: 0;
+    color: var(--maa-text, #0f172a);
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.tag-checkbox-label > span:not(.tags-form) {
+    color: var(--maa-text, #0f172a);
 }
 
 .risk-badges {
@@ -85,4 +99,19 @@
     border: 1px solid rgba(11, 94, 168, 0.16);
     background: rgba(11, 94, 168, 0.08);
     color: #0a4f8a;
+}
+
+:root[data-theme="dark"] .tag-checkbox-item {
+    background: color-mix(in srgb, var(--maa-surface, #151d2d) 92%, #fff);
+    border-color: var(--maa-border, rgba(255,255,255,.13));
+}
+
+:root[data-theme="dark"] .tag-checkbox-item:hover {
+    background: color-mix(in srgb, var(--maa-surface, #151d2d) 82%, #fff);
+    box-shadow: 0 10px 22px rgba(0,0,0,.24);
+}
+
+:root[data-theme="dark"] .tag-checkbox-label,
+:root[data-theme="dark"] .tag-checkbox-label > span:not(.tags-form) {
+    color: #f8fafc;
 }
