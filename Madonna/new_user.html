@@ -81,11 +81,14 @@
         status.textContent = 'Success! An enrollment email has been sent.';
         e.target.reset();
       } else {
-        throw new Error('Failed to send enrollment.');
+        // FIX: Handle API errors directly instead of throwing an exception
+        status.style.color = 'red';
+        status.textContent = 'Error: The server rejected the enrollment. Please try again.';
       }
     } catch (err) {
+      // Catch only handles actual network/connection failures now
       status.style.color = 'red';
-      status.textContent = 'Error: Could not complete enrollment. Please try again.';
+      status.textContent = 'Network Error: Could not connect to the server. Please check your connection.';
     }
   });
 </script>
