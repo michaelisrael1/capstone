@@ -9,3 +9,5 @@ python-json-logger
 logging
 pandas
 openpyxl
+PyJWT
+bcrypt
