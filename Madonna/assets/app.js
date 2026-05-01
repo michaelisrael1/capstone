@@ -80,54 +80,6 @@ const demoUsers = {
   }
 };
 
-const staff = [
-  {
-    id: "S-1000",
-    name: "Drew Director",
-    title: "Director",
-    email: "director@madonna.local",
-    phone: "(402) 555-0100",
-    address: { street: "10 Alliance Way", city: "Omaha", state: "NE", zip: "68106" },
-    headshotUrl: "assets/empty-headshot.jpg"
-  },
-  {
-    id: "S-1100",
-    name: "Harper Head Coordinator",
-    title: "Head Coordinator",
-    email: "head.coordinator@madonna.local",
-    phone: "(402) 555-0101",
-    address: { street: "12 Alliance Way", city: "Omaha", state: "NE", zip: "68106" },
-    headshotUrl: "assets/empty-headshot.jpg"
-  },
-  {
-    id: "S-2001",
-    name: "Taylor Smith",
-    title: "Program Coordinator",
-    email: "coordinator@madonna.local",
-    phone: "(402) 555-0199",
-    address: { street: "7197 Pine Street", city: "Omaha", state: "NE", zip: "68106" },
-    headshotUrl: "assets/empty-headshot.jpg"
-  },
-  {
-    id: "S-2002",
-    name: "Jordan Lee",
-    title: "Program Coordinator",
-    email: "jordan.lee@madonna.local",
-    phone: "(402) 555-0108",
-    address: { street: "123 Center Ave", city: "Omaha", state: "NE", zip: "68104" },
-    headshotUrl: "assets/empty-headshot.jpg"
-  },
-  {
-    id: "S-3001",
-    name: "Avery Patel",
-    title: "Staff",
-    email: "staff@madonna.local",
-    phone: "(402) 555-0141",
-    address: { street: "88 Maple Dr", city: "Omaha", state: "NE", zip: "68114" },
-    headshotUrl: "assets/empty-headshot.jpg"
-  }
-];
-
 const defaultProfiles = [
   {
     id: "P-1001",
@@ -259,7 +211,7 @@ const defaultAnnouncements = [
 
 // Load profiles from localStorage if available, otherwise use defaults
 let profiles = getStoredProfiles();
-let staffRecords = structuredClone(staff);
+let staffRecords = [];
 let announcements = getStoredAnnouncements();
 let backendHydrated = false;
 
@@ -583,15 +535,24 @@ function normalizeStaffFromApi(person) {
   };
 }
 
+/**
+ * @async
+ * @function hydrateDataFromBackend
+ * @description Synchronizes the local state with the backend database.
+ * * Fetches clients, staff, and announcements in parallel. If valid data is returned,
+ * it normalizes the objects, updates the global state variables, and persists
+ * the data to localStorage where applicable.
+ * * @returns {Promise<void>} Resolves when all data has been fetched and global state is updated.
+ */
 async function hydrateDataFromBackend() {
   if (backendHydrated) return;
 
+  const headers = buildSessionHeaders();
+
   const [clientsFromApi, staffFromApi, announcementsFromApi] = await Promise.all([
-    fetchJsonOrNull("/api/clients"),
-    fetchJsonOrNull("/api/staff"),
-    fetchJsonOrNull("/api/announcements", {
-      headers: buildSessionHeaders()
-    })
+    fetchJsonOrNull("/api/clients", {headers}),
+    fetchJsonOrNull("/api/staff", {headers}),
+    fetchJsonOrNull("/api/announcements", {headers})
   ]);
 
   if (Array.isArray(clientsFromApi) && clientsFromApi.length) {
@@ -748,15 +709,33 @@ function requireAuth() {
   return s;
 }
 
+/**
+ * @function buildSessionHeaders
+ * @description Constructs the necessary HTTP headers for API authentication and authorization.
+ * * Injects the Bearer token from localStorage and maps session properties to
+ * custom X-MAAP headers used by the backend to enforce Role-Based Access Control (RBAC).
+ * * @param {Object} [session=getSession()] - The current user session object.
+ * @param {string} session.role - The role of the user (e.g., 'director', 'staff').
+ * @param {string} session.email - The user's email address.
+ * @param {Array<string|number>} session.profileIds - IDs the user is authorized to view.
+ * * @returns {Object.<string, string>} An object containing the formatted headers.
+ */
 function buildSessionHeaders(session = getSession()) {
-  if (!session) return {};
+  const headers = {};
 
-  return {
-    "X-MAAP-Role": session.role,
-    "X-MAAP-Email": session.email || "",
-    "X-MAAP-Profile-Ids": (session.profileIds || []).join(","),
-    "X-MAAP-Visible-Tags": getAccessibleTagCodes(session).join(",")
-  };
+  const token = localStorage.getItem("auth_token");
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  if (session) {
+    headers["X-MAAP-Role"] = session.role || "";
+    headers["X-MAAP-Email"] = session.email || "";
+    headers["X-MAAP-Profile-Ids"] = (session.profileIds || []).join(",");
+    headers["X-MAAP-Visible-Tags"] = getAccessibleTagCodes(session).join(",");
+  }
+
+  return headers;
 }
 
 function canViewAll(role) {
@@ -2161,21 +2140,34 @@ async function initAnnouncementsPage() {
   renderAnnouncementList(session);
 }
 
+/**
+ * @async
+ * @function initStaffDirectory
+ * @description Initializes the Staff Directory page by enforcing authentication and rendering the staff list.
+ * * This function follows a standard page-load lifecycle:
+ * 1. Validates that a user session exists.
+ * 2. Fetches the latest staff data from the backend.
+ * 3. Filters the staff list based on the user's specific access permissions.
+ * 4. Dynamically generates and injects HTML cards into the 'staffList' container.
+ * * @requires requireAuth - To ensure the user is logged in.
+ * @requires hydrateDataFromBackend - To pull the latest staff records.
+ * @requires getAccessibleStaff - To filter records based on RBAC (Role-Based Access Control).
+ * * @returns {Promise<void>} Resolves once the staff directory has been rendered in the UI.
+ */
 // Render the staff directory and support simple staff searching
 async function initStaffDirectory() {
   const s = requireAuth();
   await hydrateDataFromBackend();
-
-  const who = document.getElementById("whoami");
-  if (who) who.textContent = `${s.name} • ${s.role}`;
-
-  if (who) who.textContent = `${s.name} | ${getRoleLabel(s.role)}`;
 
   const list = document.getElementById("staffList");
   if (!list) return;
 
   const visibleStaff = getAccessibleStaff(s);
   list.innerHTML = "";
+
+  if (visibleStaff.length === 0) {
+    list.innerHTML = `<div class="portal-muted" style="padding: 20px;">No staff found in the directory.</div>`;
+  } else {
   visibleStaff.forEach((person) => {
     const row = document.createElement("div");
     row.className = "staff-row";
@@ -2202,6 +2194,7 @@ async function initStaffDirectory() {
     `;
     list.appendChild(row);
   });
+  }
 
   const search = document.getElementById("staffSearch");
   if (search && search.dataset.bound !== "true") {

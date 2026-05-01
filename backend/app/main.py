@@ -1371,31 +1371,99 @@ def delete_client(client_id: str, request: Request):
         raise HTTPException(status_code=500, detail="Failed to delete client")
 
 
-@app.delete("/staff/{staff_id}", tags=["Database"])
-def delete_staff(staff_id: str, request: Request):
+# Staff integration from DB to frontend.
+@app.get("/staff", tags=["Staff"])
+def get_staff(request: Request):
+    """!
+        @brief Fetches all active staff members from the database.
+
+        This endpoint performs a join across the Person, Email, and Phone tables to
+        compile a list of active staff members. It includes logic to deduplicate records
+        in cases where a person may have multiple contact entries.
+
+        @param request The FastAPI Request object.
+
+        @return A list of dictionaries, each containing:
+            - id: The unique person ID.
+            - name: Combined first and last name.
+            - title: The staff setting/job title.
+            - email: Primary email address.
+            - phone: Primary phone number.
+            - headshotUrl: Path to the staff image.
+
+        @exception HTTPException 500: Raised if the database query or processing fails.
+        """
     try:
-        role = get_request_role(request)
-        if not role_can_delete_records(role):
-            raise HTTPException(status_code=403, detail="This role cannot delete staff records")
 
-        existing_staff = fetch_existing_staff(staff_id)
-        if not existing_staff:
-            raise HTTPException(status_code=404, detail="Staff member not found")
+        query = text("""
+            SELECT 
+                p.person_id,
+                p.first_name,
+                p.last_name,
+                p.staff_setting AS title,
+                e.email_address,
+                ph.phone_number
+            FROM Person p
+            LEFT JOIN Email e ON p.person_id = e.person_id
+            LEFT JOIN Phone ph ON p.person_id = ph.person_id
+            WHERE p.stakeholder_type = 'Staff' AND p.status = 'ACTIVE'
+        """)
 
-        clear_coordinator_query = text(
-            """
-            UPDATE clients
-            SET program_coordinator_id = ''
-            WHERE program_coordinator_id = :staff_id
-            """
-        )
-        delete_query = text("DELETE FROM staff WHERE staff_id = :staff_id")
+        rows = db_client.send_query(query)
 
-        db_client.send_query(clear_coordinator_query, {"staff_id": staff_id})
-        db_client.send_query(delete_query, {"staff_id": staff_id})
-        return {"status": "success", "staff_id": staff_id}
-    except HTTPException:
-        raise
+        # Deduplicate in case a staff member has multiple phones or emails
+        staff_dict = {}
+        for row in rows:
+            pid = str(row["person_id"])
+            if pid not in staff_dict:
+                staff_dict[pid] = {
+                    "id": pid,
+                    "name": f"{row['first_name']} {row['last_name']}".strip(),
+                    "title": row["title"] or "Staff",
+                    "email": row["email_address"] or "",
+                    "phone": row["phone_number"] or "",
+                    "headshotUrl": "assets/empty-headshot.jpg"
+                }
+            else:
+                # If they have multiple emails/phones, prefer to populate empty fields
+                if not staff_dict[pid]["email"] and row["email_address"]:
+                    staff_dict[pid]["email"] = row["email_address"]
+                if not staff_dict[pid]["phone"] and row["phone_number"]:
+                    staff_dict[pid]["phone"] = row["phone_number"]
+
+        return list(staff_dict.values())
+
     except Exception as e:
-        logger.error("delete_staff_failed", extra={"error": str(e), "staff_id": staff_id})
-        raise HTTPException(status_code=500, detail="Failed to delete staff record")
+        logger.error("get_staff_failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Failed to load staff")
+
+
+@app.delete("/staff/{person_id}", tags=["Staff"])
+def delete_staff(person_id: int, request: Request):
+    """!
+        @brief Performs a soft delete on a staff profile.
+
+        Updates the status of the specified staff member to 'INACTIVE' in the database.
+        This preserves the data integrity and history while removing them from the active directory.
+
+        @param person_id The unique database ID of the staff member to be deactivated.
+        @param request    The FastAPI Request object.
+
+        @return A success message dictionary upon successful update.
+
+        @exception HTTPException 500: Raised if the database update fails or the ID is invalid.
+        """
+    try:
+
+        # standard practice is to do a "soft delete" by setting status = 'INACTIVE'
+        query = text("""
+            UPDATE Person 
+            SET status = 'INACTIVE' 
+            WHERE person_id = :person_id AND stakeholder_type = 'Staff'
+        """)
+        db_client.send_query(query, {"person_id": person_id})
+        return {"detail": "Staff profile deleted successfully"}
+
+    except Exception as e:
+        logger.error("delete_staff_failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Failed to delete staff profile")
