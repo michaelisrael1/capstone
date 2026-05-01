@@ -1207,7 +1207,70 @@ def user_login(payload: dict):
     except Exception as e:
         logger.error("login_failed", extra={"error": str(e)})
         raise HTTPException(status_code=500, detail="Login failed")
+    
+@app.get("/clients", tags=["Database"])
+def get_clients():
 
+    try:
+
+        query = text("""
+            SELECT
+                p.person_id,
+                p.first_name,
+                p.last_name,
+                p.stakeholder_type,
+                p.media_consent,
+                p.notes,
+                p.status,
+
+                GROUP_CONCAT(DISTINCT t.tag_code) AS tags,
+                GROUP_CONCAT(DISTINCT r.risk_code) AS risks
+            FROM Person p
+            LEFT JOIN PersonTag pt
+                ON p.person_id = pt.person_id
+            LEFT JOIN Tag t
+                ON pt.tag_id = t.tag_id
+            LEFT JOIN PersonRisk pr
+                ON p.person_id = pr.person_id
+            LEFT JOIN Risk r
+                ON pr.risk_id = r.risk_id
+            GROUP BY p.person_id
+        """)
+
+        rows = db_client.send_query(query)
+
+        clients = []
+
+        for row in rows:
+
+            clients.append({
+                "person_id": row["person_id"],
+                "first_name": row["first_name"],
+                "last_name": row["last_name"],
+                "media_consent": row["media_consent"],
+                "notes": row["notes"],
+                "status": row["status"],
+
+                # placeholders for frontend compatibility
+                "tags": row["tags"].split(",") if row["tags"] else [],
+                "risks": row["risks"].split(",") if row["risks"] else [],
+                "updated_at": ""
+            })
+
+        return clients
+
+    except Exception as e:
+
+        logger.error(
+            "get_clients_failed",
+            extra={"error": str(e)}
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to load clients"
+        )
+        
 # --------------------------------------------------
 # Update client profile (used by frontend edits)
 # --------------------------------------------------

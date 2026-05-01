@@ -5,7 +5,6 @@ CREATE TABLE Person (
     last_name VARCHAR(100),
     stakeholder_type VARCHAR(50),   -- Student, Client, Staff
     status VARCHAR(50),             -- ACTIVE, INACTIVE
-    role VARCHAR(100),
     school VARCHAR(150),
     staff_setting VARCHAR(150),
     start_date DATE,
@@ -31,6 +30,44 @@ CREATE TABLE PersonAddress (
     PRIMARY KEY (person_id, address_id, address_type),
     FOREIGN KEY (person_id) REFERENCES Person(person_id),
     FOREIGN KEY (address_id) REFERENCES Address(address_id)
+);
+
+CREATE TABLE Tag (
+    tag_id INT PRIMARY KEY AUTO_INCREMENT,
+    tag_code VARCHAR(20) UNIQUE NOT NULL,
+    tag_label VARCHAR(100)
+);
+
+CREATE TABLE PersonTag (
+    person_id INT NOT NULL,
+    tag_id INT NOT NULL,
+
+    PRIMARY KEY (person_id, tag_id),
+
+    FOREIGN KEY (person_id)
+        REFERENCES Person(person_id),
+
+    FOREIGN KEY (tag_id)
+        REFERENCES Tag(tag_id)
+);
+
+CREATE TABLE Risk (
+    risk_id INT PRIMARY KEY AUTO_INCREMENT,
+    risk_code VARCHAR(50) UNIQUE NOT NULL,
+    risk_label VARCHAR(100)
+);
+
+CREATE TABLE PersonRisk (
+    person_id INT NOT NULL,
+    risk_id INT NOT NULL,
+
+    PRIMARY KEY (person_id, risk_id),
+
+    FOREIGN KEY (person_id)
+        REFERENCES Person(person_id),
+
+    FOREIGN KEY (risk_id)
+        REFERENCES Risk(risk_id)
 );
 
 -- 4. PHONE
