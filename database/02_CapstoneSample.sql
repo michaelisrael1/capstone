@@ -50,12 +50,12 @@ INSERT INTO ContactRelationship VALUES
 (4,6,7,'CaseWorker',FALSE);
 
 INSERT INTO UserAccount (user_id, person_id, email_id, password_hash, role, is_active, is_locked) VALUES
-(1, 1, 1, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Director', TRUE, FALSE),
+(1, 1, 1, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Head Coordinator', TRUE, FALSE),
 (2, 2, 2, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Director', TRUE, FALSE),
-(3, 3, 3, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Staff', TRUE, FALSE),
+(3, 3, 3, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Program Coordinator', TRUE, FALSE),
 (4, 4, 4, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Staff', TRUE, FALSE),
 (5, 5, 5, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Program Coordinator', TRUE, FALSE),
-(6, 6, 6, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Staff', TRUE, FALSE),
+(6, 6, 6, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Student', TRUE, FALSE),
 (7, 7, 7, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Guardian', TRUE, FALSE);
 
 INSERT INTO Employer VALUES
