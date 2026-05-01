@@ -50,9 +50,9 @@ INSERT INTO ContactRelationship VALUES
 (4,6,7,'CaseWorker',FALSE);
 
 INSERT INTO UserAccount (user_id, person_id, email_id, password_hash, role, is_active, is_locked) VALUES
-(1, 2, 2, 'password', 'Director', TRUE, FALSE),
-(2, 4, 4, 'password', 'Staff', TRUE, FALSE),
-(3, 7, 7, 'password', 'Guardian', TRUE, FALSE);
+(1, 2, 2, 'password', 'director', TRUE, FALSE),
+(2, 4, 4, 'password', 'staff', TRUE, FALSE),
+(3, 7, 7, 'password', 'guardian', TRUE, FALSE);
 
 INSERT INTO Employer VALUES
 (1,'Helping Hands Org',1),
