@@ -817,8 +817,10 @@ function canEditEmergency(session, profile) {
   return Boolean(config.emergencyEditAll || (config.emergencyEditAssigned && isAssignedToProfile(session, profile)));
 }
 
-function getAccessibleProfiles(session) {
-  return profiles.filter((profile) => canViewProfile(session, profile));
+function getAccessibleProfiles(session, profilesList = []) {
+  return profilesList.filter((profile) =>
+    canViewProfile(session, profile)
+  );
 }
 
 function getAccessibleTagCodes(session) {
@@ -1027,61 +1029,171 @@ function initExcelUpload() {
 
 // Render the dashboard, filters, and emergency broadcast tools
 async function initDashboard() {
-  const s = requireAuth();
-  await hydrateDataFromBackend();
 
-  const accessibleProfiles = getAccessibleProfiles(s);
+  const s = requireAuth();
+
+  // --------------------------------------------
+  // Load profiles directly from backend
+  // --------------------------------------------
+  let accessibleProfiles = [];
+
+  try {
+
+    const res = await fetch("/api/clients", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...buildSessionHeaders()
+      }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.detail || "Failed to load profiles");
+    }
+
+    // Normalize backend data into frontend shape
+    accessibleProfiles = (data || []).map((p) => ({
+      id: p.person_id,
+      firstName: p.first_name || "",
+      lastName: p.last_name || "",
+      name: `${p.first_name || ""} ${p.last_name || ""}`.trim(),
+      stakeholderType: p.stakeholder_type || "",
+      tags: Array.isArray(p.tags) ? p.tags : [],
+      risks: Array.isArray(p.risks) ? p.risks : [],
+      mediaConsent: p.media_consent ? "Yes" : "No",
+      updated: p.updated_at ? new Date(p.updated_at).toLocaleDateString() : "",
+      notes: p.notes || "",
+      status: p.status || ""
+    }));
+
+  } catch (err) {
+    console.error("dashboard_load_failed", err);
+
+    const tbody = document.getElementById("profilesBody");
+
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            Failed to load profiles from backend.
+          </td>
+        </tr>
+      `;
+    }
+
+    return;
+  }
+
+  // --------------------------------------------
+  // Role-based filtering (frontend side)
+  // --------------------------------------------
+  accessibleProfiles = getAccessibleProfiles(s, accessibleProfiles);
 
   const who = document.getElementById("whoami");
 
   const accessRuleSummary = document.getElementById("accessRuleSummary");
-  if (accessRuleSummary) accessRuleSummary.textContent = getRoleConfig(s.role).summary;
+
+  if (accessRuleSummary) {
+    accessRuleSummary.textContent = getRoleConfig(s.role).summary;
+  }
 
   const uploadTile = document.getElementById("uploadTile");
-  if (uploadTile) uploadTile.style.display = canImportData(s.role) ? "" : "none";
 
-  const addUserTile = document.getElementById("addUserTile");
-  if (addUserTile) addUserTile.style.display = canAccessAdmin(s.role) ? "" : "none";
+  if (uploadTile) {
+    uploadTile.style.display = canImportData(s.role) ? "" : "none";
+  }
 
-  if (who) who.textContent = `${s.name} • ${s.role}`;
+  if (who) {
+    who.textContent = `${s.name} | ${getRoleLabel(s.role)}`;
+  }
 
-  if (who) who.textContent = `${s.name} | ${getRoleLabel(s.role)}`;
-
-
+  // --------------------------------------------
+  // Render profiles table
+  // --------------------------------------------
   const tbody = document.getElementById("profilesBody");
+
   if (tbody) {
+
     tbody.innerHTML = "";
+
     accessibleProfiles.forEach((p) => {
+
       const tr = document.createElement("tr");
+
       tr.innerHTML = `
-        <td><a class="link" href="profile.html?id=${encodeURIComponent(p.id)}">${p.name}</a></td>
-        <td>${renderTags(p.tags || [])}</td>
-        <td>${renderRiskBadges(p.risks || [])}</td>
+        <td>
+          <a class="link" href="profile.html?id=${encodeURIComponent(p.id)}">
+            ${p.name}
+          </a>
+        </td>
+
+        <td>
+          ${renderTags(p.tags || [])}
+        </td>
+
+        <td>
+          ${renderRiskBadges(p.risks || [])}
+        </td>
+
         <td>
           <span class="badge ${p.mediaConsent === "Yes" ? "blue" : "orange"}">
             ${p.mediaConsent}
           </span>
         </td>
-        <td>${p.updated}</td>
+
+        <td>
+          ${p.updated}
+        </td>
       `;
+
       tbody.appendChild(tr);
     });
+
+    // Empty state
+    if (!accessibleProfiles.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            No accessible profiles found.
+          </td>
+        </tr>
+      `;
+    }
   }
 
+  // --------------------------------------------
+  // Search filtering
+  // --------------------------------------------
   const search = document.getElementById("searchInput");
+
   if (search && tbody && search.dataset.bound !== "true") {
+
     search.dataset.bound = "true";
+
     search.addEventListener("input", () => {
+
       const q = search.value.trim().toLowerCase();
+
       [...tbody.querySelectorAll("tr")].forEach((tr) => {
-        tr.style.display = tr.textContent.toLowerCase().includes(q) ? "" : "none";
+        tr.style.display = tr.textContent.toLowerCase().includes(q)
+          ? ""
+          : "none";
       });
+
     });
   }
 
+  // --------------------------------------------
+  // Broadcast UI
+  // --------------------------------------------
   const broadcastBox = document.getElementById("broadcastBox");
+
   if (broadcastBox) {
-    broadcastBox.style.display = canSendBroadcast(s.role) ? "block" : "none";
+    broadcastBox.style.display = canSendBroadcast(s.role)
+      ? "block"
+      : "none";
   }
 
   const broadcastHelp = document.getElementById("broadcastHelp");
@@ -1092,14 +1204,18 @@ async function initDashboard() {
   const programSel = document.getElementById("broadcastProgram");
   const groupSel = document.getElementById("broadcastGroup");
 
-  const accessibleTagCodes = [...new Set(accessibleProfiles.flatMap((p) => p.tags || []))].filter(
-    (code) => tag_definitions[code]
-  );
-  const accessibleGroups = [...new Set(accessibleProfiles.map((p) => p.group).filter(Boolean))];
+  const accessibleTagCodes = [
+    ...new Set(accessibleProfiles.flatMap((p) => p.tags || []))
+  ].filter((code) => tag_definitions[code]);
+
+  const accessibleGroups = [
+    ...new Set(accessibleProfiles.map((p) => p.group).filter(Boolean))
+  ];
 
   if (broadcastRoleBadge) {
     broadcastRoleBadge.textContent = getRoleLabel(s.role);
-    broadcastRoleBadge.className = `pill-label ${canViewAll(s.role) ? "orange" : "blue"}`;
+    broadcastRoleBadge.className =
+      `pill-label ${canViewAll(s.role) ? "orange" : "blue"}`;
   }
 
   if (broadcastHelp) {
@@ -1109,69 +1225,130 @@ async function initDashboard() {
   }
 
   if (scopeSel) {
-    scopeSel.options[0].text = canViewAll(s.role) ? "Everyone" : "My assigned people";
+    scopeSel.options[0].text = canViewAll(s.role)
+      ? "Everyone"
+      : "My assigned people";
   }
 
   if (programSel) {
-    const defaultLabel = canViewAll(s.role) ? "All accessible programs" : "All my programs";
+
+    const defaultLabel = canViewAll(s.role)
+      ? "All accessible programs"
+      : "All my programs";
+
     programSel.innerHTML = [
       `<option value="">${defaultLabel}</option>`,
       ...accessibleTagCodes.map(
-        (code) => `<option value="${code}">${tag_definitions[code].label}</option>`
+        (code) =>
+          `<option value="${code}">
+            ${tag_definitions[code].label}
+          </option>`
       )
     ].join("");
   }
 
   if (groupSel) {
-    const defaultLabel = canViewAll(s.role) ? "All accessible groups" : "All my groups";
+
+    const defaultLabel = canViewAll(s.role)
+      ? "All accessible groups"
+      : "All my groups";
+
     groupSel.innerHTML = [
       `<option value="">${defaultLabel}</option>`,
-      ...accessibleGroups.map((group) => `<option value="${group}">${group}</option>`)
+      ...accessibleGroups.map(
+        (group) => `<option value="${group}">${group}</option>`
+      )
     ].join("");
   }
 
   function syncScopeUI() {
+
     const scope = scopeSel?.value || "all";
-    if (programWrap) programWrap.style.display = scope === "program" ? "block" : "none";
-    if (groupWrap) groupWrap.style.display = scope === "group" ? "block" : "none";
+
+    if (programWrap) {
+      programWrap.style.display =
+        scope === "program" ? "block" : "none";
+    }
+
+    if (groupWrap) {
+      groupWrap.style.display =
+        scope === "group" ? "block" : "none";
+    }
   }
 
   if (scopeSel && scopeSel.dataset.bound !== "true") {
+
     scopeSel.dataset.bound = "true";
+
     scopeSel.addEventListener("change", syncScopeUI);
   }
+
   syncScopeUI();
 
+  // --------------------------------------------
+  // Broadcast sending
+  // --------------------------------------------
   const sendBtn = document.getElementById("sendBroadcast");
+
   if (sendBtn && sendBtn.dataset.bound !== "true") {
+
     sendBtn.dataset.bound = "true";
+
     sendBtn.addEventListener("click", () => {
-      const msg = (document.getElementById("broadcastMsg")?.value || "").trim();
-      if (!msg) return alert("Please enter a message.");
-      if (!canSendBroadcast(s.role)) return alert("You do not have permission to send alerts.");
+
+      const msg =
+        (document.getElementById("broadcastMsg")?.value || "").trim();
+
+      if (!msg) {
+        return alert("Please enter a message.");
+      }
+
+      if (!canSendBroadcast(s.role)) {
+        return alert("You do not have permission to send alerts.");
+      }
 
       const scope = scopeSel?.value || "all";
       const program = programSel?.value || "";
       const group = groupSel?.value || "";
 
       let targets = accessibleProfiles;
-      let audienceLabel = canViewAll(s.role) ? "Everyone" : "My assigned people and guardians";
+
+      let audienceLabel = canViewAll(s.role)
+        ? "Everyone"
+        : "My assigned people and guardians";
 
       if (scope === "program" && program) {
-        targets = accessibleProfiles.filter((p) => (p.tags || []).includes(program));
-        audienceLabel = `Program: ${tag_definitions[program]?.label || program}`;
+
+        targets = accessibleProfiles.filter(
+          (p) => (p.tags || []).includes(program)
+        );
+
+        audienceLabel =
+          `Program: ${tag_definitions[program]?.label || program}`;
+
       } else if (scope === "group" && group) {
-        targets = accessibleProfiles.filter((p) => p.group === group);
+
+        targets = accessibleProfiles.filter(
+          (p) => p.group === group
+        );
+
         audienceLabel = `Group: ${group}`;
       }
 
       if (!targets.length) {
-        return alert("No eligible recipients were found for that selection.");
+        return alert(
+          "No eligible recipients were found for that selection."
+        );
       }
 
-      const recipientNames = targets.map((p) => p.name).join(", ");
+      const recipientNames =
+        targets.map((p) => p.name).join(", ");
+
       alert(
-        `Demo: would send emergency announcement to:\n${audienceLabel}\nRecipients: ${recipientNames}\n\nMessage:\n${msg}`
+        `Demo: would send emergency announcement to:\n` +
+        `${audienceLabel}\n` +
+        `Recipients: ${recipientNames}\n\n` +
+        `Message:\n${msg}`
       );
     });
   }
