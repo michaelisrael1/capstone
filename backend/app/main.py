@@ -1163,8 +1163,7 @@ def user_login(payload: dict):
         # ----------------------------------------
         stored_hash = user["password_hash"]
 
-        #if not bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8")):
-        if not password == stored_hash:
+        if not bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8")):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         # ----------------------------------------
