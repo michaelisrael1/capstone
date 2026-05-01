@@ -34,6 +34,11 @@ if not logger.handlers:
 logger.setLevel(logging.INFO)
 
 
+from utils.emailService import EmailService
+
+email_svc = EmailService()
+
+
 # --------------------------------------------------
 # App / DB setup
 # --------------------------------------------------
@@ -1337,3 +1342,100 @@ def delete_staff(staff_id: str, request: Request):
     except Exception as e:
         logger.error("delete_staff_failed", extra={"error": str(e), "staff_id": staff_id})
         raise HTTPException(status_code=500, detail="Failed to delete staff record")
+
+
+# --------------------------------------------------
+# Emergency Broadcast
+# --------------------------------------------------
+
+BROADCAST_ROLES = {"director", "head_coordinator"}
+
+
+def verify_broadcast_token(request: Request) -> dict:
+    """Validate JWT from Authorization header and confirm the role can broadcast."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization token required")
+    token = auth_header[len("Bearer "):].strip()
+    try:
+        payload = jwt.decode(token, os.getenv("JWT_SECRET"), algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired — please log in again")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if payload.get("role") not in BROADCAST_ROLES:
+        raise HTTPException(status_code=403, detail="Only directors and head coordinators can send emergency broadcasts")
+    return payload
+
+
+@app.post("/broadcast/emergency", tags=["Broadcast"])
+def send_emergency_broadcast(payload: dict, request: Request):
+    """
+    Send an emergency email broadcast to staff associated with a group or program.
+    Requires a valid JWT (from /login) with role director or head_coordinator.
+
+    Body:
+      subject  (str, required)
+      message  (str, required)
+      group    (str, optional) — clients.group_name to filter by
+      program  (str, optional) — program tag (e.g. "ci", "ds") to filter by
+      If neither group nor program is provided, emails ALL staff.
+    """
+    try:
+        token_data = verify_broadcast_token(request)
+
+        subject = clean_str(payload.get("subject"))
+        message = clean_str(payload.get("message"))
+        group = clean_str(payload.get("group"))
+        program = clean_str(payload.get("program"))
+        test_emails = payload.get("test_emails", [])
+
+        if not subject or not message:
+            raise HTTPException(status_code=400, detail="subject and message are required")
+
+        # If test emails provided, use those; otherwise query database
+        if test_emails and isinstance(test_emails, list):
+            recipients = [e.strip().lower() for e in test_emails if e and "@" in str(e)]
+        else:
+            # Query Email table for all staff/coordinator emails
+            # Filter by UserAccount role = 'staff' or 'director' or roles that can broadcast
+            email_query = text(
+                """
+                SELECT DISTINCT e.email_address as email
+                FROM Email e
+                JOIN UserAccount ua ON e.email_id = ua.email_id
+                WHERE e.email_address IS NOT NULL
+                  AND e.email_address != ''
+                  AND ua.role IN ('director', 'head_coordinator', 'staff')
+                  AND ua.is_active = TRUE
+                """
+            )
+            rows = db_client.send_query(email_query)
+            recipients = [row["email"] for row in rows if row.get("email")]
+
+        if not recipients:
+            return {"status": "no_recipients", "sent": 0, "detail": "No staff emails found for the given filter"}
+
+        # Send as HTML to display logo in footer (convert plain text to basic HTML if needed)
+        html_body = f"<p>{message.replace(chr(10), '<br>')}</p>" if message else "<p></p>"
+        email_svc.send_email(to=recipients, subject=subject, body=html_body, html=True)
+
+        logger.info(
+            "emergency_broadcast_sent",
+            extra={
+                "sender_user_id": token_data.get("user_id"),
+                "sender_role": token_data.get("role"),
+                "recipients_count": len(recipients),
+                "group": group or None,
+                "program": program or None,
+                "test_group": bool(test_emails),
+            },
+        )
+
+        return {"status": "success", "sent": len(recipients)}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("emergency_broadcast_failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Failed to send emergency broadcast")

@@ -43,6 +43,7 @@
             <button class="admin-tab active" data-tab="options">Edit Options</button>
             <button class="admin-tab" data-tab="retired">Retired Options</button>
             <button class="admin-tab" data-tab="importexport">Import / Export</button>
+            <button class="admin-tab" data-tab="testgroup">Test User Group</button>
         </div>
 
         <!-- Tab: Overview -->
@@ -375,6 +376,56 @@
                             <p class="portal-muted">
                                 Uploading a file will replace all existing client and staff records
                                 with the contents of the spreadsheet. This action cannot be undone.
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <!-- Tab: Test User Group -->
+        <div class="admin-tab-panel" id="tab-testgroup">
+            <div class="portal-grid">
+                <section class="portal-main">
+                    <div class="portal-card">
+                        <div class="portal-card-head row-split">
+                            <div>
+                                <h2 class="portal-h2">Test Recipient Emails</h2>
+                                <p class="portal-muted">
+                                    Add and manage email addresses for testing emergency broadcasts.
+                                </p>
+                            </div>
+                            <span class="pill-label orange">Director Only</span>
+                        </div>
+
+                        <div class="portal-form">
+                            <label class="portal-label">Add Test Email</label>
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                                <input
+                                    id="testEmailInput"
+                                    class="portal-input"
+                                    type="email"
+                                    placeholder="test@example.com"
+                                    style="flex: 1;"
+                                />
+                                <button class="portal-btn-orange" id="addTestEmailBtn" type="button">Add</button>
+                            </div>
+
+                            <label class="portal-label">Current Test Emails</label>
+                            <div id="testEmailList" style="border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px; min-height: 60px;">
+                                <p class="portal-muted" id="testEmailEmpty">No test emails configured yet.</p>
+                                <div id="testEmailItems"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <aside class="portal-side">
+                    <div class="portal-card">
+                        <div class="portal-card-head">
+                            <h2 class="portal-h2">Test User Group</h2>
+                            <p class="portal-muted">
+                                When sending emergency broadcasts, select "Test User Group" to send only to these test emails.
+                                Useful for testing the broadcast system without affecting actual staff.
                             </p>
                         </div>
                     </div>

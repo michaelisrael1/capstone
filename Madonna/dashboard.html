@@ -118,6 +118,7 @@
                                     <option value="all">Everyone</option>
                                     <option value="program">A program</option>
                                     <option value="group">A group</option>
+                                    <option value="test_group">Test User Group</option>
                                 </select>
                             </div>
 
@@ -136,6 +137,14 @@
                             </div>
                         </div>
 
+                        <label class="portal-label" for="broadcastSubject" style="margin-top:12px;">Subject</label>
+                        <input
+                                id="broadcastSubject"
+                                class="portal-input"
+                                type="text"
+                                placeholder="Example: Weather closure — programs canceled"
+                        />
+
                         <label class="portal-label" for="broadcastMsg" style="margin-top:12px;">Message</label>
                         <textarea
                                 id="broadcastMsg"
@@ -143,6 +152,8 @@
                                 rows="3"
                                 placeholder="Example: Weather closure today — all afternoon programs canceled."
                         ></textarea>
+
+                        <div id="broadcastStatus" style="display:none; margin-top:10px; padding:10px 14px; border-radius:10px; font-size:0.9rem;"></div>
 
                         <div class="portal-actions">
                             <button class="portal-btn-orange" id="sendBroadcast" type="button">Send broadcast</button>

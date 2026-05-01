@@ -54,6 +54,31 @@ const LEGACY_ROLE_MAP = {
 };
 
 const THEME_STORAGE_KEY = "maap_theme";
+const TOKEN_STORAGE_KEY = "maa_token";
+const TEST_EMAIL_KEY = "maap_test_emails";
+const DEFAULT_TEST_EMAILS = [
+  "michaelisrael@unomaha.edu",
+  "jmurphy22@unomaha.edu",
+  "jeremycline@unomaha.edu",
+  "ciscogonzalez@unomaha.edu",
+  "tamsler@unomaha.edu"
+];
+
+function loadTestEmails() {
+  const stored = localStorage.getItem(TEST_EMAIL_KEY);
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  // Return defaults on first load
+  return [...DEFAULT_TEST_EMAILS];
+}
+
+function initializeTestEmailsIfNeeded() {
+  // Save defaults to localStorage if not already set
+  if (!localStorage.getItem(TEST_EMAIL_KEY)) {
+    localStorage.setItem(TEST_EMAIL_KEY, JSON.stringify(DEFAULT_TEST_EMAILS));
+  }
+}
 const CLIENT_PHOTO_STORAGE_KEY = "maap_client_photos";
 const STAFF_PHOTO_STORAGE_KEY = "maap_staff_photos";
 
@@ -911,8 +936,21 @@ function getSession() {
   }
 }
 
+function setToken(token) {
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
+}
+
+function getToken() {
+  return localStorage.getItem(TOKEN_STORAGE_KEY) || null;
+}
+
+function clearToken() {
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+}
+
 function clearSession() {
   localStorage.removeItem("maa_session");
+  clearToken();
 }
 
 // Redirect to the portal login page if no session exists
@@ -925,12 +963,17 @@ function requireAuth() {
 function buildSessionHeaders(session = getSession()) {
   if (!session) return {};
 
-  return {
+  const headers = {
     "X-MAAP-Role": session.role,
     "X-MAAP-Email": session.email || "",
     "X-MAAP-Profile-Ids": (session.profileIds || []).join(","),
     "X-MAAP-Visible-Tags": getAccessibleTagCodes(session).join(",")
   };
+
+  const token = getToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  return headers;
 }
 
 function canViewAll(role) {
@@ -942,7 +985,7 @@ function canViewAllStaff(role) {
 }
 
 function canSendBroadcast(role) {
-  return Boolean(getRoleConfig(role).canBroadcast);
+  return ["director", "head_coordinator"].includes(normalizeRole(role));
 }
 
 function canImportData(role) {
@@ -1127,17 +1170,53 @@ function initLoginForm() {
   const form = document.getElementById("loginForm");
   if (!form) return;
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = form.email.value.trim().toLowerCase();
+  let errorEl = form.querySelector("#loginError");
+  if (!errorEl) {
+    errorEl = document.createElement("p");
+    errorEl.id = "loginError";
+    errorEl.style.cssText = "color:#c0392b; font-size:0.9rem; margin:8px 0 0;";
+    form.querySelector(".portal-actions").insertAdjacentElement("beforebegin", errorEl);
+  }
 
-    if (!portalUsers[email]) {
-      alert("We could not find an account for that email address.");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.textContent = "";
+
+    const email = form.email.value.trim().toLowerCase();
+    const password = form.password.value;
+
+    if (!email || !password) {
+      errorEl.textContent = "Please enter your email and password.";
       return;
     }
 
-    setSession(buildSession(portalUsers[email], email));
-    window.location.href = "dashboard.html";
+    const submitBtn = form.querySelector("[type=submit]");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Signing in…";
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        errorEl.textContent = data.detail || "Invalid email or password.";
+        return;
+      }
+
+      setToken(data.token);
+      setSession(buildSession({ role: data.role }, email));
+      window.location.href = "dashboard.html";
+    } catch {
+      errorEl.textContent = "Could not connect to the server. Please try again.";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Log in";
+    }
   });
 }
 
@@ -1319,36 +1398,88 @@ async function initDashboard() {
   syncScopeUI();
 
   const sendBtn = document.getElementById("sendBroadcast");
+  const broadcastStatus = document.getElementById("broadcastStatus");
+
+  function showBroadcastStatus(msg, isError) {
+    if (!broadcastStatus) return;
+    broadcastStatus.textContent = msg;
+    broadcastStatus.style.display = "block";
+    broadcastStatus.style.background = isError ? "#fdecea" : "#eafaf1";
+    broadcastStatus.style.color = isError ? "#c0392b" : "#1e8449";
+    broadcastStatus.style.border = `1px solid ${isError ? "#f5c6cb" : "#a9dfbf"}`;
+  }
+
   if (sendBtn && sendBtn.dataset.bound !== "true") {
     sendBtn.dataset.bound = "true";
-    sendBtn.addEventListener("click", () => {
+    sendBtn.addEventListener("click", async () => {
+      if (broadcastStatus) broadcastStatus.style.display = "none";
+
+      const subject = (document.getElementById("broadcastSubject")?.value || "").trim();
       const msg = (document.getElementById("broadcastMsg")?.value || "").trim();
-      if (!msg) return alert("Please enter a message.");
-      if (!canSendBroadcast(s.role)) return alert("You do not have permission to send alerts.");
+
+      if (!subject) return showBroadcastStatus("Please enter a subject.", true);
+      if (!msg) return showBroadcastStatus("Please enter a message.", true);
+
+      if (!getToken()) {
+        return showBroadcastStatus("Your session has expired. Please log in again.", true);
+      }
 
       const scope = scopeSel?.value || "all";
-      const program = programSel?.value || "";
-      const group = groupSel?.value || "";
+      const program = scope === "program" ? (programSel?.value || "") : "";
+      const group = scope === "group" ? (groupSel?.value || "") : "";
+      const testEmails = scope === "test_group" ? loadTestEmails() : [];
 
-      let targets = accessibleProfiles;
-      let audienceLabel = canViewAll(s.role) ? "Everyone" : "My assigned people and guardians";
-
-      if (scope === "program" && program) {
-        targets = accessibleProfiles.filter((p) => (p.tags || []).includes(program));
-        audienceLabel = `Program: ${tag_definitions[program]?.label || program}`;
-      } else if (scope === "group" && group) {
-        targets = accessibleProfiles.filter((p) => p.group === group);
-        audienceLabel = `Group: ${group}`;
+      if (scope === "test_group" && testEmails.length === 0) {
+        return showBroadcastStatus("No test emails configured. Add test emails in Admin > Test User Group.", true);
       }
 
-      if (!targets.length) {
-        return alert("No eligible recipients were found for that selection.");
-      }
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Sending…";
 
-      const recipientNames = targets.map((p) => p.name).join(", ");
-      alert(
-        `Emergency announcement prepared for:\n${audienceLabel}\nRecipients: ${recipientNames}\n\nMessage:\n${msg}`
-      );
+      try {
+        const body = { subject, message: msg };
+        if (program) body.program = program;
+        if (group) body.group = group;
+        if (testEmails.length > 0) body.test_emails = testEmails;
+
+        const res = await fetch("/api/broadcast/emergency", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...buildSessionHeaders(s)
+          },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          const detail = data.detail || "Broadcast failed. Please try again.";
+          if (res.status === 401) {
+            showBroadcastStatus("Your session has expired. Please log in again.", true);
+          } else if (res.status === 403) {
+            showBroadcastStatus("You do not have permission to send emergency broadcasts.", true);
+          } else {
+            showBroadcastStatus(detail, true);
+          }
+          return;
+        }
+
+        if (data.status === "no_recipients") {
+          const msg = scope === "test_group" ? "No test emails configured." : "No staff emails were found for that selection.";
+          showBroadcastStatus(msg, true);
+        } else {
+          const recipientType = scope === "test_group" ? "test email" : "staff member";
+          showBroadcastStatus(`Broadcast sent to ${data.sent} ${recipientType}${data.sent !== 1 ? "s" : ""}.`, false);
+          document.getElementById("broadcastSubject").value = "";
+          document.getElementById("broadcastMsg").value = "";
+        }
+      } catch {
+        showBroadcastStatus("Could not reach the server. Please try again.", true);
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send broadcast";
+      }
     });
   }
 }
@@ -2679,10 +2810,80 @@ function initAdminPage() {
       fileInput.value = "";
     });
   }
+
+  // --- Test User Group Management ---
+
+  function saveTestEmails(emails) {
+    localStorage.setItem(TEST_EMAIL_KEY, JSON.stringify(emails));
+    renderTestEmails();
+  }
+
+  function renderTestEmails() {
+    const emails = loadTestEmails();
+    const itemsDiv = document.getElementById("testEmailItems");
+    const emptyMsg = document.getElementById("testEmailEmpty");
+    const listDiv = document.getElementById("testEmailList");
+
+    if (!itemsDiv) return;
+
+    itemsDiv.innerHTML = "";
+    if (emails.length === 0) {
+      emptyMsg.style.display = "block";
+      return;
+    }
+    emptyMsg.style.display = "none";
+
+    emails.forEach((email, idx) => {
+      const item = document.createElement("div");
+      item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f0f0f0;";
+      item.innerHTML = `
+        <span style="font-size:14px; color:var(--maa-text);">${email}</span>
+        <button class="btn-remove-test-email" data-index="${idx}" style="background:none; border:none; color:#c0392b; cursor:pointer; font-size:12px; text-decoration:underline;">Remove</button>
+      `;
+      itemsDiv.appendChild(item);
+    });
+
+    document.querySelectorAll(".btn-remove-test-email").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.index);
+        const emails = loadTestEmails();
+        emails.splice(idx, 1);
+        saveTestEmails(emails);
+      });
+    });
+  }
+
+  const addBtn = document.getElementById("addTestEmailBtn");
+  const input = document.getElementById("testEmailInput");
+
+  if (addBtn && input) {
+    addBtn.addEventListener("click", () => {
+      const email = input.value.trim().toLowerCase();
+      if (!email || !email.includes("@")) {
+        alert("Please enter a valid email address.");
+        return;
+      }
+      const emails = loadTestEmails();
+      if (emails.includes(email)) {
+        alert("This email is already in the test group.");
+        return;
+      }
+      emails.push(email);
+      saveTestEmails(emails);
+      input.value = "";
+    });
+
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") addBtn.click();
+    });
+  }
+
+  renderTestEmails();
 }
 
 // Boot the correct page logic after the DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
+  initializeTestEmailsIfNeeded();
   initThemeToggle();
   initNavAuthUI();
   initLoginForm();
