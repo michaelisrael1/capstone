@@ -1148,17 +1148,9 @@ function initExcelUpload() {
   const session = getSession();
   if (!session || !canImportData(session.role)) return;
 
-  let input = document.getElementById("excelUpload");
+  const input = document.getElementById("excelUpload");
   const status = document.getElementById("uploadStatus");
-
-  if (!input) {
-    input = document.createElement("input");
-    input.type = "file";
-    input.id = "excelUpload";
-    input.accept = ".xlsx,.xls,.csv";
-    input.style.display = "none";
-    document.body.appendChild(input);
-  }
+  if (!input) return;
 
   if (input.dataset.bound === "true") return;
   input.dataset.bound = "true";
@@ -1273,12 +1265,6 @@ async function initDashboard() {
 
   if (accessRuleSummary) {
     accessRuleSummary.textContent = getRoleConfig(s.role).summary;
-  }
-
-  const uploadTile = document.getElementById("uploadTile");
-
-  if (uploadTile) {
-    uploadTile.style.display = canImportData(s.role) ? "" : "none";
   }
 
   if (who) {
@@ -2907,5 +2893,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (document.body.dataset.page === "staff_profile") await initStaffProfilePage();
   if (document.body.dataset.page === "admin") initAdminPage();
 
-  initExcelUpload();
 });
