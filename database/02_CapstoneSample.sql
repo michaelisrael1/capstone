@@ -35,12 +35,12 @@ INSERT INTO Phone (phone_id, person_id, phone_number, phone_type) VALUES
 (7, 7,'402-777-7777','work');
 
 INSERT INTO Email (email_id, person_id, email_address, email_type) VALUES
-(1, 1,'alice@student.com','school'),
+(1, 1,'head.coordinator@madonna.org','school'),
 (2, 2,'director@madonna.org','work'),
-(3, 3,'charlie@mail.com','personal'),
+(3, 3,'coordinator@madonna.org','personal'),
 (4, 4,'staff@madonna.org','work'),
-(5, 5,'ethan@student.com','school'),
-(6, 6,'fiona@mail.com','personal'),
+(5, 5,'program.coordinator@madonna.org','school'),
+(6, 6,'student@madonna.org','personal'),
 (7, 7,'guardian@madonna.org','work');
 
 INSERT INTO ContactRelationship VALUES
@@ -50,9 +50,13 @@ INSERT INTO ContactRelationship VALUES
 (4,6,7,'CaseWorker',FALSE);
 
 INSERT INTO UserAccount (user_id, person_id, email_id, password_hash, role, is_active, is_locked) VALUES
-(1, 2, 2, 'password', 'Director', TRUE, FALSE),
-(2, 4, 4, 'password', 'Staff', TRUE, FALSE),
-(3, 7, 7, 'password', 'Guardian', TRUE, FALSE);
+(1, 1, 1, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Director', TRUE, FALSE),
+(2, 2, 2, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Director', TRUE, FALSE),
+(3, 3, 3, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Staff', TRUE, FALSE),
+(4, 4, 4, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Staff', TRUE, FALSE),
+(5, 5, 5, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Program Coordinator', TRUE, FALSE),
+(6, 6, 6, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Staff', TRUE, FALSE),
+(7, 7, 7, '$2a$12$UB1FCvBZq90F8nQ88Iyb9OsTJfP1OHRvAVWlBgHpGQZsx6FeYqgZu', 'Guardian', TRUE, FALSE);
 
 INSERT INTO Employer VALUES
 (1,'Helping Hands Org',1),
