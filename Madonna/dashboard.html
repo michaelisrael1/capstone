@@ -9,7 +9,6 @@
 </head>
 
 <body data-page="dashboard" class="portal-body">
-<!-- Portal header -->
 <header class="portal-header">
     <div class="container portal-nav">
         <a class="portal-brand" href="dashboard.html" aria-label="Dashboard Home">
@@ -27,7 +26,6 @@
 
 <main class="portal-page">
     <div class="container">
-        <!-- Page heading -->
         <div class="portal-heading">
             <div>
                 <h1 class="portal-h1">Dashboard</h1>
@@ -41,11 +39,8 @@
             </div>
         </div>
 
-        <!-- Layout: main + sidebar -->
         <div class="portal-grid">
-            <!-- Main column -->
             <section class="portal-main">
-                <!-- Search + filters -->
                 <div class="portal-toolbar">
                     <div class="portal-search" role="search" aria-label="Search profiles">
                         <span aria-hidden="true">🔎</span>
@@ -78,7 +73,6 @@
                     </div>
                 </div>
 
-                <!-- Results -->
                 <div class="portal-card">
                     <div class="portal-card-head">
                         <h2 class="portal-h2">Profiles</h2>
@@ -105,7 +99,6 @@
                     </div>
                 </div>
 
-                <!-- Authorized broadcast panel -->
                 <div id="broadcastBox" class="portal-card" style="display:none;">
                     <div class="portal-card-head row-split">
                         <div>
@@ -118,7 +111,6 @@
                     </div>
 
                     <div class="portal-form">
-                        <!-- Scope -->
                         <div class="portal-form-grid">
                             <div>
                                 <label class="portal-label" for="broadcastScope">Send to</label>
@@ -144,7 +136,6 @@
                             </div>
                         </div>
 
-                        <!-- Existing message -->
                         <label class="portal-label" for="broadcastMsg" style="margin-top:12px;">Message</label>
                         <textarea
                                 id="broadcastMsg"
@@ -160,7 +151,6 @@
                 </div>
             </section>
 
-            <!-- Sidebar -->
             <aside class="portal-side">
                 <div class="portal-card">
                     <div class="portal-card-head">
@@ -212,7 +202,7 @@
                             <div class="quick-icon" aria-hidden="true">👥</div>
                             <div>
                                 <div class="quick-title">Browse groups</div>
-                                <div class="quick-sub">View assigned groups (coming soon)</div>
+                                <div class="quick-sub">View assigned groups</div>
                             </div>
                         </div>
 
@@ -244,9 +234,7 @@
 
 <script src="assets/app.js"></script>
 
-<!-- small client-side filters (won’t break anything if removed) -->
 <script>
-    // Simple table filtering on top of the rows populated by app.js
     (function () {
         const riskSel = document.getElementById("filterRisk");
         const updSel = document.getElementById("filterUpdated");

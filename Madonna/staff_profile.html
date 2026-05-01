@@ -33,11 +33,20 @@
         </div>
       </div>
 
-      <div class="portal-grid">
+      <div class="portal-grid staff-profile-grid">
         <section class="portal-main">
           <div class="portal-card">
             <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-              <img id="staffHeadshot" src="empty-headshot.jpg" alt="Headshot" style="height:120px; width:120px; border-radius:16px; object-fit:cover;" />
+              <div class="profile-photo">
+                <div class="photo-frame">
+                  <img id="staffHeadshot" class="record-photo" src="assets/empty-headshot.jpg" alt="Staff photo" />
+                </div>
+                <div id="staffPhotoControls" class="photo-controls" style="display:none;">
+                  <label class="btn-maap blue photo-upload-btn" for="staffPhotoUpload">Add photo</label>
+                  <input id="staffPhotoUpload" type="file" accept="image/*" style="display:none;" />
+                  <div id="staffPhotoStatus" class="portal-footnote"></div>
+                </div>
+              </div>
               <div style="flex:1; min-width:220px;">
                 <div class="portal-label">Email</div>
                 <div id="staffEmail" class="portal-muted">—</div>
@@ -52,14 +61,6 @@
           </div>
         </section>
 
-        <aside class="portal-side">
-          <div class="portal-card">
-            <div class="portal-card-head">
-              <h2 class="portal-h2">Notes</h2>
-              <p class="portal-muted">Later: permissions + assigned client list.</p>
-            </div>
-          </div>
-        </aside>
       </div>
     </div>
   </main>
