@@ -1,0 +1,64 @@
+\doxysection{utils.\+connection.\+Database\+Client Class Reference}
+\hypertarget{classutils_1_1connection_1_1DatabaseClient}{}\label{classutils_1_1connection_1_1DatabaseClient}\index{utils.connection.DatabaseClient@{utils.connection.DatabaseClient}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classutils_1_1connection_1_1DatabaseClient_a94f26b7f526fb3ef6fcac713f0efb3b0}{\+\_\+\+\_\+init\+\_\+\+\_\+}} (self, str\texorpdfstring{$\vert$}{|}None \mbox{\hyperlink{classutils_1_1connection_1_1DatabaseClient_a4a4da173d664ca02fc8b9b3ef76b381b}{url}}=None)
+\item 
+\mbox{\hyperlink{classutils_1_1connection_1_1DatabaseClient_a6b4531b83a43bbce8ab2b6eb0cc63974}{send\+\_\+query}} (self, query, dict\texorpdfstring{$\vert$}{|}None params=None)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classutils_1_1connection_1_1DatabaseClient_a4a4da173d664ca02fc8b9b3ef76b381b}{url}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{classutils_1_1connection_1_1DatabaseClient_aafc759a985bb0bd8c1acf8665095ed28}{\+\_\+build\+\_\+url\+\_\+from\+\_\+env}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Thin wrapper around a SQLAlchemy engine for running raw SQL.\end{DoxyVerb}
+ 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classutils_1_1connection_1_1DatabaseClient_a94f26b7f526fb3ef6fcac713f0efb3b0}\label{classutils_1_1connection_1_1DatabaseClient_a94f26b7f526fb3ef6fcac713f0efb3b0} 
+\index{utils.connection.DatabaseClient@{utils.connection.DatabaseClient}!\_\_init\_\_@{\_\_init\_\_}}
+\index{\_\_init\_\_@{\_\_init\_\_}!utils.connection.DatabaseClient@{utils.connection.DatabaseClient}}
+\doxysubsubsection{\texorpdfstring{\_\_init\_\_()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily utils.\+connection.\+Database\+Client.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{str \texorpdfstring{$\vert$}{|} None }]{url = {\ttfamily None} }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classutils_1_1connection_1_1DatabaseClient_aafc759a985bb0bd8c1acf8665095ed28}\label{classutils_1_1connection_1_1DatabaseClient_aafc759a985bb0bd8c1acf8665095ed28} 
+\index{utils.connection.DatabaseClient@{utils.connection.DatabaseClient}!\_build\_url\_from\_env@{\_build\_url\_from\_env}}
+\index{\_build\_url\_from\_env@{\_build\_url\_from\_env}!utils.connection.DatabaseClient@{utils.connection.DatabaseClient}}
+\doxysubsubsection{\texorpdfstring{\_build\_url\_from\_env()}{\_build\_url\_from\_env()}}
+{\footnotesize\ttfamily  str utils.\+connection.\+Database\+Client.\+\_\+build\+\_\+url\+\_\+from\+\_\+env (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}
+
+\Hypertarget{classutils_1_1connection_1_1DatabaseClient_a6b4531b83a43bbce8ab2b6eb0cc63974}\label{classutils_1_1connection_1_1DatabaseClient_a6b4531b83a43bbce8ab2b6eb0cc63974} 
+\index{utils.connection.DatabaseClient@{utils.connection.DatabaseClient}!send\_query@{send\_query}}
+\index{send\_query@{send\_query}!utils.connection.DatabaseClient@{utils.connection.DatabaseClient}}
+\doxysubsubsection{\texorpdfstring{send\_query()}{send\_query()}}
+{\footnotesize\ttfamily utils.\+connection.\+Database\+Client.\+send\+\_\+query (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{query,  }\item[{dict \texorpdfstring{$\vert$}{|} None }]{params = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Run a SQL statement. Accepts either a plain string or a
+SQLAlchemy TextClause (already wrapped with text()).
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classutils_1_1connection_1_1DatabaseClient_a4a4da173d664ca02fc8b9b3ef76b381b}\label{classutils_1_1connection_1_1DatabaseClient_a4a4da173d664ca02fc8b9b3ef76b381b} 
+\index{utils.connection.DatabaseClient@{utils.connection.DatabaseClient}!url@{url}}
+\index{url@{url}!utils.connection.DatabaseClient@{utils.connection.DatabaseClient}}
+\doxysubsubsection{\texorpdfstring{url}{url}}
+{\footnotesize\ttfamily utils.\+connection.\+Database\+Client.\+url}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+backend/app/utils/\mbox{\hyperlink{app_2utils_2connection_8py}{connection.\+py}}\end{DoxyCompactItemize}

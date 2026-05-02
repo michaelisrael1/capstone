@@ -1,0 +1,145 @@
+\doxysection{backend/app/main.py File Reference}
+\hypertarget{main_8py}{}\label{main_8py}\index{backend/app/main.py@{backend/app/main.py}}
+\doxysubsubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \mbox{\hyperlink{namespacemain}{main}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacemain_afd1695457033c353d0cdf961d9861e10}{main.\+on\+\_\+startup}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a913ba77413170e6e8d69db70838970ab}{main.\+clean\+\_\+str}} (value, default="{}"{})
+\item 
+\mbox{\hyperlink{namespacemain_a645ecfe498ffa10a8540480d55072134}{main.\+clean\+\_\+date}} (value)
+\item 
+\mbox{\hyperlink{namespacemain_af3398b372da8e685e1f78cfad510e460}{main.\+normalize\+\_\+media\+\_\+consent}} (value)
+\item 
+\mbox{\hyperlink{namespacemain_abbcebcc9a1548113bcd4c469da64ee88}{main.\+build\+\_\+tag\+\_\+json}} (row)
+\item 
+\mbox{\hyperlink{namespacemain_a4200b719675f5e18b27efdb78aed6f87}{main.\+parse\+\_\+header\+\_\+list}} (value)
+\item 
+\mbox{\hyperlink{namespacemain_a08bb8dc1b91997febe3beb2ad0e0361b}{main.\+get\+\_\+request\+\_\+role}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a566397d2bb154be78d440fd78902ec62}{main.\+get\+\_\+allowed\+\_\+profile\+\_\+ids}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a76f1ed26d6545d9317da135fe70d5f61}{main.\+get\+\_\+visible\+\_\+tags}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a3b5c5a067cdc6987232db15ad0fc4b4d}{main.\+get\+\_\+request\+\_\+email}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_af05c8d493f66c4701f384c267196c079}{main.\+role\+\_\+can\+\_\+edit\+\_\+profile}} (str role, str client\+\_\+id, set\mbox{[}str\mbox{]} allowed\+\_\+profile\+\_\+ids)
+\item 
+\mbox{\hyperlink{namespacemain_ab19c9ec4e4ca5aa05bd62783cc1d2d90}{main.\+role\+\_\+has\+\_\+full\+\_\+edit}} (str role)
+\item 
+\mbox{\hyperlink{namespacemain_a2109f29fe173368c3753f6ba1f6d9ea6}{main.\+role\+\_\+can\+\_\+post\+\_\+announcements}} (str role)
+\item 
+\mbox{\hyperlink{namespacemain_a31e33ea4ec390101b8fec7fa499054de}{main.\+role\+\_\+can\+\_\+delete\+\_\+records}} (str role)
+\item 
+\mbox{\hyperlink{namespacemain_a23d5b8de7178455639da20626f7bb170}{main.\+row\+\_\+to\+\_\+client\+\_\+dict}} (row)
+\item 
+\mbox{\hyperlink{namespacemain_adf083bb8a761cffee58b86fd07a0d7c4}{main.\+fetch\+\_\+existing\+\_\+client}} (str client\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a8d332dd9252dc16be8b3657454439f03}{main.\+fetch\+\_\+existing\+\_\+staff}} (str staff\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a42a66d0ae6126857ceb3e8df747e3b55}{main.\+merged\+\_\+payload\+\_\+for\+\_\+role}} (dict existing\+\_\+client, dict payload, str role)
+\item 
+\mbox{\hyperlink{namespacemain_a068c63288a47def91215758fc3ea83de}{main.\+safe\+\_\+json\+\_\+loads}} (value, default)
+\item 
+\mbox{\hyperlink{namespacemain_a9c5d399e9da362974bcb3dcbc27225b7}{main.\+ensure\+\_\+staff\+\_\+table}} ()
+\item 
+\mbox{\hyperlink{namespacemain_ac86fe6aa52520738bb7eab4e2b7c60ef}{main.\+ensure\+\_\+clients\+\_\+table}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a1a8e0176f59167373d9a9bfd2d096190}{main.\+ensure\+\_\+announcements\+\_\+table}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a5347bdc17a36584ade5a635f2c7f26ec}{main.\+ensure\+\_\+option\+\_\+definitions\+\_\+table}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a4f2f02021ce2cab2380ee60571f85fd7}{main.\+normalize\+\_\+attachment\+\_\+payload}} (item)
+\item 
+\mbox{\hyperlink{namespacemain_a2de100f034e6c85a36da654a280cda8a}{main.\+normalize\+\_\+comment\+\_\+payload}} (item)
+\item 
+\mbox{\hyperlink{namespacemain_a7cf81ebf4bd162b612ab9a4e97aea7f2}{main.\+row\+\_\+to\+\_\+announcement\+\_\+dict}} (row)
+\item 
+\mbox{\hyperlink{namespacemain_afac86dcdf2222ca27eeaa2e4552d252c}{main.\+fetch\+\_\+announcements}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a71acad4fbac4bafe686160efa1d7b066}{main.\+fetch\+\_\+announcement\+\_\+by\+\_\+id}} (str announcement\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a182f4776a925cd8406d03420047eeea5}{main.\+save\+\_\+announcement\+\_\+record}} (dict announcement)
+\item 
+\mbox{\hyperlink{namespacemain_ae5f0f4deff247d25dd1a0049fecd4c89}{main.\+announcement\+\_\+is\+\_\+visible}} (dict announcement, str role, set\mbox{[}str\mbox{]} visible\+\_\+tags)
+\item 
+\mbox{\hyperlink{namespacemain_a66b0266dcfd3f50efc3acf5ba7f69bb8}{main.\+save\+\_\+attachment\+\_\+to\+\_\+filesystem}} (dict attachment)
+\item 
+\mbox{\hyperlink{namespacemain_af0fb25cf693c599e0d77e29e802af13a}{main.\+health\+\_\+check}} ()
+\item 
+\mbox{\hyperlink{namespacemain_ada39dfac338a7a3d5b6df3acb84ddee4}{main.\+get\+\_\+db\+\_\+time}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a38e285b1bbc2380ba9b6a45c7efa9a6d}{main.\+get\+\_\+announcements}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_ab57e62ceac76ab365c1a4c63eb6ceaa6}{main.\+create\+\_\+announcement}} (dict payload, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a77a2226e7bb0e7c8f7bf3b84304c0bf1}{main.\+add\+\_\+announcement\+\_\+comment}} (str announcement\+\_\+id, dict payload, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a18fe63074082369c52504a2dda02ce5c}{main.\+toggle\+\_\+announcement\+\_\+like}} (str announcement\+\_\+id, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_ad983f59f502827c1430e4bece481f992}{main.\+get\+\_\+option\+\_\+definitions}} (Request request, str category=None)
+\item 
+\mbox{\hyperlink{namespacemain_a3cfa0632adb39837951a8acff494cc4a}{main.\+add\+\_\+option\+\_\+definition}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a8aa88c29d5c1716685d50e0eb0e21f5e}{main.\+update\+\_\+option\+\_\+definition}} (int option\+\_\+id, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a397bcd358b2e7a7276ecc239abf97009}{main.\+import\+\_\+excel}} (Upload\+File file=File(...))
+\item 
+\mbox{\hyperlink{namespacemain_a339b7387235e1ca901196159ec57ccf2}{main.\+user\+\_\+login}} (dict payload)
+\item 
+\mbox{\hyperlink{namespacemain_a038704e12b54367c82cb01df40de848b}{main.\+get\+\_\+clients}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a379c1353872b670d07f848d6a01b385d}{main.\+get\+\_\+profile}} (int person\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a746b17b98a39123ac0c88eca6e640065}{main.\+update\+\_\+client}} (str client\+\_\+id, dict payload, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_aecf79e964a4497284b4003e5dc060d3d}{main.\+delete\+\_\+client}} (str client\+\_\+id, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a5afd303e47288304791383ae85a4000c}{main.\+delete\+\_\+staff}} (str staff\+\_\+id, Request request)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacemain_ae1d4a0295c904f672a1f044188274bf1}{main.\+logger}} = logging.\+get\+Logger()
+\item 
+\mbox{\hyperlink{namespacemain_afd006429470102f060684a838ea7efb3}{main.\+log\+\_\+handler}} = logging.\+Stream\+Handler(sys.\+stdout)
+\item 
+\mbox{\hyperlink{namespacemain_a7de630a04a0cb1034b5761870fdbe448}{main.\+formatter}} = jsonlogger.\+Json\+Formatter()
+\item 
+\mbox{\hyperlink{namespacemain_a898ec19db0e0dff9ffc262e5b0ad5451}{main.\+db\+\_\+client}} = \mbox{\hyperlink{classutils_1_1connection_1_1DatabaseClient}{Database\+Client}}()
+\item 
+\mbox{\hyperlink{namespacemain_a92f3dde1865a21639e884a1ac0eca0d8}{main.\+DB\+\_\+\+HOST}} = os.\+getenv("{}DB\+\_\+\+HOST"{}, "{}db"{})
+\item 
+str \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{main.\+UPLOAD\+\_\+\+ROOT}} = Path(\+\_\+\+\_\+file\+\_\+\+\_\+).resolve().parent / "{}uploads"{}
+\item 
+str \mbox{\hyperlink{namespacemain_a99d65a72b4db599dfb624116faf6141e}{main.\+ANNOUNCEMENT\+\_\+\+UPLOAD\+\_\+\+ROOT}} = \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_\+\+ROOT}} / "{}announcements"{}
+\item 
+\mbox{\hyperlink{namespacemain_aa6eea602ff3979e1ff2936eeeb7c1cd7}{main.\+parents}}
+\item 
+\mbox{\hyperlink{namespacemain_a0c5b8ab1603c8c5b8db5e1128a757fea}{main.\+True}}
+\item 
+\mbox{\hyperlink{namespacemain_ab0bf13547032e9bb1cc6c8ede308794a}{main.\+exist\+\_\+ok}}
+\item 
+\mbox{\hyperlink{namespacemain_a5fa94f0581009434c7a63791944d6ff4}{main.\+app}} = Fast\+API(root\+\_\+path="{}/api"{})
+\item 
+\mbox{\hyperlink{namespacemain_a75935476dce7e7a59f1c6604af9dad37}{main.\+name}}
+\item 
+list \mbox{\hyperlink{namespacemain_adcc00e4cb6c480c39abf3ddbc117fe4f}{main.\+CLIENT\+\_\+\+SELECT\+\_\+\+COLUMNS}}
+\item 
+dict \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{main.\+FULL\+\_\+\+EDIT\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}, "{}program\+\_\+coordinator"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_aa405c42d214f58e6fa1f74c27809e2a5}{main.\+EMERGENCY\+\_\+\+EDIT\+\_\+\+ROLES}} = \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{FULL\+\_\+\+EDIT\+\_\+\+ROLES}} \texorpdfstring{$\vert$}{|} \{"{}staff"{}, "{}guardian"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_a79708c90012f4253333f9c9c60ee087d}{main.\+ANNOUNCEMENT\+\_\+\+POST\+\_\+\+ROLES}} = \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{FULL\+\_\+\+EDIT\+\_\+\+ROLES}}
+\item 
+dict \mbox{\hyperlink{namespacemain_a0154fb5c23da536de9a3938df19a3127}{main.\+DELETE\+\_\+\+PROFILE\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_ab1ef1171736296636b79105b7b74a22a}{main.\+ADMIN\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}, "{}program\+\_\+coordinator"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{main.\+VALID\+\_\+\+CATEGORIES}} = \{"{}sport"{}, "{}risk"{}, "{}school"{}, "{}tag"{}\}
+\end{DoxyCompactItemize}

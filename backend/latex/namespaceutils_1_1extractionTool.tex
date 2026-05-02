@@ -1,0 +1,136 @@
+\doxysection{utils.\+extraction\+Tool Namespace Reference}
+\hypertarget{namespaceutils_1_1extractionTool}{}\label{namespaceutils_1_1extractionTool}\index{utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_a6a7ba4a0f66aa24b8e3ab3def5a17737}{normalize\+\_\+phone}} (value)
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_a669cea2b2baf5065486acf12e90c202d}{normalize\+\_\+str}} (value, \texorpdfstring{$\ast$}{*}title=False, upper=False, lower=False)
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_a8743823743983811081945cfded92650}{normalize\+\_\+mark}} (value)
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_a5f76805fbe7159997e0f330b7a215900}{normalize\+\_\+media\+\_\+consent}} (value)
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_a79f9d161777786ebb4265d01e65aa859}{build\+\_\+display\+\_\+name}} (first\+\_\+name, last\+\_\+name)
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_ac7d36c982fcb75532b2848ada3659d80}{sanitize\+\_\+data}} (file\+\_\+path)
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_a4d9c60bd7d6e6a33aff69678331deae4}{process\+\_\+row}} (row)
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_aeac24a7447d374c94bb0ffc453edc5c0}{flatten\+\_\+and\+\_\+split}} (pd.\+Data\+Frame sanitized\+\_\+df)
+\item 
+str \mbox{\hyperlink{namespaceutils_1_1extractionTool_ad5d559b9df978418e418d36e8425a3a7}{build\+\_\+tag\+\_\+list}} (row)
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_a15c8fe3b9a0bff01add32978fc2a0fdb}{prepare\+\_\+import\+\_\+frames}} (str file\+\_\+path)
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_a4fe2337a154486af1a65051f90dfa774}{save\+\_\+to\+\_\+postgres}} (pd.\+Data\+Frame students\+\_\+df, pd.\+Data\+Frame clients\+\_\+df, pd.\+Data\+Frame staff\+\_\+df, str db\+\_\+url, str schema=None, str if\+\_\+exists="{}replace"{})
+\item 
+\mbox{\hyperlink{namespaceutils_1_1extractionTool_a9db793ff90f3de28f1ee22c1e6d9d491}{main}} (file\+\_\+path=None)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+list \mbox{\hyperlink{namespaceutils_1_1extractionTool_a4af1b7331d25528eaf2160e1a14e5021}{PROGRAM\+\_\+\+FLAG\+\_\+\+COLUMNS}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceutils_1_1extractionTool_a79f9d161777786ebb4265d01e65aa859}\label{namespaceutils_1_1extractionTool_a79f9d161777786ebb4265d01e65aa859} 
+\index{utils.extractionTool@{utils.extractionTool}!build\_display\_name@{build\_display\_name}}
+\index{build\_display\_name@{build\_display\_name}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{build\_display\_name()}{build\_display\_name()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+build\+\_\+display\+\_\+name (\begin{DoxyParamCaption}\item[{}]{first\+\_\+name,  }\item[{}]{last\+\_\+name }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_ad5d559b9df978418e418d36e8425a3a7}\label{namespaceutils_1_1extractionTool_ad5d559b9df978418e418d36e8425a3a7} 
+\index{utils.extractionTool@{utils.extractionTool}!build\_tag\_list@{build\_tag\_list}}
+\index{build\_tag\_list@{build\_tag\_list}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{build\_tag\_list()}{build\_tag\_list()}}
+{\footnotesize\ttfamily  str utils.\+extraction\+Tool.\+build\+\_\+tag\+\_\+list (\begin{DoxyParamCaption}\item[{}]{row }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_aeac24a7447d374c94bb0ffc453edc5c0}\label{namespaceutils_1_1extractionTool_aeac24a7447d374c94bb0ffc453edc5c0} 
+\index{utils.extractionTool@{utils.extractionTool}!flatten\_and\_split@{flatten\_and\_split}}
+\index{flatten\_and\_split@{flatten\_and\_split}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{flatten\_and\_split()}{flatten\_and\_split()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+flatten\+\_\+and\+\_\+split (\begin{DoxyParamCaption}\item[{pd.\+Data\+Frame}]{sanitized\+\_\+df }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_a9db793ff90f3de28f1ee22c1e6d9d491}\label{namespaceutils_1_1extractionTool_a9db793ff90f3de28f1ee22c1e6d9d491} 
+\index{utils.extractionTool@{utils.extractionTool}!main@{main}}
+\index{main@{main}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+main (\begin{DoxyParamCaption}\item[{}]{file\+\_\+path = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_a8743823743983811081945cfded92650}\label{namespaceutils_1_1extractionTool_a8743823743983811081945cfded92650} 
+\index{utils.extractionTool@{utils.extractionTool}!normalize\_mark@{normalize\_mark}}
+\index{normalize\_mark@{normalize\_mark}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{normalize\_mark()}{normalize\_mark()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+normalize\+\_\+mark (\begin{DoxyParamCaption}\item[{}]{value }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_a5f76805fbe7159997e0f330b7a215900}\label{namespaceutils_1_1extractionTool_a5f76805fbe7159997e0f330b7a215900} 
+\index{utils.extractionTool@{utils.extractionTool}!normalize\_media\_consent@{normalize\_media\_consent}}
+\index{normalize\_media\_consent@{normalize\_media\_consent}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{normalize\_media\_consent()}{normalize\_media\_consent()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+normalize\+\_\+media\+\_\+consent (\begin{DoxyParamCaption}\item[{}]{value }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_a6a7ba4a0f66aa24b8e3ab3def5a17737}\label{namespaceutils_1_1extractionTool_a6a7ba4a0f66aa24b8e3ab3def5a17737} 
+\index{utils.extractionTool@{utils.extractionTool}!normalize\_phone@{normalize\_phone}}
+\index{normalize\_phone@{normalize\_phone}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{normalize\_phone()}{normalize\_phone()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+normalize\+\_\+phone (\begin{DoxyParamCaption}\item[{}]{value }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_a669cea2b2baf5065486acf12e90c202d}\label{namespaceutils_1_1extractionTool_a669cea2b2baf5065486acf12e90c202d} 
+\index{utils.extractionTool@{utils.extractionTool}!normalize\_str@{normalize\_str}}
+\index{normalize\_str@{normalize\_str}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{normalize\_str()}{normalize\_str()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+normalize\+\_\+str (\begin{DoxyParamCaption}\item[{}]{value,  }\item[{\texorpdfstring{$\ast$}{*}}]{title = {\ttfamily False},  }\item[{}]{upper = {\ttfamily False},  }\item[{}]{lower = {\ttfamily False} }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_a15c8fe3b9a0bff01add32978fc2a0fdb}\label{namespaceutils_1_1extractionTool_a15c8fe3b9a0bff01add32978fc2a0fdb} 
+\index{utils.extractionTool@{utils.extractionTool}!prepare\_import\_frames@{prepare\_import\_frames}}
+\index{prepare\_import\_frames@{prepare\_import\_frames}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{prepare\_import\_frames()}{prepare\_import\_frames()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+prepare\+\_\+import\+\_\+frames (\begin{DoxyParamCaption}\item[{str}]{file\+\_\+path }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_a4d9c60bd7d6e6a33aff69678331deae4}\label{namespaceutils_1_1extractionTool_a4d9c60bd7d6e6a33aff69678331deae4} 
+\index{utils.extractionTool@{utils.extractionTool}!process\_row@{process\_row}}
+\index{process\_row@{process\_row}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{process\_row()}{process\_row()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+process\+\_\+row (\begin{DoxyParamCaption}\item[{}]{row }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_ac7d36c982fcb75532b2848ada3659d80}\label{namespaceutils_1_1extractionTool_ac7d36c982fcb75532b2848ada3659d80} 
+\index{utils.extractionTool@{utils.extractionTool}!sanitize\_data@{sanitize\_data}}
+\index{sanitize\_data@{sanitize\_data}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{sanitize\_data()}{sanitize\_data()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+sanitize\+\_\+data (\begin{DoxyParamCaption}\item[{}]{file\+\_\+path }\end{DoxyParamCaption})}
+
+\Hypertarget{namespaceutils_1_1extractionTool_a4fe2337a154486af1a65051f90dfa774}\label{namespaceutils_1_1extractionTool_a4fe2337a154486af1a65051f90dfa774} 
+\index{utils.extractionTool@{utils.extractionTool}!save\_to\_postgres@{save\_to\_postgres}}
+\index{save\_to\_postgres@{save\_to\_postgres}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{save\_to\_postgres()}{save\_to\_postgres()}}
+{\footnotesize\ttfamily utils.\+extraction\+Tool.\+save\+\_\+to\+\_\+postgres (\begin{DoxyParamCaption}\item[{pd.\+Data\+Frame}]{students\+\_\+df,  }\item[{pd.\+Data\+Frame}]{clients\+\_\+df,  }\item[{pd.\+Data\+Frame}]{staff\+\_\+df,  }\item[{str}]{db\+\_\+url,  }\item[{str }]{schema = {\ttfamily None},  }\item[{str }]{if\+\_\+exists = {\ttfamily "{}replace"{}} }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceutils_1_1extractionTool_a4af1b7331d25528eaf2160e1a14e5021}\label{namespaceutils_1_1extractionTool_a4af1b7331d25528eaf2160e1a14e5021} 
+\index{utils.extractionTool@{utils.extractionTool}!PROGRAM\_FLAG\_COLUMNS@{PROGRAM\_FLAG\_COLUMNS}}
+\index{PROGRAM\_FLAG\_COLUMNS@{PROGRAM\_FLAG\_COLUMNS}!utils.extractionTool@{utils.extractionTool}}
+\doxysubsubsection{\texorpdfstring{PROGRAM\_FLAG\_COLUMNS}{PROGRAM\_FLAG\_COLUMNS}}
+{\footnotesize\ttfamily list utils.\+extraction\+Tool.\+PROGRAM\+\_\+\+FLAG\+\_\+\+COLUMNS}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ [}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}ci"{}},}
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}ds"{}},}
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}sfl"{}},}
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}il"{}},}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}se"{}},}
+\DoxyCodeLine{00007\ \ \ \ \ \textcolor{stringliteral}{"{}tr"{}},}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{stringliteral}{"{}rp"{}},}
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{stringliteral}{"{}pp"{}},}
+\DoxyCodeLine{00010\ \ \ \ \ \textcolor{stringliteral}{"{}vr"{}},}
+\DoxyCodeLine{00011\ \ \ \ \ \textcolor{stringliteral}{"{}so"{}},}
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{stringliteral}{"{}re"{}},}
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{stringliteral}{"{}pr"{}},}
+\DoxyCodeLine{00014\ ]}
+
+\end{DoxyCode}

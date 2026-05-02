@@ -1,0 +1,82 @@
+\doxysection{utils.\+email\+Service.\+Email\+Service Class Reference}
+\hypertarget{classutils_1_1emailService_1_1EmailService}{}\label{classutils_1_1emailService_1_1EmailService}\index{utils.emailService.EmailService@{utils.emailService.EmailService}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classutils_1_1emailService_1_1EmailService_a545169682d9a52dcb29f9d1535cdacb0}{\+\_\+\+\_\+init\+\_\+\+\_\+}} (self)
+\item 
+bool \mbox{\hyperlink{classutils_1_1emailService_1_1EmailService_afee61d64a78f9ed21ac089cd2d9dd0d1}{send\+\_\+email}} (self, str\texorpdfstring{$\vert$}{|}list\mbox{[}str\mbox{]} to, str subject, str body, bool html=False)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classutils_1_1emailService_1_1EmailService_aa89950f458a145b6691ff70ceb3e6955}{host}}
+\item 
+\mbox{\hyperlink{classutils_1_1emailService_1_1EmailService_a380b8b969c0f47cb0e174abae5789a3d}{port}}
+\item 
+\mbox{\hyperlink{classutils_1_1emailService_1_1EmailService_ac750d89a22352b55be3c38b2e54fa3fc}{user}}
+\item 
+\mbox{\hyperlink{classutils_1_1emailService_1_1EmailService_ae465a5a55cf1aac99de7cdf3cdfca10c}{password}}
+\item 
+\mbox{\hyperlink{classutils_1_1emailService_1_1EmailService_a95c299cc1232cc4562c5890f131946c8}{from\+\_\+addr}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classutils_1_1emailService_1_1EmailService_a545169682d9a52dcb29f9d1535cdacb0}\label{classutils_1_1emailService_1_1EmailService_a545169682d9a52dcb29f9d1535cdacb0} 
+\index{utils.emailService.EmailService@{utils.emailService.EmailService}!\_\_init\_\_@{\_\_init\_\_}}
+\index{\_\_init\_\_@{\_\_init\_\_}!utils.emailService.EmailService@{utils.emailService.EmailService}}
+\doxysubsubsection{\texorpdfstring{\_\_init\_\_()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily utils.\+email\+Service.\+Email\+Service.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classutils_1_1emailService_1_1EmailService_afee61d64a78f9ed21ac089cd2d9dd0d1}\label{classutils_1_1emailService_1_1EmailService_afee61d64a78f9ed21ac089cd2d9dd0d1} 
+\index{utils.emailService.EmailService@{utils.emailService.EmailService}!send\_email@{send\_email}}
+\index{send\_email@{send\_email}!utils.emailService.EmailService@{utils.emailService.EmailService}}
+\doxysubsubsection{\texorpdfstring{send\_email()}{send\_email()}}
+{\footnotesize\ttfamily  bool utils.\+email\+Service.\+Email\+Service.\+send\+\_\+email (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{str \texorpdfstring{$\vert$}{|} list\mbox{[}str\mbox{]}}]{to,  }\item[{str}]{subject,  }\item[{str}]{body,  }\item[{bool }]{html = {\ttfamily False} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Send an email. Returns True on success, raises on failure.
+to: single address string or list of addresses.
+html: if True, body is sent as HTML; otherwise plain text.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classutils_1_1emailService_1_1EmailService_a95c299cc1232cc4562c5890f131946c8}\label{classutils_1_1emailService_1_1EmailService_a95c299cc1232cc4562c5890f131946c8} 
+\index{utils.emailService.EmailService@{utils.emailService.EmailService}!from\_addr@{from\_addr}}
+\index{from\_addr@{from\_addr}!utils.emailService.EmailService@{utils.emailService.EmailService}}
+\doxysubsubsection{\texorpdfstring{from\_addr}{from\_addr}}
+{\footnotesize\ttfamily utils.\+email\+Service.\+Email\+Service.\+from\+\_\+addr}
+
+\Hypertarget{classutils_1_1emailService_1_1EmailService_aa89950f458a145b6691ff70ceb3e6955}\label{classutils_1_1emailService_1_1EmailService_aa89950f458a145b6691ff70ceb3e6955} 
+\index{utils.emailService.EmailService@{utils.emailService.EmailService}!host@{host}}
+\index{host@{host}!utils.emailService.EmailService@{utils.emailService.EmailService}}
+\doxysubsubsection{\texorpdfstring{host}{host}}
+{\footnotesize\ttfamily utils.\+email\+Service.\+Email\+Service.\+host}
+
+\Hypertarget{classutils_1_1emailService_1_1EmailService_ae465a5a55cf1aac99de7cdf3cdfca10c}\label{classutils_1_1emailService_1_1EmailService_ae465a5a55cf1aac99de7cdf3cdfca10c} 
+\index{utils.emailService.EmailService@{utils.emailService.EmailService}!password@{password}}
+\index{password@{password}!utils.emailService.EmailService@{utils.emailService.EmailService}}
+\doxysubsubsection{\texorpdfstring{password}{password}}
+{\footnotesize\ttfamily utils.\+email\+Service.\+Email\+Service.\+password}
+
+\Hypertarget{classutils_1_1emailService_1_1EmailService_a380b8b969c0f47cb0e174abae5789a3d}\label{classutils_1_1emailService_1_1EmailService_a380b8b969c0f47cb0e174abae5789a3d} 
+\index{utils.emailService.EmailService@{utils.emailService.EmailService}!port@{port}}
+\index{port@{port}!utils.emailService.EmailService@{utils.emailService.EmailService}}
+\doxysubsubsection{\texorpdfstring{port}{port}}
+{\footnotesize\ttfamily utils.\+email\+Service.\+Email\+Service.\+port}
+
+\Hypertarget{classutils_1_1emailService_1_1EmailService_ac750d89a22352b55be3c38b2e54fa3fc}\label{classutils_1_1emailService_1_1EmailService_ac750d89a22352b55be3c38b2e54fa3fc} 
+\index{utils.emailService.EmailService@{utils.emailService.EmailService}!user@{user}}
+\index{user@{user}!utils.emailService.EmailService@{utils.emailService.EmailService}}
+\doxysubsubsection{\texorpdfstring{user}{user}}
+{\footnotesize\ttfamily utils.\+email\+Service.\+Email\+Service.\+user}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+backend/app/utils/\mbox{\hyperlink{emailService_8py}{email\+Service.\+py}}\end{DoxyCompactItemize}

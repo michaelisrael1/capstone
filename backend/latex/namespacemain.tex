@@ -1,0 +1,567 @@
+\doxysection{main Namespace Reference}
+\hypertarget{namespacemain}{}\label{namespacemain}\index{main@{main}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacemain_afd1695457033c353d0cdf961d9861e10}{on\+\_\+startup}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a913ba77413170e6e8d69db70838970ab}{clean\+\_\+str}} (value, default="{}"{})
+\item 
+\mbox{\hyperlink{namespacemain_a645ecfe498ffa10a8540480d55072134}{clean\+\_\+date}} (value)
+\item 
+\mbox{\hyperlink{namespacemain_af3398b372da8e685e1f78cfad510e460}{normalize\+\_\+media\+\_\+consent}} (value)
+\item 
+\mbox{\hyperlink{namespacemain_abbcebcc9a1548113bcd4c469da64ee88}{build\+\_\+tag\+\_\+json}} (row)
+\item 
+\mbox{\hyperlink{namespacemain_a4200b719675f5e18b27efdb78aed6f87}{parse\+\_\+header\+\_\+list}} (value)
+\item 
+\mbox{\hyperlink{namespacemain_a08bb8dc1b91997febe3beb2ad0e0361b}{get\+\_\+request\+\_\+role}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a566397d2bb154be78d440fd78902ec62}{get\+\_\+allowed\+\_\+profile\+\_\+ids}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a76f1ed26d6545d9317da135fe70d5f61}{get\+\_\+visible\+\_\+tags}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a3b5c5a067cdc6987232db15ad0fc4b4d}{get\+\_\+request\+\_\+email}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_af05c8d493f66c4701f384c267196c079}{role\+\_\+can\+\_\+edit\+\_\+profile}} (str role, str client\+\_\+id, set\mbox{[}str\mbox{]} allowed\+\_\+profile\+\_\+ids)
+\item 
+\mbox{\hyperlink{namespacemain_ab19c9ec4e4ca5aa05bd62783cc1d2d90}{role\+\_\+has\+\_\+full\+\_\+edit}} (str role)
+\item 
+\mbox{\hyperlink{namespacemain_a2109f29fe173368c3753f6ba1f6d9ea6}{role\+\_\+can\+\_\+post\+\_\+announcements}} (str role)
+\item 
+\mbox{\hyperlink{namespacemain_a31e33ea4ec390101b8fec7fa499054de}{role\+\_\+can\+\_\+delete\+\_\+records}} (str role)
+\item 
+\mbox{\hyperlink{namespacemain_a23d5b8de7178455639da20626f7bb170}{row\+\_\+to\+\_\+client\+\_\+dict}} (row)
+\item 
+\mbox{\hyperlink{namespacemain_adf083bb8a761cffee58b86fd07a0d7c4}{fetch\+\_\+existing\+\_\+client}} (str client\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a8d332dd9252dc16be8b3657454439f03}{fetch\+\_\+existing\+\_\+staff}} (str staff\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a42a66d0ae6126857ceb3e8df747e3b55}{merged\+\_\+payload\+\_\+for\+\_\+role}} (dict existing\+\_\+client, dict payload, str role)
+\item 
+\mbox{\hyperlink{namespacemain_a068c63288a47def91215758fc3ea83de}{safe\+\_\+json\+\_\+loads}} (value, default)
+\item 
+\mbox{\hyperlink{namespacemain_a9c5d399e9da362974bcb3dcbc27225b7}{ensure\+\_\+staff\+\_\+table}} ()
+\item 
+\mbox{\hyperlink{namespacemain_ac86fe6aa52520738bb7eab4e2b7c60ef}{ensure\+\_\+clients\+\_\+table}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a1a8e0176f59167373d9a9bfd2d096190}{ensure\+\_\+announcements\+\_\+table}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a5347bdc17a36584ade5a635f2c7f26ec}{ensure\+\_\+option\+\_\+definitions\+\_\+table}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a4f2f02021ce2cab2380ee60571f85fd7}{normalize\+\_\+attachment\+\_\+payload}} (item)
+\item 
+\mbox{\hyperlink{namespacemain_a2de100f034e6c85a36da654a280cda8a}{normalize\+\_\+comment\+\_\+payload}} (item)
+\item 
+\mbox{\hyperlink{namespacemain_a7cf81ebf4bd162b612ab9a4e97aea7f2}{row\+\_\+to\+\_\+announcement\+\_\+dict}} (row)
+\item 
+\mbox{\hyperlink{namespacemain_afac86dcdf2222ca27eeaa2e4552d252c}{fetch\+\_\+announcements}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a71acad4fbac4bafe686160efa1d7b066}{fetch\+\_\+announcement\+\_\+by\+\_\+id}} (str announcement\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a182f4776a925cd8406d03420047eeea5}{save\+\_\+announcement\+\_\+record}} (dict announcement)
+\item 
+\mbox{\hyperlink{namespacemain_ae5f0f4deff247d25dd1a0049fecd4c89}{announcement\+\_\+is\+\_\+visible}} (dict announcement, str role, set\mbox{[}str\mbox{]} visible\+\_\+tags)
+\item 
+\mbox{\hyperlink{namespacemain_a66b0266dcfd3f50efc3acf5ba7f69bb8}{save\+\_\+attachment\+\_\+to\+\_\+filesystem}} (dict attachment)
+\item 
+\mbox{\hyperlink{namespacemain_af0fb25cf693c599e0d77e29e802af13a}{health\+\_\+check}} ()
+\item 
+\mbox{\hyperlink{namespacemain_ada39dfac338a7a3d5b6df3acb84ddee4}{get\+\_\+db\+\_\+time}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a38e285b1bbc2380ba9b6a45c7efa9a6d}{get\+\_\+announcements}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_ab57e62ceac76ab365c1a4c63eb6ceaa6}{create\+\_\+announcement}} (dict payload, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a77a2226e7bb0e7c8f7bf3b84304c0bf1}{add\+\_\+announcement\+\_\+comment}} (str announcement\+\_\+id, dict payload, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a18fe63074082369c52504a2dda02ce5c}{toggle\+\_\+announcement\+\_\+like}} (str announcement\+\_\+id, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_ad983f59f502827c1430e4bece481f992}{get\+\_\+option\+\_\+definitions}} (Request request, str category=None)
+\item 
+\mbox{\hyperlink{namespacemain_a3cfa0632adb39837951a8acff494cc4a}{add\+\_\+option\+\_\+definition}} (Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a8aa88c29d5c1716685d50e0eb0e21f5e}{update\+\_\+option\+\_\+definition}} (int option\+\_\+id, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a397bcd358b2e7a7276ecc239abf97009}{import\+\_\+excel}} (Upload\+File file=File(...))
+\item 
+\mbox{\hyperlink{namespacemain_a339b7387235e1ca901196159ec57ccf2}{user\+\_\+login}} (dict payload)
+\item 
+\mbox{\hyperlink{namespacemain_a038704e12b54367c82cb01df40de848b}{get\+\_\+clients}} ()
+\item 
+\mbox{\hyperlink{namespacemain_a379c1353872b670d07f848d6a01b385d}{get\+\_\+profile}} (int person\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a746b17b98a39123ac0c88eca6e640065}{update\+\_\+client}} (str client\+\_\+id, dict payload, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_aecf79e964a4497284b4003e5dc060d3d}{delete\+\_\+client}} (str client\+\_\+id, Request request)
+\item 
+\mbox{\hyperlink{namespacemain_a5afd303e47288304791383ae85a4000c}{delete\+\_\+staff}} (str staff\+\_\+id, Request request)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacemain_ae1d4a0295c904f672a1f044188274bf1}{logger}} = logging.\+get\+Logger()
+\item 
+\mbox{\hyperlink{namespacemain_afd006429470102f060684a838ea7efb3}{log\+\_\+handler}} = logging.\+Stream\+Handler(sys.\+stdout)
+\item 
+\mbox{\hyperlink{namespacemain_a7de630a04a0cb1034b5761870fdbe448}{formatter}} = jsonlogger.\+Json\+Formatter()
+\item 
+\mbox{\hyperlink{namespacemain_a898ec19db0e0dff9ffc262e5b0ad5451}{db\+\_\+client}} = \mbox{\hyperlink{classutils_1_1connection_1_1DatabaseClient}{Database\+Client}}()
+\item 
+\mbox{\hyperlink{namespacemain_a92f3dde1865a21639e884a1ac0eca0d8}{DB\+\_\+\+HOST}} = os.\+getenv("{}DB\+\_\+\+HOST"{}, "{}db"{})
+\item 
+str \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_\+\+ROOT}} = Path(\+\_\+\+\_\+file\+\_\+\+\_\+).resolve().parent / "{}uploads"{}
+\item 
+str \mbox{\hyperlink{namespacemain_a99d65a72b4db599dfb624116faf6141e}{ANNOUNCEMENT\+\_\+\+UPLOAD\+\_\+\+ROOT}} = \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_\+\+ROOT}} / "{}announcements"{}
+\item 
+\mbox{\hyperlink{namespacemain_aa6eea602ff3979e1ff2936eeeb7c1cd7}{parents}}
+\item 
+\mbox{\hyperlink{namespacemain_a0c5b8ab1603c8c5b8db5e1128a757fea}{True}}
+\item 
+\mbox{\hyperlink{namespacemain_ab0bf13547032e9bb1cc6c8ede308794a}{exist\+\_\+ok}}
+\item 
+\mbox{\hyperlink{namespacemain_a5fa94f0581009434c7a63791944d6ff4}{app}} = Fast\+API(root\+\_\+path="{}/api"{})
+\item 
+\mbox{\hyperlink{namespacemain_a75935476dce7e7a59f1c6604af9dad37}{name}}
+\item 
+list \mbox{\hyperlink{namespacemain_adcc00e4cb6c480c39abf3ddbc117fe4f}{CLIENT\+\_\+\+SELECT\+\_\+\+COLUMNS}}
+\item 
+dict \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{FULL\+\_\+\+EDIT\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}, "{}program\+\_\+coordinator"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_aa405c42d214f58e6fa1f74c27809e2a5}{EMERGENCY\+\_\+\+EDIT\+\_\+\+ROLES}} = \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{FULL\+\_\+\+EDIT\+\_\+\+ROLES}} \texorpdfstring{$\vert$}{|} \{"{}staff"{}, "{}guardian"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_a79708c90012f4253333f9c9c60ee087d}{ANNOUNCEMENT\+\_\+\+POST\+\_\+\+ROLES}} = \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{FULL\+\_\+\+EDIT\+\_\+\+ROLES}}
+\item 
+dict \mbox{\hyperlink{namespacemain_a0154fb5c23da536de9a3938df19a3127}{DELETE\+\_\+\+PROFILE\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_ab1ef1171736296636b79105b7b74a22a}{ADMIN\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}, "{}program\+\_\+coordinator"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_\+\+CATEGORIES}} = \{"{}sport"{}, "{}risk"{}, "{}school"{}, "{}tag"{}\}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespacemain_a77a2226e7bb0e7c8f7bf3b84304c0bf1}\label{namespacemain_a77a2226e7bb0e7c8f7bf3b84304c0bf1} 
+\index{main@{main}!add\_announcement\_comment@{add\_announcement\_comment}}
+\index{add\_announcement\_comment@{add\_announcement\_comment}!main@{main}}
+\doxysubsubsection{\texorpdfstring{add\_announcement\_comment()}{add\_announcement\_comment()}}
+{\footnotesize\ttfamily main.\+add\+\_\+announcement\+\_\+comment (\begin{DoxyParamCaption}\item[{str}]{announcement\+\_\+id,  }\item[{dict}]{payload,  }\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a3cfa0632adb39837951a8acff494cc4a}\label{namespacemain_a3cfa0632adb39837951a8acff494cc4a} 
+\index{main@{main}!add\_option\_definition@{add\_option\_definition}}
+\index{add\_option\_definition@{add\_option\_definition}!main@{main}}
+\doxysubsubsection{\texorpdfstring{add\_option\_definition()}{add\_option\_definition()}}
+{\footnotesize\ttfamily main.\+add\+\_\+option\+\_\+definition (\begin{DoxyParamCaption}\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_ae5f0f4deff247d25dd1a0049fecd4c89}\label{namespacemain_ae5f0f4deff247d25dd1a0049fecd4c89} 
+\index{main@{main}!announcement\_is\_visible@{announcement\_is\_visible}}
+\index{announcement\_is\_visible@{announcement\_is\_visible}!main@{main}}
+\doxysubsubsection{\texorpdfstring{announcement\_is\_visible()}{announcement\_is\_visible()}}
+{\footnotesize\ttfamily main.\+announcement\+\_\+is\+\_\+visible (\begin{DoxyParamCaption}\item[{dict}]{announcement,  }\item[{str}]{role,  }\item[{set\mbox{[}str\mbox{]}}]{visible\+\_\+tags }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_abbcebcc9a1548113bcd4c469da64ee88}\label{namespacemain_abbcebcc9a1548113bcd4c469da64ee88} 
+\index{main@{main}!build\_tag\_json@{build\_tag\_json}}
+\index{build\_tag\_json@{build\_tag\_json}!main@{main}}
+\doxysubsubsection{\texorpdfstring{build\_tag\_json()}{build\_tag\_json()}}
+{\footnotesize\ttfamily main.\+build\+\_\+tag\+\_\+json (\begin{DoxyParamCaption}\item[{}]{row }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a645ecfe498ffa10a8540480d55072134}\label{namespacemain_a645ecfe498ffa10a8540480d55072134} 
+\index{main@{main}!clean\_date@{clean\_date}}
+\index{clean\_date@{clean\_date}!main@{main}}
+\doxysubsubsection{\texorpdfstring{clean\_date()}{clean\_date()}}
+{\footnotesize\ttfamily main.\+clean\+\_\+date (\begin{DoxyParamCaption}\item[{}]{value }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a913ba77413170e6e8d69db70838970ab}\label{namespacemain_a913ba77413170e6e8d69db70838970ab} 
+\index{main@{main}!clean\_str@{clean\_str}}
+\index{clean\_str@{clean\_str}!main@{main}}
+\doxysubsubsection{\texorpdfstring{clean\_str()}{clean\_str()}}
+{\footnotesize\ttfamily main.\+clean\+\_\+str (\begin{DoxyParamCaption}\item[{}]{value,  }\item[{}]{default = {\ttfamily "{}"{}} }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_ab57e62ceac76ab365c1a4c63eb6ceaa6}\label{namespacemain_ab57e62ceac76ab365c1a4c63eb6ceaa6} 
+\index{main@{main}!create\_announcement@{create\_announcement}}
+\index{create\_announcement@{create\_announcement}!main@{main}}
+\doxysubsubsection{\texorpdfstring{create\_announcement()}{create\_announcement()}}
+{\footnotesize\ttfamily main.\+create\+\_\+announcement (\begin{DoxyParamCaption}\item[{dict}]{payload,  }\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_aecf79e964a4497284b4003e5dc060d3d}\label{namespacemain_aecf79e964a4497284b4003e5dc060d3d} 
+\index{main@{main}!delete\_client@{delete\_client}}
+\index{delete\_client@{delete\_client}!main@{main}}
+\doxysubsubsection{\texorpdfstring{delete\_client()}{delete\_client()}}
+{\footnotesize\ttfamily main.\+delete\+\_\+client (\begin{DoxyParamCaption}\item[{str}]{client\+\_\+id,  }\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a5afd303e47288304791383ae85a4000c}\label{namespacemain_a5afd303e47288304791383ae85a4000c} 
+\index{main@{main}!delete\_staff@{delete\_staff}}
+\index{delete\_staff@{delete\_staff}!main@{main}}
+\doxysubsubsection{\texorpdfstring{delete\_staff()}{delete\_staff()}}
+{\footnotesize\ttfamily main.\+delete\+\_\+staff (\begin{DoxyParamCaption}\item[{str}]{staff\+\_\+id,  }\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a1a8e0176f59167373d9a9bfd2d096190}\label{namespacemain_a1a8e0176f59167373d9a9bfd2d096190} 
+\index{main@{main}!ensure\_announcements\_table@{ensure\_announcements\_table}}
+\index{ensure\_announcements\_table@{ensure\_announcements\_table}!main@{main}}
+\doxysubsubsection{\texorpdfstring{ensure\_announcements\_table()}{ensure\_announcements\_table()}}
+{\footnotesize\ttfamily main.\+ensure\+\_\+announcements\+\_\+table (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_ac86fe6aa52520738bb7eab4e2b7c60ef}\label{namespacemain_ac86fe6aa52520738bb7eab4e2b7c60ef} 
+\index{main@{main}!ensure\_clients\_table@{ensure\_clients\_table}}
+\index{ensure\_clients\_table@{ensure\_clients\_table}!main@{main}}
+\doxysubsubsection{\texorpdfstring{ensure\_clients\_table()}{ensure\_clients\_table()}}
+{\footnotesize\ttfamily main.\+ensure\+\_\+clients\+\_\+table (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a5347bdc17a36584ade5a635f2c7f26ec}\label{namespacemain_a5347bdc17a36584ade5a635f2c7f26ec} 
+\index{main@{main}!ensure\_option\_definitions\_table@{ensure\_option\_definitions\_table}}
+\index{ensure\_option\_definitions\_table@{ensure\_option\_definitions\_table}!main@{main}}
+\doxysubsubsection{\texorpdfstring{ensure\_option\_definitions\_table()}{ensure\_option\_definitions\_table()}}
+{\footnotesize\ttfamily main.\+ensure\+\_\+option\+\_\+definitions\+\_\+table (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a9c5d399e9da362974bcb3dcbc27225b7}\label{namespacemain_a9c5d399e9da362974bcb3dcbc27225b7} 
+\index{main@{main}!ensure\_staff\_table@{ensure\_staff\_table}}
+\index{ensure\_staff\_table@{ensure\_staff\_table}!main@{main}}
+\doxysubsubsection{\texorpdfstring{ensure\_staff\_table()}{ensure\_staff\_table()}}
+{\footnotesize\ttfamily main.\+ensure\+\_\+staff\+\_\+table (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a71acad4fbac4bafe686160efa1d7b066}\label{namespacemain_a71acad4fbac4bafe686160efa1d7b066} 
+\index{main@{main}!fetch\_announcement\_by\_id@{fetch\_announcement\_by\_id}}
+\index{fetch\_announcement\_by\_id@{fetch\_announcement\_by\_id}!main@{main}}
+\doxysubsubsection{\texorpdfstring{fetch\_announcement\_by\_id()}{fetch\_announcement\_by\_id()}}
+{\footnotesize\ttfamily main.\+fetch\+\_\+announcement\+\_\+by\+\_\+id (\begin{DoxyParamCaption}\item[{str}]{announcement\+\_\+id }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_afac86dcdf2222ca27eeaa2e4552d252c}\label{namespacemain_afac86dcdf2222ca27eeaa2e4552d252c} 
+\index{main@{main}!fetch\_announcements@{fetch\_announcements}}
+\index{fetch\_announcements@{fetch\_announcements}!main@{main}}
+\doxysubsubsection{\texorpdfstring{fetch\_announcements()}{fetch\_announcements()}}
+{\footnotesize\ttfamily main.\+fetch\+\_\+announcements (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_adf083bb8a761cffee58b86fd07a0d7c4}\label{namespacemain_adf083bb8a761cffee58b86fd07a0d7c4} 
+\index{main@{main}!fetch\_existing\_client@{fetch\_existing\_client}}
+\index{fetch\_existing\_client@{fetch\_existing\_client}!main@{main}}
+\doxysubsubsection{\texorpdfstring{fetch\_existing\_client()}{fetch\_existing\_client()}}
+{\footnotesize\ttfamily main.\+fetch\+\_\+existing\+\_\+client (\begin{DoxyParamCaption}\item[{str}]{client\+\_\+id }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a8d332dd9252dc16be8b3657454439f03}\label{namespacemain_a8d332dd9252dc16be8b3657454439f03} 
+\index{main@{main}!fetch\_existing\_staff@{fetch\_existing\_staff}}
+\index{fetch\_existing\_staff@{fetch\_existing\_staff}!main@{main}}
+\doxysubsubsection{\texorpdfstring{fetch\_existing\_staff()}{fetch\_existing\_staff()}}
+{\footnotesize\ttfamily main.\+fetch\+\_\+existing\+\_\+staff (\begin{DoxyParamCaption}\item[{str}]{staff\+\_\+id }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a566397d2bb154be78d440fd78902ec62}\label{namespacemain_a566397d2bb154be78d440fd78902ec62} 
+\index{main@{main}!get\_allowed\_profile\_ids@{get\_allowed\_profile\_ids}}
+\index{get\_allowed\_profile\_ids@{get\_allowed\_profile\_ids}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_allowed\_profile\_ids()}{get\_allowed\_profile\_ids()}}
+{\footnotesize\ttfamily main.\+get\+\_\+allowed\+\_\+profile\+\_\+ids (\begin{DoxyParamCaption}\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a38e285b1bbc2380ba9b6a45c7efa9a6d}\label{namespacemain_a38e285b1bbc2380ba9b6a45c7efa9a6d} 
+\index{main@{main}!get\_announcements@{get\_announcements}}
+\index{get\_announcements@{get\_announcements}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_announcements()}{get\_announcements()}}
+{\footnotesize\ttfamily main.\+get\+\_\+announcements (\begin{DoxyParamCaption}\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a038704e12b54367c82cb01df40de848b}\label{namespacemain_a038704e12b54367c82cb01df40de848b} 
+\index{main@{main}!get\_clients@{get\_clients}}
+\index{get\_clients@{get\_clients}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_clients()}{get\_clients()}}
+{\footnotesize\ttfamily main.\+get\+\_\+clients (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_ada39dfac338a7a3d5b6df3acb84ddee4}\label{namespacemain_ada39dfac338a7a3d5b6df3acb84ddee4} 
+\index{main@{main}!get\_db\_time@{get\_db\_time}}
+\index{get\_db\_time@{get\_db\_time}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_db\_time()}{get\_db\_time()}}
+{\footnotesize\ttfamily main.\+get\+\_\+db\+\_\+time (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_ad983f59f502827c1430e4bece481f992}\label{namespacemain_ad983f59f502827c1430e4bece481f992} 
+\index{main@{main}!get\_option\_definitions@{get\_option\_definitions}}
+\index{get\_option\_definitions@{get\_option\_definitions}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_option\_definitions()}{get\_option\_definitions()}}
+{\footnotesize\ttfamily main.\+get\+\_\+option\+\_\+definitions (\begin{DoxyParamCaption}\item[{Request}]{request,  }\item[{str }]{category = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a379c1353872b670d07f848d6a01b385d}\label{namespacemain_a379c1353872b670d07f848d6a01b385d} 
+\index{main@{main}!get\_profile@{get\_profile}}
+\index{get\_profile@{get\_profile}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_profile()}{get\_profile()}}
+{\footnotesize\ttfamily main.\+get\+\_\+profile (\begin{DoxyParamCaption}\item[{int}]{person\+\_\+id }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a3b5c5a067cdc6987232db15ad0fc4b4d}\label{namespacemain_a3b5c5a067cdc6987232db15ad0fc4b4d} 
+\index{main@{main}!get\_request\_email@{get\_request\_email}}
+\index{get\_request\_email@{get\_request\_email}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_request\_email()}{get\_request\_email()}}
+{\footnotesize\ttfamily main.\+get\+\_\+request\+\_\+email (\begin{DoxyParamCaption}\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a08bb8dc1b91997febe3beb2ad0e0361b}\label{namespacemain_a08bb8dc1b91997febe3beb2ad0e0361b} 
+\index{main@{main}!get\_request\_role@{get\_request\_role}}
+\index{get\_request\_role@{get\_request\_role}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_request\_role()}{get\_request\_role()}}
+{\footnotesize\ttfamily main.\+get\+\_\+request\+\_\+role (\begin{DoxyParamCaption}\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a76f1ed26d6545d9317da135fe70d5f61}\label{namespacemain_a76f1ed26d6545d9317da135fe70d5f61} 
+\index{main@{main}!get\_visible\_tags@{get\_visible\_tags}}
+\index{get\_visible\_tags@{get\_visible\_tags}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_visible\_tags()}{get\_visible\_tags()}}
+{\footnotesize\ttfamily main.\+get\+\_\+visible\+\_\+tags (\begin{DoxyParamCaption}\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_af0fb25cf693c599e0d77e29e802af13a}\label{namespacemain_af0fb25cf693c599e0d77e29e802af13a} 
+\index{main@{main}!health\_check@{health\_check}}
+\index{health\_check@{health\_check}!main@{main}}
+\doxysubsubsection{\texorpdfstring{health\_check()}{health\_check()}}
+{\footnotesize\ttfamily main.\+health\+\_\+check (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a397bcd358b2e7a7276ecc239abf97009}\label{namespacemain_a397bcd358b2e7a7276ecc239abf97009} 
+\index{main@{main}!import\_excel@{import\_excel}}
+\index{import\_excel@{import\_excel}!main@{main}}
+\doxysubsubsection{\texorpdfstring{import\_excel()}{import\_excel()}}
+{\footnotesize\ttfamily main.\+import\+\_\+excel (\begin{DoxyParamCaption}\item[{Upload\+File }]{file = {\ttfamily File(...)} }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a42a66d0ae6126857ceb3e8df747e3b55}\label{namespacemain_a42a66d0ae6126857ceb3e8df747e3b55} 
+\index{main@{main}!merged\_payload\_for\_role@{merged\_payload\_for\_role}}
+\index{merged\_payload\_for\_role@{merged\_payload\_for\_role}!main@{main}}
+\doxysubsubsection{\texorpdfstring{merged\_payload\_for\_role()}{merged\_payload\_for\_role()}}
+{\footnotesize\ttfamily main.\+merged\+\_\+payload\+\_\+for\+\_\+role (\begin{DoxyParamCaption}\item[{dict}]{existing\+\_\+client,  }\item[{dict}]{payload,  }\item[{str}]{role }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a4f2f02021ce2cab2380ee60571f85fd7}\label{namespacemain_a4f2f02021ce2cab2380ee60571f85fd7} 
+\index{main@{main}!normalize\_attachment\_payload@{normalize\_attachment\_payload}}
+\index{normalize\_attachment\_payload@{normalize\_attachment\_payload}!main@{main}}
+\doxysubsubsection{\texorpdfstring{normalize\_attachment\_payload()}{normalize\_attachment\_payload()}}
+{\footnotesize\ttfamily main.\+normalize\+\_\+attachment\+\_\+payload (\begin{DoxyParamCaption}\item[{}]{item }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a2de100f034e6c85a36da654a280cda8a}\label{namespacemain_a2de100f034e6c85a36da654a280cda8a} 
+\index{main@{main}!normalize\_comment\_payload@{normalize\_comment\_payload}}
+\index{normalize\_comment\_payload@{normalize\_comment\_payload}!main@{main}}
+\doxysubsubsection{\texorpdfstring{normalize\_comment\_payload()}{normalize\_comment\_payload()}}
+{\footnotesize\ttfamily main.\+normalize\+\_\+comment\+\_\+payload (\begin{DoxyParamCaption}\item[{}]{item }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_af3398b372da8e685e1f78cfad510e460}\label{namespacemain_af3398b372da8e685e1f78cfad510e460} 
+\index{main@{main}!normalize\_media\_consent@{normalize\_media\_consent}}
+\index{normalize\_media\_consent@{normalize\_media\_consent}!main@{main}}
+\doxysubsubsection{\texorpdfstring{normalize\_media\_consent()}{normalize\_media\_consent()}}
+{\footnotesize\ttfamily main.\+normalize\+\_\+media\+\_\+consent (\begin{DoxyParamCaption}\item[{}]{value }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_afd1695457033c353d0cdf961d9861e10}\label{namespacemain_afd1695457033c353d0cdf961d9861e10} 
+\index{main@{main}!on\_startup@{on\_startup}}
+\index{on\_startup@{on\_startup}!main@{main}}
+\doxysubsubsection{\texorpdfstring{on\_startup()}{on\_startup()}}
+{\footnotesize\ttfamily main.\+on\+\_\+startup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a4200b719675f5e18b27efdb78aed6f87}\label{namespacemain_a4200b719675f5e18b27efdb78aed6f87} 
+\index{main@{main}!parse\_header\_list@{parse\_header\_list}}
+\index{parse\_header\_list@{parse\_header\_list}!main@{main}}
+\doxysubsubsection{\texorpdfstring{parse\_header\_list()}{parse\_header\_list()}}
+{\footnotesize\ttfamily main.\+parse\+\_\+header\+\_\+list (\begin{DoxyParamCaption}\item[{}]{value }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a31e33ea4ec390101b8fec7fa499054de}\label{namespacemain_a31e33ea4ec390101b8fec7fa499054de} 
+\index{main@{main}!role\_can\_delete\_records@{role\_can\_delete\_records}}
+\index{role\_can\_delete\_records@{role\_can\_delete\_records}!main@{main}}
+\doxysubsubsection{\texorpdfstring{role\_can\_delete\_records()}{role\_can\_delete\_records()}}
+{\footnotesize\ttfamily main.\+role\+\_\+can\+\_\+delete\+\_\+records (\begin{DoxyParamCaption}\item[{str}]{role }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_af05c8d493f66c4701f384c267196c079}\label{namespacemain_af05c8d493f66c4701f384c267196c079} 
+\index{main@{main}!role\_can\_edit\_profile@{role\_can\_edit\_profile}}
+\index{role\_can\_edit\_profile@{role\_can\_edit\_profile}!main@{main}}
+\doxysubsubsection{\texorpdfstring{role\_can\_edit\_profile()}{role\_can\_edit\_profile()}}
+{\footnotesize\ttfamily main.\+role\+\_\+can\+\_\+edit\+\_\+profile (\begin{DoxyParamCaption}\item[{str}]{role,  }\item[{str}]{client\+\_\+id,  }\item[{set\mbox{[}str\mbox{]}}]{allowed\+\_\+profile\+\_\+ids }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a2109f29fe173368c3753f6ba1f6d9ea6}\label{namespacemain_a2109f29fe173368c3753f6ba1f6d9ea6} 
+\index{main@{main}!role\_can\_post\_announcements@{role\_can\_post\_announcements}}
+\index{role\_can\_post\_announcements@{role\_can\_post\_announcements}!main@{main}}
+\doxysubsubsection{\texorpdfstring{role\_can\_post\_announcements()}{role\_can\_post\_announcements()}}
+{\footnotesize\ttfamily main.\+role\+\_\+can\+\_\+post\+\_\+announcements (\begin{DoxyParamCaption}\item[{str}]{role }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_ab19c9ec4e4ca5aa05bd62783cc1d2d90}\label{namespacemain_ab19c9ec4e4ca5aa05bd62783cc1d2d90} 
+\index{main@{main}!role\_has\_full\_edit@{role\_has\_full\_edit}}
+\index{role\_has\_full\_edit@{role\_has\_full\_edit}!main@{main}}
+\doxysubsubsection{\texorpdfstring{role\_has\_full\_edit()}{role\_has\_full\_edit()}}
+{\footnotesize\ttfamily main.\+role\+\_\+has\+\_\+full\+\_\+edit (\begin{DoxyParamCaption}\item[{str}]{role }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a7cf81ebf4bd162b612ab9a4e97aea7f2}\label{namespacemain_a7cf81ebf4bd162b612ab9a4e97aea7f2} 
+\index{main@{main}!row\_to\_announcement\_dict@{row\_to\_announcement\_dict}}
+\index{row\_to\_announcement\_dict@{row\_to\_announcement\_dict}!main@{main}}
+\doxysubsubsection{\texorpdfstring{row\_to\_announcement\_dict()}{row\_to\_announcement\_dict()}}
+{\footnotesize\ttfamily main.\+row\+\_\+to\+\_\+announcement\+\_\+dict (\begin{DoxyParamCaption}\item[{}]{row }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a23d5b8de7178455639da20626f7bb170}\label{namespacemain_a23d5b8de7178455639da20626f7bb170} 
+\index{main@{main}!row\_to\_client\_dict@{row\_to\_client\_dict}}
+\index{row\_to\_client\_dict@{row\_to\_client\_dict}!main@{main}}
+\doxysubsubsection{\texorpdfstring{row\_to\_client\_dict()}{row\_to\_client\_dict()}}
+{\footnotesize\ttfamily main.\+row\+\_\+to\+\_\+client\+\_\+dict (\begin{DoxyParamCaption}\item[{}]{row }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a068c63288a47def91215758fc3ea83de}\label{namespacemain_a068c63288a47def91215758fc3ea83de} 
+\index{main@{main}!safe\_json\_loads@{safe\_json\_loads}}
+\index{safe\_json\_loads@{safe\_json\_loads}!main@{main}}
+\doxysubsubsection{\texorpdfstring{safe\_json\_loads()}{safe\_json\_loads()}}
+{\footnotesize\ttfamily main.\+safe\+\_\+json\+\_\+loads (\begin{DoxyParamCaption}\item[{}]{value,  }\item[{}]{default }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a182f4776a925cd8406d03420047eeea5}\label{namespacemain_a182f4776a925cd8406d03420047eeea5} 
+\index{main@{main}!save\_announcement\_record@{save\_announcement\_record}}
+\index{save\_announcement\_record@{save\_announcement\_record}!main@{main}}
+\doxysubsubsection{\texorpdfstring{save\_announcement\_record()}{save\_announcement\_record()}}
+{\footnotesize\ttfamily main.\+save\+\_\+announcement\+\_\+record (\begin{DoxyParamCaption}\item[{dict}]{announcement }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a66b0266dcfd3f50efc3acf5ba7f69bb8}\label{namespacemain_a66b0266dcfd3f50efc3acf5ba7f69bb8} 
+\index{main@{main}!save\_attachment\_to\_filesystem@{save\_attachment\_to\_filesystem}}
+\index{save\_attachment\_to\_filesystem@{save\_attachment\_to\_filesystem}!main@{main}}
+\doxysubsubsection{\texorpdfstring{save\_attachment\_to\_filesystem()}{save\_attachment\_to\_filesystem()}}
+{\footnotesize\ttfamily main.\+save\+\_\+attachment\+\_\+to\+\_\+filesystem (\begin{DoxyParamCaption}\item[{dict}]{attachment }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a18fe63074082369c52504a2dda02ce5c}\label{namespacemain_a18fe63074082369c52504a2dda02ce5c} 
+\index{main@{main}!toggle\_announcement\_like@{toggle\_announcement\_like}}
+\index{toggle\_announcement\_like@{toggle\_announcement\_like}!main@{main}}
+\doxysubsubsection{\texorpdfstring{toggle\_announcement\_like()}{toggle\_announcement\_like()}}
+{\footnotesize\ttfamily main.\+toggle\+\_\+announcement\+\_\+like (\begin{DoxyParamCaption}\item[{str}]{announcement\+\_\+id,  }\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a746b17b98a39123ac0c88eca6e640065}\label{namespacemain_a746b17b98a39123ac0c88eca6e640065} 
+\index{main@{main}!update\_client@{update\_client}}
+\index{update\_client@{update\_client}!main@{main}}
+\doxysubsubsection{\texorpdfstring{update\_client()}{update\_client()}}
+{\footnotesize\ttfamily main.\+update\+\_\+client (\begin{DoxyParamCaption}\item[{str}]{client\+\_\+id,  }\item[{dict}]{payload,  }\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a8aa88c29d5c1716685d50e0eb0e21f5e}\label{namespacemain_a8aa88c29d5c1716685d50e0eb0e21f5e} 
+\index{main@{main}!update\_option\_definition@{update\_option\_definition}}
+\index{update\_option\_definition@{update\_option\_definition}!main@{main}}
+\doxysubsubsection{\texorpdfstring{update\_option\_definition()}{update\_option\_definition()}}
+{\footnotesize\ttfamily main.\+update\+\_\+option\+\_\+definition (\begin{DoxyParamCaption}\item[{int}]{option\+\_\+id,  }\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a339b7387235e1ca901196159ec57ccf2}\label{namespacemain_a339b7387235e1ca901196159ec57ccf2} 
+\index{main@{main}!user\_login@{user\_login}}
+\index{user\_login@{user\_login}!main@{main}}
+\doxysubsubsection{\texorpdfstring{user\_login()}{user\_login()}}
+{\footnotesize\ttfamily main.\+user\+\_\+login (\begin{DoxyParamCaption}\item[{dict}]{payload }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespacemain_ab1ef1171736296636b79105b7b74a22a}\label{namespacemain_ab1ef1171736296636b79105b7b74a22a} 
+\index{main@{main}!ADMIN\_ROLES@{ADMIN\_ROLES}}
+\index{ADMIN\_ROLES@{ADMIN\_ROLES}!main@{main}}
+\doxysubsubsection{\texorpdfstring{ADMIN\_ROLES}{ADMIN\_ROLES}}
+{\footnotesize\ttfamily dict main.\+ADMIN\+\_\+\+ROLES = \{"{}director"{}, "{}head\+\_\+coordinator"{}, "{}program\+\_\+coordinator"{}\}}
+
+\Hypertarget{namespacemain_a79708c90012f4253333f9c9c60ee087d}\label{namespacemain_a79708c90012f4253333f9c9c60ee087d} 
+\index{main@{main}!ANNOUNCEMENT\_POST\_ROLES@{ANNOUNCEMENT\_POST\_ROLES}}
+\index{ANNOUNCEMENT\_POST\_ROLES@{ANNOUNCEMENT\_POST\_ROLES}!main@{main}}
+\doxysubsubsection{\texorpdfstring{ANNOUNCEMENT\_POST\_ROLES}{ANNOUNCEMENT\_POST\_ROLES}}
+{\footnotesize\ttfamily dict main.\+ANNOUNCEMENT\+\_\+\+POST\+\_\+\+ROLES = \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{FULL\+\_\+\+EDIT\+\_\+\+ROLES}}}
+
+\Hypertarget{namespacemain_a99d65a72b4db599dfb624116faf6141e}\label{namespacemain_a99d65a72b4db599dfb624116faf6141e} 
+\index{main@{main}!ANNOUNCEMENT\_UPLOAD\_ROOT@{ANNOUNCEMENT\_UPLOAD\_ROOT}}
+\index{ANNOUNCEMENT\_UPLOAD\_ROOT@{ANNOUNCEMENT\_UPLOAD\_ROOT}!main@{main}}
+\doxysubsubsection{\texorpdfstring{ANNOUNCEMENT\_UPLOAD\_ROOT}{ANNOUNCEMENT\_UPLOAD\_ROOT}}
+{\footnotesize\ttfamily str main.\+ANNOUNCEMENT\+\_\+\+UPLOAD\+\_\+\+ROOT = \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_\+\+ROOT}} / "{}announcements"{}}
+
+\Hypertarget{namespacemain_a5fa94f0581009434c7a63791944d6ff4}\label{namespacemain_a5fa94f0581009434c7a63791944d6ff4} 
+\index{main@{main}!app@{app}}
+\index{app@{app}!main@{main}}
+\doxysubsubsection{\texorpdfstring{app}{app}}
+{\footnotesize\ttfamily main.\+app = Fast\+API(root\+\_\+path="{}/api"{})}
+
+\Hypertarget{namespacemain_adcc00e4cb6c480c39abf3ddbc117fe4f}\label{namespacemain_adcc00e4cb6c480c39abf3ddbc117fe4f} 
+\index{main@{main}!CLIENT\_SELECT\_COLUMNS@{CLIENT\_SELECT\_COLUMNS}}
+\index{CLIENT\_SELECT\_COLUMNS@{CLIENT\_SELECT\_COLUMNS}!main@{main}}
+\doxysubsubsection{\texorpdfstring{CLIENT\_SELECT\_COLUMNS}{CLIENT\_SELECT\_COLUMNS}}
+{\footnotesize\ttfamily list main.\+CLIENT\+\_\+\+SELECT\+\_\+\+COLUMNS}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ [}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}client\_id"{}},}
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}name"{}},}
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}group\_name"{}},}
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}media\_consent"{}},}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}tags"{}},}
+\DoxyCodeLine{00007\ \ \ \ \ \textcolor{stringliteral}{"{}risks"{}},}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{stringliteral}{"{}sports"{}},}
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{stringliteral}{"{}schools"{}},}
+\DoxyCodeLine{00010\ \ \ \ \ \textcolor{stringliteral}{"{}updated"{}},}
+\DoxyCodeLine{00011\ \ \ \ \ \textcolor{stringliteral}{"{}program\_coordinator\_id"{}},}
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{stringliteral}{"{}street\_address"{}},}
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{stringliteral}{"{}city"{}},}
+\DoxyCodeLine{00014\ \ \ \ \ \textcolor{stringliteral}{"{}state"{}},}
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{stringliteral}{"{}zip"{}},}
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{stringliteral}{"{}primary\_contact\_name"{}},}
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{stringliteral}{"{}primary\_contact\_phone"{}},}
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{stringliteral}{"{}secondary\_contact\_name"{}},}
+\DoxyCodeLine{00019\ \ \ \ \ \textcolor{stringliteral}{"{}secondary\_contact\_phone"{}},}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{stringliteral}{"{}notes"{}},}
+\DoxyCodeLine{00021\ ]}
+
+\end{DoxyCode}
+\Hypertarget{namespacemain_a898ec19db0e0dff9ffc262e5b0ad5451}\label{namespacemain_a898ec19db0e0dff9ffc262e5b0ad5451} 
+\index{main@{main}!db\_client@{db\_client}}
+\index{db\_client@{db\_client}!main@{main}}
+\doxysubsubsection{\texorpdfstring{db\_client}{db\_client}}
+{\footnotesize\ttfamily main.\+db\+\_\+client = \mbox{\hyperlink{classutils_1_1connection_1_1DatabaseClient}{Database\+Client}}()}
+
+\Hypertarget{namespacemain_a92f3dde1865a21639e884a1ac0eca0d8}\label{namespacemain_a92f3dde1865a21639e884a1ac0eca0d8} 
+\index{main@{main}!DB\_HOST@{DB\_HOST}}
+\index{DB\_HOST@{DB\_HOST}!main@{main}}
+\doxysubsubsection{\texorpdfstring{DB\_HOST}{DB\_HOST}}
+{\footnotesize\ttfamily main.\+DB\+\_\+\+HOST = os.\+getenv("{}DB\+\_\+\+HOST"{}, "{}db"{})}
+
+\Hypertarget{namespacemain_a0154fb5c23da536de9a3938df19a3127}\label{namespacemain_a0154fb5c23da536de9a3938df19a3127} 
+\index{main@{main}!DELETE\_PROFILE\_ROLES@{DELETE\_PROFILE\_ROLES}}
+\index{DELETE\_PROFILE\_ROLES@{DELETE\_PROFILE\_ROLES}!main@{main}}
+\doxysubsubsection{\texorpdfstring{DELETE\_PROFILE\_ROLES}{DELETE\_PROFILE\_ROLES}}
+{\footnotesize\ttfamily dict main.\+DELETE\+\_\+\+PROFILE\+\_\+\+ROLES = \{"{}director"{}, "{}head\+\_\+coordinator"{}\}}
+
+\Hypertarget{namespacemain_aa405c42d214f58e6fa1f74c27809e2a5}\label{namespacemain_aa405c42d214f58e6fa1f74c27809e2a5} 
+\index{main@{main}!EMERGENCY\_EDIT\_ROLES@{EMERGENCY\_EDIT\_ROLES}}
+\index{EMERGENCY\_EDIT\_ROLES@{EMERGENCY\_EDIT\_ROLES}!main@{main}}
+\doxysubsubsection{\texorpdfstring{EMERGENCY\_EDIT\_ROLES}{EMERGENCY\_EDIT\_ROLES}}
+{\footnotesize\ttfamily dict main.\+EMERGENCY\+\_\+\+EDIT\+\_\+\+ROLES = \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{FULL\+\_\+\+EDIT\+\_\+\+ROLES}} \texorpdfstring{$\vert$}{|} \{"{}staff"{}, "{}guardian"{}\}}
+
+\Hypertarget{namespacemain_ab0bf13547032e9bb1cc6c8ede308794a}\label{namespacemain_ab0bf13547032e9bb1cc6c8ede308794a} 
+\index{main@{main}!exist\_ok@{exist\_ok}}
+\index{exist\_ok@{exist\_ok}!main@{main}}
+\doxysubsubsection{\texorpdfstring{exist\_ok}{exist\_ok}}
+{\footnotesize\ttfamily main.\+exist\+\_\+ok}
+
+\Hypertarget{namespacemain_a7de630a04a0cb1034b5761870fdbe448}\label{namespacemain_a7de630a04a0cb1034b5761870fdbe448} 
+\index{main@{main}!formatter@{formatter}}
+\index{formatter@{formatter}!main@{main}}
+\doxysubsubsection{\texorpdfstring{formatter}{formatter}}
+{\footnotesize\ttfamily main.\+formatter = jsonlogger.\+Json\+Formatter()}
+
+\Hypertarget{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}\label{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db} 
+\index{main@{main}!FULL\_EDIT\_ROLES@{FULL\_EDIT\_ROLES}}
+\index{FULL\_EDIT\_ROLES@{FULL\_EDIT\_ROLES}!main@{main}}
+\doxysubsubsection{\texorpdfstring{FULL\_EDIT\_ROLES}{FULL\_EDIT\_ROLES}}
+{\footnotesize\ttfamily dict main.\+FULL\+\_\+\+EDIT\+\_\+\+ROLES = \{"{}director"{}, "{}head\+\_\+coordinator"{}, "{}program\+\_\+coordinator"{}\}}
+
+\Hypertarget{namespacemain_afd006429470102f060684a838ea7efb3}\label{namespacemain_afd006429470102f060684a838ea7efb3} 
+\index{main@{main}!log\_handler@{log\_handler}}
+\index{log\_handler@{log\_handler}!main@{main}}
+\doxysubsubsection{\texorpdfstring{log\_handler}{log\_handler}}
+{\footnotesize\ttfamily main.\+log\+\_\+handler = logging.\+Stream\+Handler(sys.\+stdout)}
+
+\Hypertarget{namespacemain_ae1d4a0295c904f672a1f044188274bf1}\label{namespacemain_ae1d4a0295c904f672a1f044188274bf1} 
+\index{main@{main}!logger@{logger}}
+\index{logger@{logger}!main@{main}}
+\doxysubsubsection{\texorpdfstring{logger}{logger}}
+{\footnotesize\ttfamily main.\+logger = logging.\+get\+Logger()}
+
+\Hypertarget{namespacemain_a75935476dce7e7a59f1c6604af9dad37}\label{namespacemain_a75935476dce7e7a59f1c6604af9dad37} 
+\index{main@{main}!name@{name}}
+\index{name@{name}!main@{main}}
+\doxysubsubsection{\texorpdfstring{name}{name}}
+{\footnotesize\ttfamily main.\+name}
+
+\Hypertarget{namespacemain_aa6eea602ff3979e1ff2936eeeb7c1cd7}\label{namespacemain_aa6eea602ff3979e1ff2936eeeb7c1cd7} 
+\index{main@{main}!parents@{parents}}
+\index{parents@{parents}!main@{main}}
+\doxysubsubsection{\texorpdfstring{parents}{parents}}
+{\footnotesize\ttfamily main.\+parents}
+
+\Hypertarget{namespacemain_a0c5b8ab1603c8c5b8db5e1128a757fea}\label{namespacemain_a0c5b8ab1603c8c5b8db5e1128a757fea} 
+\index{main@{main}!True@{True}}
+\index{True@{True}!main@{main}}
+\doxysubsubsection{\texorpdfstring{True}{True}}
+{\footnotesize\ttfamily main.\+True}
+
+\Hypertarget{namespacemain_a49b5a611c17f699007b325f34c189d85}\label{namespacemain_a49b5a611c17f699007b325f34c189d85} 
+\index{main@{main}!UPLOAD\_ROOT@{UPLOAD\_ROOT}}
+\index{UPLOAD\_ROOT@{UPLOAD\_ROOT}!main@{main}}
+\doxysubsubsection{\texorpdfstring{UPLOAD\_ROOT}{UPLOAD\_ROOT}}
+{\footnotesize\ttfamily str main.\+UPLOAD\+\_\+\+ROOT = Path(\+\_\+\+\_\+file\+\_\+\+\_\+).resolve().parent / "{}uploads"{}}
+
+\Hypertarget{namespacemain_acd65797f43277067a9a34306234866ed}\label{namespacemain_acd65797f43277067a9a34306234866ed} 
+\index{main@{main}!VALID\_CATEGORIES@{VALID\_CATEGORIES}}
+\index{VALID\_CATEGORIES@{VALID\_CATEGORIES}!main@{main}}
+\doxysubsubsection{\texorpdfstring{VALID\_CATEGORIES}{VALID\_CATEGORIES}}
+{\footnotesize\ttfamily dict main.\+VALID\+\_\+\+CATEGORIES = \{"{}sport"{}, "{}risk"{}, "{}school"{}, "{}tag"{}\}}
+
