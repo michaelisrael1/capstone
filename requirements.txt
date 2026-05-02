@@ -2,3 +2,14 @@ pandas
 sqlalchemy
 psycopg2-binary
 openpyxl
+pytest
+pytest-cov
+httpx
+bcrypt
+fastapi[standard]
+pymysql
+cryptography
+passlib[bcrypt]
+pydantic-settings
+python-json-logger
+PyJWT

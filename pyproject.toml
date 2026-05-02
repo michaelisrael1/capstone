@@ -1,0 +1,14 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "backend/app"]
+addopts = "--cov=backend/app --cov-report=term-missing --cov-fail-under=65"
+
+[tool.coverage.run]
+source = ["backend/app"]
+omit = ["*/test_*", "*/conftest*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.",
+]
