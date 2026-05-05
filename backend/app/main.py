@@ -1239,7 +1239,7 @@ def get_clients():
                 ON p.person_id = pr.person_id
             LEFT JOIN Risk r
                 ON pr.risk_id = r.risk_id
-            Where p.stakeholder_type = 'client' OR p.stakeholder_type = 'student'
+            WHERE LOWER(p.stakeholder_type) IN ('client', 'student')
             GROUP BY p.person_id
         """)
 
