@@ -1215,6 +1215,54 @@ def user_login(payload: dict):
         raise HTTPException(status_code=500, detail="Login failed")
 
 # --------------------------------------------------
+# Get all clients (profiles)
+# --------------------------------------------------
+@app.get("/clients", tags=["Database"])
+def get_all_clients(request: Request):
+    try:
+        role = get_request_role(request)
+        allowed_profile_ids = get_allowed_profile_ids(request)
+
+        query = text("""
+            SELECT
+                p.person_id as id,
+                CONCAT(COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as name,
+                p.stakeholder_type as type,
+                p.status,
+                p.role,
+                p.school,
+                p.media_consent,
+                p.notes,
+                GROUP_CONCAT(DISTINCT ps.service_id) as services,
+                COALESCE(e.email_address, '') as email,
+                COALESCE(ph.phone_number, '') as phone,
+                DATE(p.updated_at) as updated
+            FROM Person p
+            LEFT JOIN PersonService ps ON p.person_id = ps.person_id
+            LEFT JOIN Email e ON p.person_id = (SELECT person_id FROM UserAccount WHERE email_id = e.email_id LIMIT 1)
+            LEFT JOIN Phone ph ON p.person_id = (SELECT person_id FROM UserAccount WHERE phone_id = ph.phone_id LIMIT 1)
+            WHERE p.stakeholder_type IN ('Student', 'Client')
+            GROUP BY p.person_id
+            ORDER BY p.person_id DESC
+        """)
+        rows = db_client.send_query(query)
+
+        clients = []
+        for row in rows:
+            client = dict(row)
+            if role in {"director", "head_coordinator"}:
+                clients.append(client)
+            elif str(client.get("id")) in allowed_profile_ids:
+                clients.append(client)
+
+        return clients
+
+    except Exception as e:
+        logger.error("get_clients_failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Failed to fetch clients")
+
+
+# --------------------------------------------------
 # Update client profile (used by frontend edits)
 # --------------------------------------------------
 @app.put("/clients/{client_id}", tags=["Database"])
