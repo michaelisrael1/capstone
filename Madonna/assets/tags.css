@@ -101,17 +101,39 @@
     color: #0a4f8a;
 }
 
+:root[data-theme="dark"] .risk-badge {
+    border-color: color-mix(in srgb, var(--maa-blue, #68a8ff) 28%, transparent);
+    background: color-mix(in srgb, var(--maa-blue, #68a8ff) 14%, transparent);
+    color: var(--maa-blue, #68a8ff);
+}
+
 :root[data-theme="dark"] .tag-checkbox-item {
-    background: color-mix(in srgb, var(--maa-surface, #151d2d) 92%, #fff);
-    border-color: var(--maa-border, rgba(255,255,255,.13));
+    background: color-mix(in srgb, var(--maa-surface, #151d2d) 86%, #fff);
+    border-color: color-mix(in srgb, var(--maa-blue, #68a8ff) 30%, var(--maa-border, rgba(255,255,255,.13)));
+    color: var(--maa-blue, #68a8ff);
 }
 
 :root[data-theme="dark"] .tag-checkbox-item:hover {
-    background: color-mix(in srgb, var(--maa-surface, #151d2d) 82%, #fff);
+    background: color-mix(in srgb, var(--maa-surface, #151d2d) 78%, #fff);
+    border-color: color-mix(in srgb, var(--maa-blue, #68a8ff) 50%, var(--maa-border, rgba(255,255,255,.13)));
     box-shadow: 0 10px 22px rgba(0,0,0,.24);
 }
 
 :root[data-theme="dark"] .tag-checkbox-label,
 :root[data-theme="dark"] .tag-checkbox-label > span:not(.tags-form) {
-    color: #f8fafc;
+    color: var(--maa-blue, #68a8ff);
+}
+
+:root[data-theme="dark"] .tag-checkbox-item:has(input:checked) {
+    background: color-mix(in srgb, var(--maa-blue, #68a8ff) 18%, var(--maa-surface, #151d2d));
+    border-color: color-mix(in srgb, var(--maa-blue, #68a8ff) 62%, var(--maa-border, rgba(255,255,255,.13)));
+}
+
+:root[data-theme="dark"] .tag-checkbox-item input:disabled,
+:root[data-theme="dark"] .tag-checkbox-item input:disabled ~ .tag-checkbox-label {
+    opacity: 1;
+}
+
+:root[data-theme="dark"] #profilesBody .tags-form {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--maa-blue, #68a8ff) 28%, transparent);
 }

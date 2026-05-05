@@ -1168,8 +1168,7 @@ def user_login(payload: dict):
         # ----------------------------------------
         stored_hash = user["password_hash"]
 
-        #if not bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8")):
-        if not password == stored_hash:
+        if not bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8")):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         # ----------------------------------------
@@ -1213,6 +1212,212 @@ def user_login(payload: dict):
     except Exception as e:
         logger.error("login_failed", extra={"error": str(e)})
         raise HTTPException(status_code=500, detail="Login failed")
+    
+@app.get("/clients", tags=["Database"])
+def get_clients():
+
+    try:
+
+        query = text("""
+            SELECT
+                p.person_id,
+                p.first_name,
+                p.last_name,
+                p.stakeholder_type,
+                p.media_consent,
+                p.notes,
+                p.status,
+                GROUP_CONCAT(DISTINCT t.tag_code) AS tags,
+                GROUP_CONCAT(DISTINCT r.risk_code) AS risks
+            FROM Person p
+            
+            LEFT JOIN PersonTag pt
+                ON p.person_id = pt.person_id
+            LEFT JOIN Tag t
+                ON pt.tag_id = t.tag_id
+            LEFT JOIN PersonRisk pr
+                ON p.person_id = pr.person_id
+            LEFT JOIN Risk r
+                ON pr.risk_id = r.risk_id
+            Where p.stakeholder_type = 'client' OR p.stakeholder_type = 'student'
+            GROUP BY p.person_id
+        """)
+
+        rows = db_client.send_query(query)
+
+        clients = []
+
+        for row in rows:
+
+            clients.append({
+                "person_id": row["person_id"],
+                "first_name": row["first_name"],
+                "last_name": row["last_name"],
+                "stakeholder_type": row["stakeholder_type"],
+                "media_consent": row["media_consent"],
+                "notes": row["notes"],
+                "status": row["status"],
+
+                # placeholders for frontend compatibility
+                "tags": row["tags"].split(",") if row["tags"] else [],
+                "risks": row["risks"].split(",") if row["risks"] else [],
+                "updated_at": ""
+            })
+
+        return clients
+
+    except Exception as e:
+
+        logger.error(
+            "get_clients_failed",
+            extra={"error": str(e)}
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to load clients"
+        )
+
+@app.get("/profiles/{person_id}", tags=["Database"])
+def get_profile(person_id: int):
+
+    try:
+        query = text("""
+            SELECT
+                p.person_id,
+                p.first_name,
+                p.last_name,
+                p.stakeholder_type,
+                p.status,
+                p.school,
+                p.staff_setting,
+                p.start_date,
+                p.end_date,
+                p.media_consent,
+                p.notes,
+
+                a.street,
+                a.city,
+                a.state,
+                a.zip,
+
+                cr_primary.contact_person_id AS primary_contact_id,
+                cp.first_name AS primary_first_name,
+                cp.last_name AS primary_last_name,
+
+                cr_secondary.contact_person_id AS secondary_contact_id,
+                cs.first_name AS secondary_first_name,
+                cs.last_name AS secondary_last_name,
+
+                coord.person_id AS coordinator_id,
+                coord.first_name AS coordinator_first_name,
+                coord.last_name AS coordinator_last_name,
+
+                (SELECT GROUP_CONCAT(t.tag_code)
+                FROM PersonTag pt
+                JOIN Tag t ON pt.tag_id = t.tag_id
+                WHERE pt.person_id = p.person_id
+                ) AS tags,
+
+                (SELECT GROUP_CONCAT(r.risk_code)
+                FROM PersonRisk pr
+                JOIN Risk r ON pr.risk_id = r.risk_id
+                WHERE pr.person_id = p.person_id
+                ) AS risks
+
+            FROM Person p
+
+            LEFT JOIN PersonAddress pa
+                ON p.person_id = pa.person_id
+                AND pa.address_type = 'mailing'
+
+            LEFT JOIN Address a
+                ON pa.address_id = a.address_id
+
+            LEFT JOIN ContactRelationship cr_primary
+                ON p.person_id = cr_primary.person_id
+                AND cr_primary.is_primary = TRUE
+
+            LEFT JOIN Person cp
+                ON cr_primary.contact_person_id = cp.person_id
+
+            LEFT JOIN ContactRelationship cr_secondary
+                ON p.person_id = cr_secondary.person_id
+                AND cr_secondary.is_primary = FALSE
+
+            LEFT JOIN Person cs
+                ON cr_secondary.contact_person_id = cs.person_id
+
+            LEFT JOIN CoordinatorAssignment ca
+                ON p.person_id = ca.person_id
+
+            LEFT JOIN Person coord
+                ON ca.coordinator_id = coord.person_id
+
+            WHERE p.person_id = :person_id
+        """)
+
+        rows = db_client.send_query(query, {"person_id": person_id})
+
+        if not rows:
+            raise HTTPException(status_code=404, detail="Profile not found")
+
+        row = rows[0]
+
+        return {
+            "person_id": row["person_id"],
+            "first_name": row["first_name"],
+            "last_name": row["last_name"],
+            "name": f"{row['first_name']} {row['last_name']}",
+
+            "stakeholder_type": row["stakeholder_type"],
+            "status": row["status"],
+            "school": row["school"],
+            "staff_setting": row["staff_setting"],
+            "start_date": row["start_date"],
+            "end_date": row["end_date"],
+            "media_consent": row["media_consent"],
+            "notes": row["notes"],
+
+            "address": {
+                "street": row["street"] or "",
+                "city": row["city"] or "",
+                "state": row["state"] or "",
+                "zip": row["zip"] or ""
+            },
+
+            "primary_contact": {
+                "name": f"{row['primary_first_name']} {row.get('primary_last_name') or ''}".strip(),
+                "person_id": row["primary_contact_id"]
+            } if row["primary_contact_id"] else None,
+
+            "secondary_contact": {
+                "name": f"{row['secondary_first_name']} {row.get('secondary_last_name') or ''}".strip(),
+                "person_id": row["secondary_contact_id"]
+            } if row["secondary_contact_id"] else None,
+
+            "coordinator": {
+                "person_id": row["coordinator_id"],
+                "name": f"{row['coordinator_first_name']} {row['coordinator_last_name']}"
+            } if row["coordinator_id"] else None,
+
+            "tags": row["tags"].split(",") if row["tags"] else [],
+            "risks": row["risks"].split(",") if row["risks"] else [],
+
+            "updated_at": ""
+        }
+
+    except Exception as e:
+
+        logger.error(
+            "get_profile_failed",
+            extra={"person_id": person_id, "error": str(e)}
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to load profile"
+        )
 
 # --------------------------------------------------
 # Get all clients (profiles)

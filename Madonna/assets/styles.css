@@ -965,6 +965,15 @@ a.btn-maap, a.btn-maap:visited{
   filter: brightness(0.9);
 }
 
+:root[data-theme="dark"] #profilesBody a,
+:root[data-theme="dark"] #profilesBody a:visited{
+  color: var(--maa-blue) !important;
+}
+
+:root[data-theme="dark"] #profilesBody a:hover{
+  filter: brightness(1.08);
+}
+
 .announcement-list{
   display:grid;
   gap:14px;

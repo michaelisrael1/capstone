@@ -1034,8 +1034,10 @@ function canEditEmergency(session, profile) {
   return Boolean(config.emergencyEditAll || (config.emergencyEditAssigned && isAssignedToProfile(session, profile)));
 }
 
-function getAccessibleProfiles(session) {
-  return profiles.filter((profile) => canViewProfile(session, profile));
+function getAccessibleProfiles(session, profilesList = []) {
+  return profilesList.filter((profile) =>
+    canViewProfile(session, profile)
+  );
 }
 
 function getAccessibleTagCodes(session) {
@@ -1225,17 +1227,9 @@ function initExcelUpload() {
   const session = getSession();
   if (!session || !canImportData(session.role)) return;
 
-  let input = document.getElementById("excelUpload");
+  const input = document.getElementById("excelUpload");
   const status = document.getElementById("uploadStatus");
-
-  if (!input) {
-    input = document.createElement("input");
-    input.type = "file";
-    input.id = "excelUpload";
-    input.accept = ".xlsx,.xls,.csv";
-    input.style.display = "none";
-    document.body.appendChild(input);
-  }
+  if (!input) return;
 
   if (input.dataset.bound === "true") return;
   input.dataset.bound = "true";
@@ -1282,61 +1276,165 @@ function initExcelUpload() {
 
 // Render the dashboard, filters, and emergency broadcast tools
 async function initDashboard() {
-  const s = requireAuth();
-  await hydrateDataFromBackend();
 
-  const accessibleProfiles = getAccessibleProfiles(s);
+  const s = requireAuth();
+
+  // --------------------------------------------
+  // Load profiles directly from backend
+  // --------------------------------------------
+  let accessibleProfiles = [];
+
+  try {
+
+    const res = await fetch("/api/clients", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...buildSessionHeaders()
+      }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.detail || "Failed to load profiles");
+    }
+
+    // Normalize backend data into frontend shape
+    accessibleProfiles = (data || []).map((p) => ({
+      id: p.person_id,
+      firstName: p.first_name || "",
+      lastName: p.last_name || "",
+      name: `${p.first_name || ""} ${p.last_name || ""}`.trim(),
+      stakeholderType: p.stakeholder_type || "",
+      tags: Array.isArray(p.tags) ? p.tags : [],
+      risks: Array.isArray(p.risks) ? p.risks : [],
+      mediaConsent: p.media_consent ? "Yes" : "No",
+      updated: p.updated_at ? new Date(p.updated_at).toLocaleDateString() : "",
+      notes: p.notes || "",
+      status: p.status || ""
+    }));
+
+  } catch (err) {
+    console.error("dashboard_load_failed", err);
+
+    const tbody = document.getElementById("profilesBody");
+
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            Failed to load profiles from backend.
+          </td>
+        </tr>
+      `;
+    }
+
+    return;
+  }
+
+  // --------------------------------------------
+  // Role-based filtering (frontend side)
+  // --------------------------------------------
+  accessibleProfiles = getAccessibleProfiles(s, accessibleProfiles);
 
   const who = document.getElementById("whoami");
 
   const accessRuleSummary = document.getElementById("accessRuleSummary");
-  if (accessRuleSummary) accessRuleSummary.textContent = getRoleConfig(s.role).summary;
 
-  const uploadTile = document.getElementById("uploadTile");
-  if (uploadTile) uploadTile.style.display = canImportData(s.role) ? "" : "none";
+  if (accessRuleSummary) {
+    accessRuleSummary.textContent = getRoleConfig(s.role).summary;
+  }
 
-  const addUserTile = document.getElementById("addUserTile");
-  if (addUserTile) addUserTile.style.display = canAccessAdmin(s.role) ? "" : "none";
+  if (who) {
+    who.textContent = `${s.name} | ${getRoleLabel(s.role)}`;
+  }
 
-  if (who) who.textContent = `${s.name} • ${s.role}`;
-
-  if (who) who.textContent = `${s.name} | ${getRoleLabel(s.role)}`;
-
-
+  // --------------------------------------------
+  // Render profiles table
+  // --------------------------------------------
   const tbody = document.getElementById("profilesBody");
+
   if (tbody) {
+
     tbody.innerHTML = "";
+
     accessibleProfiles.forEach((p) => {
+
       const tr = document.createElement("tr");
+
       tr.innerHTML = `
-        <td><a class="link" href="profile.html?id=${encodeURIComponent(p.id)}">${p.name}</a></td>
-        <td>${renderTags(p.tags || [])}</td>
-        <td>${renderRiskBadges(p.risks || [])}</td>
+        <td>
+          <a class="link" href="profile.html?id=${encodeURIComponent(p.id)}">
+            ${p.name}
+          </a>
+        </td>
+
+        <td>
+          ${renderTags(p.tags || [])}
+        </td>
+
+        <td>
+          ${renderRiskBadges(p.risks || [])}
+        </td>
+
         <td>
           <span class="badge ${p.mediaConsent === "Yes" ? "blue" : "orange"}">
             ${p.mediaConsent}
           </span>
         </td>
-        <td>${p.updated}</td>
+
+        <td>
+          ${p.updated}
+        </td>
       `;
+
       tbody.appendChild(tr);
     });
+
+    // Empty state
+    if (!accessibleProfiles.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            No accessible profiles found.
+          </td>
+        </tr>
+      `;
+    }
   }
 
+  // --------------------------------------------
+  // Search filtering
+  // --------------------------------------------
   const search = document.getElementById("searchInput");
+
   if (search && tbody && search.dataset.bound !== "true") {
+
     search.dataset.bound = "true";
+
     search.addEventListener("input", () => {
+
       const q = search.value.trim().toLowerCase();
+
       [...tbody.querySelectorAll("tr")].forEach((tr) => {
-        tr.style.display = tr.textContent.toLowerCase().includes(q) ? "" : "none";
+        tr.style.display = tr.textContent.toLowerCase().includes(q)
+          ? ""
+          : "none";
       });
+
     });
   }
 
+  // --------------------------------------------
+  // Broadcast UI
+  // --------------------------------------------
   const broadcastBox = document.getElementById("broadcastBox");
+
   if (broadcastBox) {
-    broadcastBox.style.display = canSendBroadcast(s.role) ? "block" : "none";
+    broadcastBox.style.display = canSendBroadcast(s.role)
+      ? "block"
+      : "none";
   }
 
   const broadcastHelp = document.getElementById("broadcastHelp");
@@ -1347,14 +1445,18 @@ async function initDashboard() {
   const programSel = document.getElementById("broadcastProgram");
   const groupSel = document.getElementById("broadcastGroup");
 
-  const accessibleTagCodes = [...new Set(accessibleProfiles.flatMap((p) => p.tags || []))].filter(
-    (code) => tag_definitions[code]
-  );
-  const accessibleGroups = [...new Set(accessibleProfiles.map((p) => p.group).filter(Boolean))];
+  const accessibleTagCodes = [
+    ...new Set(accessibleProfiles.flatMap((p) => p.tags || []))
+  ].filter((code) => tag_definitions[code]);
+
+  const accessibleGroups = [
+    ...new Set(accessibleProfiles.map((p) => p.group).filter(Boolean))
+  ];
 
   if (broadcastRoleBadge) {
     broadcastRoleBadge.textContent = getRoleLabel(s.role);
-    broadcastRoleBadge.className = `pill-label ${canViewAll(s.role) ? "orange" : "blue"}`;
+    broadcastRoleBadge.className =
+      `pill-label ${canViewAll(s.role) ? "orange" : "blue"}`;
   }
 
   if (broadcastHelp) {
@@ -1364,39 +1466,69 @@ async function initDashboard() {
   }
 
   if (scopeSel) {
-    scopeSel.options[0].text = canViewAll(s.role) ? "Everyone" : "My assigned people";
+    scopeSel.options[0].text = canViewAll(s.role)
+      ? "Everyone"
+      : "My assigned people";
   }
 
   if (programSel) {
-    const defaultLabel = canViewAll(s.role) ? "All accessible programs" : "All my programs";
+
+    const defaultLabel = canViewAll(s.role)
+      ? "All accessible programs"
+      : "All my programs";
+
     programSel.innerHTML = [
       `<option value="">${defaultLabel}</option>`,
       ...accessibleTagCodes.map(
-        (code) => `<option value="${code}">${tag_definitions[code].label}</option>`
+        (code) =>
+          `<option value="${code}">
+            ${tag_definitions[code].label}
+          </option>`
       )
     ].join("");
   }
 
   if (groupSel) {
-    const defaultLabel = canViewAll(s.role) ? "All accessible groups" : "All my groups";
+
+    const defaultLabel = canViewAll(s.role)
+      ? "All accessible groups"
+      : "All my groups";
+
     groupSel.innerHTML = [
       `<option value="">${defaultLabel}</option>`,
-      ...accessibleGroups.map((group) => `<option value="${group}">${group}</option>`)
+      ...accessibleGroups.map(
+        (group) => `<option value="${group}">${group}</option>`
+      )
     ].join("");
   }
 
   function syncScopeUI() {
+
     const scope = scopeSel?.value || "all";
-    if (programWrap) programWrap.style.display = scope === "program" ? "block" : "none";
-    if (groupWrap) groupWrap.style.display = scope === "group" ? "block" : "none";
+
+    if (programWrap) {
+      programWrap.style.display =
+        scope === "program" ? "block" : "none";
+    }
+
+    if (groupWrap) {
+      groupWrap.style.display =
+        scope === "group" ? "block" : "none";
+    }
   }
 
   if (scopeSel && scopeSel.dataset.bound !== "true") {
+
     scopeSel.dataset.bound = "true";
+
     scopeSel.addEventListener("change", syncScopeUI);
   }
+
   syncScopeUI();
 
+  // --------------------------------------------
+  // Broadcast sending
+  // --------------------------------------------
   const sendBtn = document.getElementById("sendBroadcast");
   const broadcastStatus = document.getElementById("broadcastStatus");
 
@@ -1410,6 +1542,7 @@ async function initDashboard() {
   }
 
   if (sendBtn && sendBtn.dataset.bound !== "true") {
+
     sendBtn.dataset.bound = "true";
     sendBtn.addEventListener("click", async () => {
       if (broadcastStatus) broadcastStatus.style.display = "none";
@@ -1484,22 +1617,54 @@ async function initDashboard() {
   }
 }
 
-// Render a client profile page, permissions, tags/risks, and personal notes
+// Render a client profile page using backend database APIs
 async function initProfilePage() {
   const s = requireAuth();
-  await hydrateDataFromBackend();
 
   const params = new URLSearchParams(window.location.search);
-  const id = params.get("id") || "P-1001";
+  const id = params.get("id");
 
-  const prof = getProfileById(id);
+  if (!id) {
+    alert("Missing profile id.");
+    window.location.href = "dashboard.html";
+    return;
+  }
+
+  let prof = null;
+
+  try {
+    // Pull profile directly from backend/database
+    const response = await fetch(`/api/profiles/${encodeURIComponent(id)}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${s.token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load profile (${response.status})`);
+    }
+
+    prof = await response.json();
+  } catch (err) {
+    console.error(err);
+    alert(`Unable to load profile: ${err.message}`);
+    return;
+  }
+
   if (!prof || !canViewProfile(s, prof)) {
     alert("You do not have permission to view that profile.");
     window.location.href = "dashboard.html";
     return;
   }
 
+  // =========================
+  // Populate UI
+  // =========================
+
   const addressFields = document.querySelectorAll("[data-full-edit-field]");
+
   if (addressFields.length >= 4) {
     addressFields[0].value = prof.address?.street || "";
     addressFields[1].value = prof.address?.city || "";
@@ -1508,22 +1673,25 @@ async function initProfilePage() {
   }
 
   const emergencyInputs = document.querySelectorAll("input[data-emergency-field]");
+
   if (emergencyInputs.length >= 4) {
-    emergencyInputs[0].value = prof.primaryContact?.name || "";
-    emergencyInputs[1].value = prof.primaryContact?.phone || "";
-    emergencyInputs[2].value = prof.secondaryContact?.name || "";
-    emergencyInputs[3].value = prof.secondaryContact?.phone || "";
+    emergencyInputs[0].value = prof.primary_contact?.name || "";
+    emergencyInputs[1].value = prof.primary_contact?.phone || "";
+    emergencyInputs[2].value = prof.secondary_contact?.name || "";
+    emergencyInputs[3].value = prof.secondary_contact?.phone || "";
   }
 
   const textareas = document.querySelectorAll(".portal-textarea[data-emergency-field]");
+
   if (textareas.length >= 2) {
-    textareas[0].value = prof.medicalNotes || "";
-    textareas[1].value = prof.mobilityNotes || "";
+    textareas[0].value = prof.medical_notes || "";
+    textareas[1].value = prof.mobility_notes || "";
   }
 
   const title = document.getElementById("profileTitle");
+
   if (title) {
-    title.textContent = prof.name;
+    title.textContent = `${prof.first_name} ${prof.last_name}`;
   }
 
   const canEditFull = canEditFullProfile(s, prof);
@@ -1558,6 +1726,7 @@ async function initProfilePage() {
   }
 
   const accessSummary = document.getElementById("profileAccessSummary");
+
   if (accessSummary) {
     accessSummary.textContent = canEditFull
       ? `${getRoleLabel(s.role)}: full edit access for this profile.`
@@ -1566,197 +1735,158 @@ async function initProfilePage() {
         : `${getRoleLabel(s.role)}: view-only access for this profile.`;
   }
 
-  const coord = getStaffById(prof.programCoordinatorId);
+  // =========================
+  // Coordinator
+  // =========================
+
   const coordEl = document.getElementById("coordinatorLink");
-  if (coordEl) {
-    coordEl.innerHTML = coord
-      ? `<a class="link" href="staff_profile.html?id=${encodeURIComponent(coord.id)}">${coord.name}</a>
-         <div class="small">${coord.title}</div>`
-      : `<span class="small">Unassigned</span>`;
+
+  if (coordEl && prof.coordinator) {
+    coordEl.innerHTML = `
+      <a class="link"
+         href="staff_profile.html?id=${encodeURIComponent(prof.coordinator.staff_id)}">
+         ${prof.coordinator.name}
+      </a>
+      <div class="small">${prof.coordinator.title || ""}</div>
+    `;
   }
+
+  // =========================
+  // Enable / Disable Fields
+  // =========================
 
   addressFields.forEach((field) => {
     field.disabled = !canEditFull;
   });
 
   const fields = document.querySelectorAll("[data-emergency-field]");
+
   fields.forEach((field) => {
     field.disabled = !canEdit;
   });
 
+  // =========================
+  // Tags / Risks
+  // =========================
+
   const tagEditor = document.getElementById("profileTagsEditor");
+
   if (tagEditor) {
-    renderTagCheckboxes(tagEditor, prof.tags || [], !canEditFull);
+    renderTagCheckboxes(
+      tagEditor,
+      prof.tags || [],
+      !canEditFull
+    );
   }
 
   const riskEditor = document.getElementById("profileRisksEditor");
+
   if (riskEditor) {
-    renderRiskCheckboxes(riskEditor, prof.risks || [], !canEditRisks);
+    renderRiskCheckboxes(
+      riskEditor,
+      prof.risks || [],
+      !canEditRisks
+    );
   }
 
-  // Sports picker — always mounted; visibility tracks the 'SO' tag in real time
-  const sportCard = document.getElementById("profileSportsCard");
-  const sportEditor = document.getElementById("profileSportsEditor");
-  const sportKey = `maap_sports_${id}`;
-
-  function ensureSportsRendered() {
-    if (!sportEditor || sportEditor.dataset.rendered === "true") return;
-    let storedSports = [];
-    try {
-      const raw = localStorage.getItem(sportKey);
-      storedSports = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(storedSports)) storedSports = [];
-    } catch {
-      storedSports = [];
-    }
-    renderSportCheckboxes(sportEditor, storedSports, !canEditFull);
-    sportEditor.dataset.rendered = "true";
-  }
-
-  function updateSportsCardVisibility(show) {
-    if (!sportCard) return;
-    sportCard.style.display = show ? "" : "none";
-    if (show) ensureSportsRendered();
-  }
-
-  updateSportsCardVisibility(Array.isArray(prof.tags) && prof.tags.includes("so"));
-
-  // Schools picker — always mounted; visibility tracks the 'E' (Elementary) tag in real time
-  const schoolCard = document.getElementById("profileSchoolsCard");
-  const schoolEditor = document.getElementById("profileSchoolsEditor");
-  const schoolKey = `maap_schools_${id}`;
-
-  function ensureSchoolsRendered() {
-    if (!schoolEditor || schoolEditor.dataset.rendered === "true") return;
-    let storedSchools = [];
-    try {
-      const raw = localStorage.getItem(schoolKey);
-      storedSchools = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(storedSchools)) storedSchools = [];
-    } catch {
-      storedSchools = [];
-    }
-    renderSchoolCheckboxes(schoolEditor, storedSchools, !canEditFull);
-    schoolEditor.dataset.rendered = "true";
-  }
-
-  function updateSchoolsCardVisibility(show) {
-    if (!schoolCard) return;
-    schoolCard.style.display = show ? "" : "none";
-    if (show) ensureSchoolsRendered();
-  }
-
-  updateSchoolsCardVisibility(Array.isArray(prof.tags) && prof.tags.includes("e"));
-
-  // Live toggle: react the moment the SO or E checkboxes flip in the tag editor
-  if (tagEditor && tagEditor.dataset.conditionalListenerBound !== "true") {
-    tagEditor.dataset.conditionalListenerBound = "true";
-    tagEditor.addEventListener("change", (event) => {
-      const target = event.target;
-      if (!target || target.type !== "checkbox") return;
-      if (target.value === "so") updateSportsCardVisibility(target.checked);
-      if (target.value === "e") updateSchoolsCardVisibility(target.checked);
-    });
-  }
+  // =========================
+  // Save Profile
+  // =========================
 
   const saveEmergencyBtn = document.getElementById("saveEmergency");
-  if (saveEmergencyBtn) {
-    saveEmergencyBtn.style.display = canEditFull || canEdit ? "" : "none";
-  }
 
-  const deleteProfileBtn = document.getElementById("deleteProfileBtn");
-  if (deleteProfileBtn) {
-    deleteProfileBtn.style.display = canDeleteRecords(s.role) ? "" : "none";
+  if (saveEmergencyBtn) {
+    saveEmergencyBtn.style.display =
+      canEditFull || canEdit ? "" : "none";
   }
 
   if (saveEmergencyBtn && saveEmergencyBtn.dataset.bound !== "true") {
     saveEmergencyBtn.dataset.bound = "true";
+
     saveEmergencyBtn.addEventListener("click", async () => {
+
       if (!canEdit) {
-        return alert("You don’t have permission to edit this profile’s emergency info.");
+        alert("You don’t have permission to edit this profile.");
+        return;
       }
 
-      if (!prof) {
-        return alert("Profile not found.");
-      }
+      // Build payload for backend
+      const payload = {
+        person_id: prof.person_id,
 
-      const visibleCheckedTags = canEditFull && tagEditor
-        ? [...tagEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value)
-        : prof.tags || [];
-      const hiddenTags = (prof.tags || []).filter(code => tag_definitions[code]?._hidden);
-      const selectedTags = [...new Set([...visibleCheckedTags, ...hiddenTags])];
+        address: canEditFull
+          ? {
+              street: addressFields[0].value.trim(),
+              city: addressFields[1].value.trim(),
+              state: addressFields[2].value.trim(),
+              zip: addressFields[3].value.trim()
+            }
+          : undefined,
 
-      const visibleCheckedRisks = canEditRisks && riskEditor
-        ? [...riskEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value)
-        : prof.risks || [];
-      const hiddenRisks = (prof.risks || []).filter(code => risk_definitions[code]?._hidden);
-      const selectedRisks = [...new Set([...visibleCheckedRisks, ...hiddenRisks])];
-
-      prof.tags = selectedTags;
-      prof.risks = selectedRisks;
-      prof.updated = new Date().toISOString().slice(0, 10);
-
-      // Persist Special Olympics sports selection (local-only quick view)
-      if (canEditFull && sportEditor && prof.tags.includes("so")) {
-        const visibleCheckedSports = [...sportEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
-        const storedSports = JSON.parse(localStorage.getItem(sportKey) || "[]");
-        const hiddenSports = storedSports.filter(code => sport_definitions[code]?._hidden);
-        localStorage.setItem(sportKey, JSON.stringify([...new Set([...visibleCheckedSports, ...hiddenSports])]));
-      } else if (!prof.tags.includes("so")) {
-        localStorage.removeItem(sportKey);
-      }
-
-      // Persist Elementary schools selection (local-only quick view)
-      if (canEditFull && schoolEditor && prof.tags.includes("e")) {
-        const visibleCheckedSchools = [...schoolEditor.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
-        const storedSchools = JSON.parse(localStorage.getItem(schoolKey) || "[]");
-        const hiddenSchools = storedSchools.filter(code => school_definitions[code]?._hidden);
-        localStorage.setItem(schoolKey, JSON.stringify([...new Set([...visibleCheckedSchools, ...hiddenSchools])]));
-      } else if (!prof.tags.includes("e")) {
-        localStorage.removeItem(schoolKey);
-      }
-
-      if (canEditFull && addressFields.length >= 4) {
-        prof.address = {
-          street: addressFields[0].value.trim(),
-          city: addressFields[1].value.trim(),
-          state: addressFields[2].value.trim(),
-          zip: addressFields[3].value.trim()
-        };
-      }
-
-      if (canEdit && emergencyInputs.length >= 4) {
-        prof.primaryContact = {
+        primary_contact: {
           name: emergencyInputs[0].value.trim(),
           phone: emergencyInputs[1].value.trim()
-        };
-        prof.secondaryContact = {
+        },
+
+        secondary_contact: {
           name: emergencyInputs[2].value.trim(),
           phone: emergencyInputs[3].value.trim()
-        };
-      }
+        },
 
-      if (canEdit && textareas.length >= 2) {
-        prof.medicalNotes = textareas[0].value.trim();
-        prof.mobilityNotes = textareas[1].value.trim();
-      }
+        medical_notes:
+          textareas.length >= 1
+            ? textareas[0].value.trim()
+            : "",
 
-      // Keep local copy in sync too
-      saveProfiles();
+        mobility_notes:
+          textareas.length >= 2
+            ? textareas[1].value.trim()
+            : "",
+
+        tags: tagEditor
+          ? [...tagEditor.querySelectorAll('input[type="checkbox"]:checked')]
+              .map((cb) => cb.value)
+          : [],
+
+        risks: riskEditor
+          ? [...riskEditor.querySelectorAll('input[type="checkbox"]:checked')]
+              .map((cb) => cb.value)
+          : []
+      };
 
       try {
-        await saveProfileToBackend(prof);
-        backendHydrated = false;
-        await hydrateDataFromBackend();
+        const response = await fetch(
+          `/api/profiles/${encodeURIComponent(prof.person_id)}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${s.token}`
+            },
+            body: JSON.stringify(payload)
+          }
+        );
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.message || "Update failed");
+        }
+
         alert("Profile saved successfully.");
+
       } catch (err) {
+        console.error(err);
         alert(`Failed to save profile: ${err.message}`);
       }
     });
   }
 
-  // Account-specific private notes stored locally per profile
+  // =========================
+  // Personal Notes
+  // =========================
+
   const noteKey = `maap_note_${id}_${s.email}`;
+
   const notesField = document.getElementById("personalNotes");
   const saveNotesBtn = document.getElementById("saveNotes");
 
@@ -1766,31 +1896,65 @@ async function initProfilePage() {
 
   if (saveNotesBtn && saveNotesBtn.dataset.bound !== "true") {
     saveNotesBtn.dataset.bound = "true";
+
     saveNotesBtn.addEventListener("click", () => {
-      localStorage.setItem(noteKey, (notesField?.value || "").trim());
+      localStorage.setItem(
+        noteKey,
+        (notesField?.value || "").trim()
+      );
+
       alert("Personal note saved.");
     });
   }
 
+  // =========================
+  // Delete Profile
+  // =========================
+
+  const deleteProfileBtn = document.getElementById("deleteProfileBtn");
+
+  if (deleteProfileBtn) {
+    deleteProfileBtn.style.display =
+      canDeleteRecords(s.role) ? "" : "none";
+  }
+
   if (deleteProfileBtn && deleteProfileBtn.dataset.bound !== "true") {
     deleteProfileBtn.dataset.bound = "true";
+
     deleteProfileBtn.addEventListener("click", async () => {
+
       if (!canDeleteRecords(s.role)) {
         alert("Only Director and Head Coordinator can delete profiles.");
         return;
       }
 
-      const confirmed = window.confirm(`Delete ${prof.name}'s profile? This cannot be undone.`);
+      const confirmed = window.confirm(
+        `Delete this profile? This cannot be undone.`
+      );
+
       if (!confirmed) return;
 
       try {
-        await deleteProfileFromBackend(prof.id, s);
-        profiles = profiles.filter((profile) => profile.id !== prof.id);
-        saveProfiles();
-        backendHydrated = false;
+        const response = await fetch(
+          `/api/profiles/${encodeURIComponent(prof.person_id)}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${s.token}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Delete failed");
+        }
+
         alert("Profile deleted successfully.");
+
         window.location.href = "dashboard.html";
+
       } catch (err) {
+        console.error(err);
         alert(`Failed to delete profile: ${err.message}`);
       }
     });
@@ -2895,5 +3059,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (document.body.dataset.page === "staff_profile") await initStaffProfilePage();
   if (document.body.dataset.page === "admin") initAdminPage();
 
-  initExcelUpload();
 });
