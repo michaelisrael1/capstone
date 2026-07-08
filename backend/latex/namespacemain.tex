@@ -31,6 +31,14 @@
 \item 
 \mbox{\hyperlink{namespacemain_a31e33ea4ec390101b8fec7fa499054de}{role\+\_\+can\+\_\+delete\+\_\+records}} (str role)
 \item 
+\mbox{\hyperlink{namespacemain_a7e847ab7e79337e183f71618b25fa42a}{role\+\_\+can\+\_\+create\+\_\+profiles}} (str role)
+\item 
+\mbox{\hyperlink{namespacemain_abcd2e8af4ac1b32ffa14390b9b41e82f}{row\+\_\+value}} (row, key, index=0, default=None)
+\item 
+\mbox{\hyperlink{namespacemain_a4bf6ba0326f636570ad92ce1eff0c759}{get\+\_\+next\+\_\+int\+\_\+id}} (str table\+\_\+name, str column\+\_\+name)
+\item 
+\mbox{\hyperlink{namespacemain_a2e7f7103998e68c765d8a8ef1c1b3a74}{split\+\_\+full\+\_\+name}} (str value)
+\item 
 \mbox{\hyperlink{namespacemain_a23d5b8de7178455639da20626f7bb170}{row\+\_\+to\+\_\+client\+\_\+dict}} (row)
 \item 
 \mbox{\hyperlink{namespacemain_adf083bb8a761cffee58b86fd07a0d7c4}{fetch\+\_\+existing\+\_\+client}} (str client\+\_\+id)
@@ -65,6 +73,12 @@
 \item 
 \mbox{\hyperlink{namespacemain_a66b0266dcfd3f50efc3acf5ba7f69bb8}{save\+\_\+attachment\+\_\+to\+\_\+filesystem}} (dict attachment)
 \item 
+\mbox{\hyperlink{namespacemain_a9352826c4df7e4c712755e2368fee5ac}{get\+\_\+profile\+\_\+photo\+\_\+path}} (int person\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a1988adad7fe6955f940f84bf39ca7221}{get\+\_\+profile\+\_\+photo\+\_\+url}} (int person\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a86866587b782017f213e5952d238ae31}{save\+\_\+profile\+\_\+photo\+\_\+to\+\_\+filesystem}} (int person\+\_\+id, str data\+\_\+url)
+\item 
 \mbox{\hyperlink{namespacemain_af0fb25cf693c599e0d77e29e802af13a}{health\+\_\+check}} ()
 \item 
 \mbox{\hyperlink{namespacemain_ada39dfac338a7a3d5b6df3acb84ddee4}{get\+\_\+db\+\_\+time}} ()
@@ -89,7 +103,11 @@
 \item 
 \mbox{\hyperlink{namespacemain_a038704e12b54367c82cb01df40de848b}{get\+\_\+clients}} ()
 \item 
+\mbox{\hyperlink{namespacemain_ac20a1ac4ec7450e3598ef83070828d1e}{create\+\_\+client}} (dict payload, Request request)
+\item 
 \mbox{\hyperlink{namespacemain_a379c1353872b670d07f848d6a01b385d}{get\+\_\+profile}} (int person\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_aa06344c0a1505c62f39603a2ef757598}{upload\+\_\+profile\+\_\+photo}} (int person\+\_\+id, dict payload, Request request)
 \item 
 \mbox{\hyperlink{namespacemain_a746b17b98a39123ac0c88eca6e640065}{update\+\_\+client}} (str client\+\_\+id, dict payload, Request request)
 \item 
@@ -114,6 +132,8 @@ str \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_
 \item 
 str \mbox{\hyperlink{namespacemain_a99d65a72b4db599dfb624116faf6141e}{ANNOUNCEMENT\+\_\+\+UPLOAD\+\_\+\+ROOT}} = \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_\+\+ROOT}} / "{}announcements"{}
 \item 
+str \mbox{\hyperlink{namespacemain_a39aa55f45701322eb69f53a59b57931f}{PROFILE\+\_\+\+UPLOAD\+\_\+\+ROOT}} = \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_\+\+ROOT}} / "{}profiles"{}
+\item 
 \mbox{\hyperlink{namespacemain_aa6eea602ff3979e1ff2936eeeb7c1cd7}{parents}}
 \item 
 \mbox{\hyperlink{namespacemain_a0c5b8ab1603c8c5b8db5e1128a757fea}{True}}
@@ -133,6 +153,8 @@ dict \mbox{\hyperlink{namespacemain_aa405c42d214f58e6fa1f74c27809e2a5}{EMERGENCY
 dict \mbox{\hyperlink{namespacemain_a79708c90012f4253333f9c9c60ee087d}{ANNOUNCEMENT\+\_\+\+POST\+\_\+\+ROLES}} = \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{FULL\+\_\+\+EDIT\+\_\+\+ROLES}}
 \item 
 dict \mbox{\hyperlink{namespacemain_a0154fb5c23da536de9a3938df19a3127}{DELETE\+\_\+\+PROFILE\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_a7161fe0204ebd94a030d6898bfa8e1e7}{CREATE\+\_\+\+PROFILE\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}\}
 \item 
 dict \mbox{\hyperlink{namespacemain_ab1ef1171736296636b79105b7b74a22a}{ADMIN\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}, "{}program\+\_\+coordinator"{}\}
 \item 
@@ -182,6 +204,12 @@ dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_
 \index{create\_announcement@{create\_announcement}!main@{main}}
 \doxysubsubsection{\texorpdfstring{create\_announcement()}{create\_announcement()}}
 {\footnotesize\ttfamily main.\+create\+\_\+announcement (\begin{DoxyParamCaption}\item[{dict}]{payload,  }\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_ac20a1ac4ec7450e3598ef83070828d1e}\label{namespacemain_ac20a1ac4ec7450e3598ef83070828d1e} 
+\index{main@{main}!create\_client@{create\_client}}
+\index{create\_client@{create\_client}!main@{main}}
+\doxysubsubsection{\texorpdfstring{create\_client()}{create\_client()}}
+{\footnotesize\ttfamily main.\+create\+\_\+client (\begin{DoxyParamCaption}\item[{dict}]{payload,  }\item[{Request}]{request }\end{DoxyParamCaption})}
 
 \Hypertarget{namespacemain_aecf79e964a4497284b4003e5dc060d3d}\label{namespacemain_aecf79e964a4497284b4003e5dc060d3d} 
 \index{main@{main}!delete\_client@{delete\_client}}
@@ -267,6 +295,12 @@ dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_
 \doxysubsubsection{\texorpdfstring{get\_db\_time()}{get\_db\_time()}}
 {\footnotesize\ttfamily main.\+get\+\_\+db\+\_\+time (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
+\Hypertarget{namespacemain_a4bf6ba0326f636570ad92ce1eff0c759}\label{namespacemain_a4bf6ba0326f636570ad92ce1eff0c759} 
+\index{main@{main}!get\_next\_int\_id@{get\_next\_int\_id}}
+\index{get\_next\_int\_id@{get\_next\_int\_id}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_next\_int\_id()}{get\_next\_int\_id()}}
+{\footnotesize\ttfamily main.\+get\+\_\+next\+\_\+int\+\_\+id (\begin{DoxyParamCaption}\item[{str}]{table\+\_\+name,  }\item[{str}]{column\+\_\+name }\end{DoxyParamCaption})}
+
 \Hypertarget{namespacemain_ad983f59f502827c1430e4bece481f992}\label{namespacemain_ad983f59f502827c1430e4bece481f992} 
 \index{main@{main}!get\_option\_definitions@{get\_option\_definitions}}
 \index{get\_option\_definitions@{get\_option\_definitions}!main@{main}}
@@ -278,6 +312,18 @@ dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_
 \index{get\_profile@{get\_profile}!main@{main}}
 \doxysubsubsection{\texorpdfstring{get\_profile()}{get\_profile()}}
 {\footnotesize\ttfamily main.\+get\+\_\+profile (\begin{DoxyParamCaption}\item[{int}]{person\+\_\+id }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a9352826c4df7e4c712755e2368fee5ac}\label{namespacemain_a9352826c4df7e4c712755e2368fee5ac} 
+\index{main@{main}!get\_profile\_photo\_path@{get\_profile\_photo\_path}}
+\index{get\_profile\_photo\_path@{get\_profile\_photo\_path}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_profile\_photo\_path()}{get\_profile\_photo\_path()}}
+{\footnotesize\ttfamily main.\+get\+\_\+profile\+\_\+photo\+\_\+path (\begin{DoxyParamCaption}\item[{int}]{person\+\_\+id }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a1988adad7fe6955f940f84bf39ca7221}\label{namespacemain_a1988adad7fe6955f940f84bf39ca7221} 
+\index{main@{main}!get\_profile\_photo\_url@{get\_profile\_photo\_url}}
+\index{get\_profile\_photo\_url@{get\_profile\_photo\_url}!main@{main}}
+\doxysubsubsection{\texorpdfstring{get\_profile\_photo\_url()}{get\_profile\_photo\_url()}}
+{\footnotesize\ttfamily main.\+get\+\_\+profile\+\_\+photo\+\_\+url (\begin{DoxyParamCaption}\item[{int}]{person\+\_\+id }\end{DoxyParamCaption})}
 
 \Hypertarget{namespacemain_a3b5c5a067cdc6987232db15ad0fc4b4d}\label{namespacemain_a3b5c5a067cdc6987232db15ad0fc4b4d} 
 \index{main@{main}!get\_request\_email@{get\_request\_email}}
@@ -345,6 +391,12 @@ dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_
 \doxysubsubsection{\texorpdfstring{parse\_header\_list()}{parse\_header\_list()}}
 {\footnotesize\ttfamily main.\+parse\+\_\+header\+\_\+list (\begin{DoxyParamCaption}\item[{}]{value }\end{DoxyParamCaption})}
 
+\Hypertarget{namespacemain_a7e847ab7e79337e183f71618b25fa42a}\label{namespacemain_a7e847ab7e79337e183f71618b25fa42a} 
+\index{main@{main}!role\_can\_create\_profiles@{role\_can\_create\_profiles}}
+\index{role\_can\_create\_profiles@{role\_can\_create\_profiles}!main@{main}}
+\doxysubsubsection{\texorpdfstring{role\_can\_create\_profiles()}{role\_can\_create\_profiles()}}
+{\footnotesize\ttfamily main.\+role\+\_\+can\+\_\+create\+\_\+profiles (\begin{DoxyParamCaption}\item[{str}]{role }\end{DoxyParamCaption})}
+
 \Hypertarget{namespacemain_a31e33ea4ec390101b8fec7fa499054de}\label{namespacemain_a31e33ea4ec390101b8fec7fa499054de} 
 \index{main@{main}!role\_can\_delete\_records@{role\_can\_delete\_records}}
 \index{role\_can\_delete\_records@{role\_can\_delete\_records}!main@{main}}
@@ -381,6 +433,12 @@ dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_
 \doxysubsubsection{\texorpdfstring{row\_to\_client\_dict()}{row\_to\_client\_dict()}}
 {\footnotesize\ttfamily main.\+row\+\_\+to\+\_\+client\+\_\+dict (\begin{DoxyParamCaption}\item[{}]{row }\end{DoxyParamCaption})}
 
+\Hypertarget{namespacemain_abcd2e8af4ac1b32ffa14390b9b41e82f}\label{namespacemain_abcd2e8af4ac1b32ffa14390b9b41e82f} 
+\index{main@{main}!row\_value@{row\_value}}
+\index{row\_value@{row\_value}!main@{main}}
+\doxysubsubsection{\texorpdfstring{row\_value()}{row\_value()}}
+{\footnotesize\ttfamily main.\+row\+\_\+value (\begin{DoxyParamCaption}\item[{}]{row,  }\item[{}]{key,  }\item[{}]{index = {\ttfamily 0},  }\item[{}]{default = {\ttfamily None} }\end{DoxyParamCaption})}
+
 \Hypertarget{namespacemain_a068c63288a47def91215758fc3ea83de}\label{namespacemain_a068c63288a47def91215758fc3ea83de} 
 \index{main@{main}!safe\_json\_loads@{safe\_json\_loads}}
 \index{safe\_json\_loads@{safe\_json\_loads}!main@{main}}
@@ -399,6 +457,18 @@ dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_
 \doxysubsubsection{\texorpdfstring{save\_attachment\_to\_filesystem()}{save\_attachment\_to\_filesystem()}}
 {\footnotesize\ttfamily main.\+save\+\_\+attachment\+\_\+to\+\_\+filesystem (\begin{DoxyParamCaption}\item[{dict}]{attachment }\end{DoxyParamCaption})}
 
+\Hypertarget{namespacemain_a86866587b782017f213e5952d238ae31}\label{namespacemain_a86866587b782017f213e5952d238ae31} 
+\index{main@{main}!save\_profile\_photo\_to\_filesystem@{save\_profile\_photo\_to\_filesystem}}
+\index{save\_profile\_photo\_to\_filesystem@{save\_profile\_photo\_to\_filesystem}!main@{main}}
+\doxysubsubsection{\texorpdfstring{save\_profile\_photo\_to\_filesystem()}{save\_profile\_photo\_to\_filesystem()}}
+{\footnotesize\ttfamily main.\+save\+\_\+profile\+\_\+photo\+\_\+to\+\_\+filesystem (\begin{DoxyParamCaption}\item[{int}]{person\+\_\+id,  }\item[{str}]{data\+\_\+url }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_a2e7f7103998e68c765d8a8ef1c1b3a74}\label{namespacemain_a2e7f7103998e68c765d8a8ef1c1b3a74} 
+\index{main@{main}!split\_full\_name@{split\_full\_name}}
+\index{split\_full\_name@{split\_full\_name}!main@{main}}
+\doxysubsubsection{\texorpdfstring{split\_full\_name()}{split\_full\_name()}}
+{\footnotesize\ttfamily main.\+split\+\_\+full\+\_\+name (\begin{DoxyParamCaption}\item[{str}]{value }\end{DoxyParamCaption})}
+
 \Hypertarget{namespacemain_a18fe63074082369c52504a2dda02ce5c}\label{namespacemain_a18fe63074082369c52504a2dda02ce5c} 
 \index{main@{main}!toggle\_announcement\_like@{toggle\_announcement\_like}}
 \index{toggle\_announcement\_like@{toggle\_announcement\_like}!main@{main}}
@@ -416,6 +486,12 @@ dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_
 \index{update\_option\_definition@{update\_option\_definition}!main@{main}}
 \doxysubsubsection{\texorpdfstring{update\_option\_definition()}{update\_option\_definition()}}
 {\footnotesize\ttfamily main.\+update\+\_\+option\+\_\+definition (\begin{DoxyParamCaption}\item[{int}]{option\+\_\+id,  }\item[{Request}]{request }\end{DoxyParamCaption})}
+
+\Hypertarget{namespacemain_aa06344c0a1505c62f39603a2ef757598}\label{namespacemain_aa06344c0a1505c62f39603a2ef757598} 
+\index{main@{main}!upload\_profile\_photo@{upload\_profile\_photo}}
+\index{upload\_profile\_photo@{upload\_profile\_photo}!main@{main}}
+\doxysubsubsection{\texorpdfstring{upload\_profile\_photo()}{upload\_profile\_photo()}}
+{\footnotesize\ttfamily main.\+upload\+\_\+profile\+\_\+photo (\begin{DoxyParamCaption}\item[{int}]{person\+\_\+id,  }\item[{dict}]{payload,  }\item[{Request}]{request }\end{DoxyParamCaption})}
 
 \Hypertarget{namespacemain_a339b7387235e1ca901196159ec57ccf2}\label{namespacemain_a339b7387235e1ca901196159ec57ccf2} 
 \index{main@{main}!user\_login@{user\_login}}
@@ -481,6 +557,12 @@ dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_
 \DoxyCodeLine{00021\ ]}
 
 \end{DoxyCode}
+\Hypertarget{namespacemain_a7161fe0204ebd94a030d6898bfa8e1e7}\label{namespacemain_a7161fe0204ebd94a030d6898bfa8e1e7} 
+\index{main@{main}!CREATE\_PROFILE\_ROLES@{CREATE\_PROFILE\_ROLES}}
+\index{CREATE\_PROFILE\_ROLES@{CREATE\_PROFILE\_ROLES}!main@{main}}
+\doxysubsubsection{\texorpdfstring{CREATE\_PROFILE\_ROLES}{CREATE\_PROFILE\_ROLES}}
+{\footnotesize\ttfamily dict main.\+CREATE\+\_\+\+PROFILE\+\_\+\+ROLES = \{"{}director"{}, "{}head\+\_\+coordinator"{}\}}
+
 \Hypertarget{namespacemain_a898ec19db0e0dff9ffc262e5b0ad5451}\label{namespacemain_a898ec19db0e0dff9ffc262e5b0ad5451} 
 \index{main@{main}!db\_client@{db\_client}}
 \index{db\_client@{db\_client}!main@{main}}
@@ -546,6 +628,12 @@ dict \mbox{\hyperlink{namespacemain_acd65797f43277067a9a34306234866ed}{VALID\+\_
 \index{parents@{parents}!main@{main}}
 \doxysubsubsection{\texorpdfstring{parents}{parents}}
 {\footnotesize\ttfamily main.\+parents}
+
+\Hypertarget{namespacemain_a39aa55f45701322eb69f53a59b57931f}\label{namespacemain_a39aa55f45701322eb69f53a59b57931f} 
+\index{main@{main}!PROFILE\_UPLOAD\_ROOT@{PROFILE\_UPLOAD\_ROOT}}
+\index{PROFILE\_UPLOAD\_ROOT@{PROFILE\_UPLOAD\_ROOT}!main@{main}}
+\doxysubsubsection{\texorpdfstring{PROFILE\_UPLOAD\_ROOT}{PROFILE\_UPLOAD\_ROOT}}
+{\footnotesize\ttfamily str main.\+PROFILE\+\_\+\+UPLOAD\+\_\+\+ROOT = \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_\+\+ROOT}} / "{}profiles"{}}
 
 \Hypertarget{namespacemain_a0c5b8ab1603c8c5b8db5e1128a757fea}\label{namespacemain_a0c5b8ab1603c8c5b8db5e1128a757fea} 
 \index{main@{main}!True@{True}}

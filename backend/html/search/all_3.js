@@ -5,5 +5,7 @@ var searchData=
   ['client_5fselect_5fcolumns_2',['CLIENT_SELECT_COLUMNS',['../namespacemain.html#adcc00e4cb6c480c39abf3ddbc117fe4f',1,'main']]],
   ['connection_3',['connection',['../namespaceconnection.html',1,'']]],
   ['connection_2epy_4',['connection.py',['../app_2utils_2connection_8py.html',1,'(Global Namespace)'],['../utils_2connection_8py.html',1,'(Global Namespace)']]],
-  ['create_5fannouncement_5',['create_announcement',['../namespacemain.html#ab57e62ceac76ab365c1a4c63eb6ceaa6',1,'main']]]
+  ['create_5fannouncement_5',['create_announcement',['../namespacemain.html#ab57e62ceac76ab365c1a4c63eb6ceaa6',1,'main']]],
+  ['create_5fclient_6',['create_client',['../namespacemain.html#ac20a1ac4ec7450e3598ef83070828d1e',1,'main']]],
+  ['create_5fprofile_5froles_7',['CREATE_PROFILE_ROLES',['../namespacemain.html#a7161fe0204ebd94a030d6898bfa8e1e7',1,'main']]]
 ];

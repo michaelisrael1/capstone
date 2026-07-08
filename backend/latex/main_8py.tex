@@ -36,6 +36,14 @@ namespace \mbox{\hyperlink{namespacemain}{main}}
 \item 
 \mbox{\hyperlink{namespacemain_a31e33ea4ec390101b8fec7fa499054de}{main.\+role\+\_\+can\+\_\+delete\+\_\+records}} (str role)
 \item 
+\mbox{\hyperlink{namespacemain_a7e847ab7e79337e183f71618b25fa42a}{main.\+role\+\_\+can\+\_\+create\+\_\+profiles}} (str role)
+\item 
+\mbox{\hyperlink{namespacemain_abcd2e8af4ac1b32ffa14390b9b41e82f}{main.\+row\+\_\+value}} (row, key, index=0, default=None)
+\item 
+\mbox{\hyperlink{namespacemain_a4bf6ba0326f636570ad92ce1eff0c759}{main.\+get\+\_\+next\+\_\+int\+\_\+id}} (str table\+\_\+name, str column\+\_\+name)
+\item 
+\mbox{\hyperlink{namespacemain_a2e7f7103998e68c765d8a8ef1c1b3a74}{main.\+split\+\_\+full\+\_\+name}} (str value)
+\item 
 \mbox{\hyperlink{namespacemain_a23d5b8de7178455639da20626f7bb170}{main.\+row\+\_\+to\+\_\+client\+\_\+dict}} (row)
 \item 
 \mbox{\hyperlink{namespacemain_adf083bb8a761cffee58b86fd07a0d7c4}{main.\+fetch\+\_\+existing\+\_\+client}} (str client\+\_\+id)
@@ -70,6 +78,12 @@ namespace \mbox{\hyperlink{namespacemain}{main}}
 \item 
 \mbox{\hyperlink{namespacemain_a66b0266dcfd3f50efc3acf5ba7f69bb8}{main.\+save\+\_\+attachment\+\_\+to\+\_\+filesystem}} (dict attachment)
 \item 
+\mbox{\hyperlink{namespacemain_a9352826c4df7e4c712755e2368fee5ac}{main.\+get\+\_\+profile\+\_\+photo\+\_\+path}} (int person\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a1988adad7fe6955f940f84bf39ca7221}{main.\+get\+\_\+profile\+\_\+photo\+\_\+url}} (int person\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_a86866587b782017f213e5952d238ae31}{main.\+save\+\_\+profile\+\_\+photo\+\_\+to\+\_\+filesystem}} (int person\+\_\+id, str data\+\_\+url)
+\item 
 \mbox{\hyperlink{namespacemain_af0fb25cf693c599e0d77e29e802af13a}{main.\+health\+\_\+check}} ()
 \item 
 \mbox{\hyperlink{namespacemain_ada39dfac338a7a3d5b6df3acb84ddee4}{main.\+get\+\_\+db\+\_\+time}} ()
@@ -94,7 +108,11 @@ namespace \mbox{\hyperlink{namespacemain}{main}}
 \item 
 \mbox{\hyperlink{namespacemain_a038704e12b54367c82cb01df40de848b}{main.\+get\+\_\+clients}} ()
 \item 
+\mbox{\hyperlink{namespacemain_ac20a1ac4ec7450e3598ef83070828d1e}{main.\+create\+\_\+client}} (dict payload, Request request)
+\item 
 \mbox{\hyperlink{namespacemain_a379c1353872b670d07f848d6a01b385d}{main.\+get\+\_\+profile}} (int person\+\_\+id)
+\item 
+\mbox{\hyperlink{namespacemain_aa06344c0a1505c62f39603a2ef757598}{main.\+upload\+\_\+profile\+\_\+photo}} (int person\+\_\+id, dict payload, Request request)
 \item 
 \mbox{\hyperlink{namespacemain_a746b17b98a39123ac0c88eca6e640065}{main.\+update\+\_\+client}} (str client\+\_\+id, dict payload, Request request)
 \item 
@@ -119,6 +137,8 @@ str \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{main.\+UPL
 \item 
 str \mbox{\hyperlink{namespacemain_a99d65a72b4db599dfb624116faf6141e}{main.\+ANNOUNCEMENT\+\_\+\+UPLOAD\+\_\+\+ROOT}} = \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_\+\+ROOT}} / "{}announcements"{}
 \item 
+str \mbox{\hyperlink{namespacemain_a39aa55f45701322eb69f53a59b57931f}{main.\+PROFILE\+\_\+\+UPLOAD\+\_\+\+ROOT}} = \mbox{\hyperlink{namespacemain_a49b5a611c17f699007b325f34c189d85}{UPLOAD\+\_\+\+ROOT}} / "{}profiles"{}
+\item 
 \mbox{\hyperlink{namespacemain_aa6eea602ff3979e1ff2936eeeb7c1cd7}{main.\+parents}}
 \item 
 \mbox{\hyperlink{namespacemain_a0c5b8ab1603c8c5b8db5e1128a757fea}{main.\+True}}
@@ -138,6 +158,8 @@ dict \mbox{\hyperlink{namespacemain_aa405c42d214f58e6fa1f74c27809e2a5}{main.\+EM
 dict \mbox{\hyperlink{namespacemain_a79708c90012f4253333f9c9c60ee087d}{main.\+ANNOUNCEMENT\+\_\+\+POST\+\_\+\+ROLES}} = \mbox{\hyperlink{namespacemain_a645fab1c965cb01d0cdeff0b35c0a8db}{FULL\+\_\+\+EDIT\+\_\+\+ROLES}}
 \item 
 dict \mbox{\hyperlink{namespacemain_a0154fb5c23da536de9a3938df19a3127}{main.\+DELETE\+\_\+\+PROFILE\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}\}
+\item 
+dict \mbox{\hyperlink{namespacemain_a7161fe0204ebd94a030d6898bfa8e1e7}{main.\+CREATE\+\_\+\+PROFILE\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}\}
 \item 
 dict \mbox{\hyperlink{namespacemain_ab1ef1171736296636b79105b7b74a22a}{main.\+ADMIN\+\_\+\+ROLES}} = \{"{}director"{}, "{}head\+\_\+coordinator"{}, "{}program\+\_\+coordinator"{}\}
 \item 
