@@ -33,6 +33,9 @@
             </div>
 
             <div class="portal-meta">
+                <button class="btn-maap primary" id="addClientProfileButton" type="button" style="display:none;">
+                    Add Client
+                </button>
                 <span class="pill-label">Archive</span>
                 <span class="pill-label blue">Profiles</span>
                 <span class="pill-label orange">Emergency</span>
@@ -71,6 +74,89 @@
 
                         <button class="portal-btn-lite" id="clearFilters" type="button">Clear</button>
                     </div>
+                </div>
+
+                <div id="addClientProfileCard" class="portal-card dashboard-create-card" style="display:none;">
+                    <div class="portal-card-head row-split">
+                        <div>
+                            <h2 class="portal-h2">Add Client Profile</h2>
+                            <p class="portal-muted">Create a basic profile for a new client. Required fields are marked.</p>
+                        </div>
+                        <span class="pill-label blue">Admin</span>
+                    </div>
+
+                    <form id="addClientProfileForm" class="portal-form">
+                        <div class="portal-form-grid">
+                            <div>
+                                <label class="portal-label" for="newClientFirstName">First Name *</label>
+                                <input id="newClientFirstName" class="portal-input" autocomplete="given-name" required/>
+                            </div>
+
+                            <div>
+                                <label class="portal-label" for="newClientLastName">Last Name *</label>
+                                <input id="newClientLastName" class="portal-input" autocomplete="family-name" required/>
+                            </div>
+
+                            <div>
+                                <label class="portal-label" for="newClientGroup">Group / Program Setting</label>
+                                <input id="newClientGroup" class="portal-input" placeholder="Adult Services"/>
+                            </div>
+
+                            <div>
+                                <label class="portal-label" for="newClientMediaConsent">Media Consent</label>
+                                <select id="newClientMediaConsent" class="portal-select">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="portal-form-grid">
+                            <div>
+                                <label class="portal-label" for="newClientStreet">Street Address</label>
+                                <input id="newClientStreet" class="portal-input" autocomplete="street-address"/>
+                            </div>
+
+                            <div>
+                                <label class="portal-label" for="newClientCity">City</label>
+                                <input id="newClientCity" class="portal-input" autocomplete="address-level2"/>
+                            </div>
+
+                            <div>
+                                <label class="portal-label" for="newClientState">State</label>
+                                <input id="newClientState" class="portal-input" maxlength="2" autocomplete="address-level1"/>
+                            </div>
+
+                            <div>
+                                <label class="portal-label" for="newClientZip">ZIP</label>
+                                <input id="newClientZip" class="portal-input" autocomplete="postal-code"/>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-create-options">
+                            <div>
+                                <label class="portal-label">Programs / Tags</label>
+                                <div id="newClientTagsEditor" class="tag-checkbox-grid"></div>
+                            </div>
+
+                            <div>
+                                <label class="portal-label">Risks / Supports</label>
+                                <div id="newClientRisksEditor" class="tag-checkbox-grid"></div>
+                            </div>
+                        </div>
+
+                        <label class="portal-label" for="newClientNotes">Notes</label>
+                        <textarea id="newClientNotes" class="portal-textarea" rows="3" placeholder="Optional notes for staff"></textarea>
+
+                        <div class="portal-actions row-split">
+                            <div id="addClientStatus" class="portal-footnote"></div>
+                            <div class="portal-action-buttons">
+                                <button class="portal-btn-lite" id="closeClientProfileForm" type="button">Cancel</button>
+                                <button class="portal-btn-lite" id="resetClientProfileForm" type="button">Reset</button>
+                                <button class="portal-btn-orange" type="submit">Create profile</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="portal-card">
@@ -164,6 +250,14 @@
                             <div>
                                 <div class="quick-title">View Announcements</div>
                                 <div class="quick-sub">Tagged feed with likes and comments</div>
+                            </div>
+                        </a>
+
+                        <a class="quick-item" href="#addClientProfileCard" id="addClientTile" style="display:none;">
+                            <div class="quick-icon" aria-hidden="true">+</div>
+                            <div>
+                                <div class="quick-title">Add Client Profile</div>
+                                <div class="quick-sub">Create a new client record</div>
                             </div>
                         </a>
 

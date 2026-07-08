@@ -63,6 +63,72 @@ class TestClientsEndpoints:
         response = client.get("/clients", headers=director_headers)
         assert response.status_code == 500
 
+    def test_create_client_director_succeeds(self, client, mock_db, director_headers):
+        mock_db.send_query.side_effect = [[{"next_id": 42}], 1]
+        payload = {
+            "firstName": "New",
+            "lastName": "Client",
+            "mediaConsent": "No",
+            "tags": [],
+            "risks": [],
+        }
+        response = client.post("/clients", json=payload, headers=director_headers)
+        assert response.status_code == 200
+        assert response.json()["person_id"] == 42
+
+    def test_create_client_head_coordinator_succeeds(self, client, mock_db, head_coordinator_headers):
+        mock_db.send_query.side_effect = [[{"next_id": 43}], 1]
+        payload = {
+            "firstName": "Head",
+            "lastName": "Created",
+            "mediaConsent": "Yes",
+            "tags": [],
+            "risks": [],
+        }
+        response = client.post("/clients", json=payload, headers=head_coordinator_headers)
+        assert response.status_code == 200
+        assert response.json()["media_consent"] is True
+
+    def test_create_client_staff_returns_403(self, client, mock_db, staff_headers):
+        payload = {
+            "firstName": "Staff",
+            "lastName": "Attempt",
+            "tags": [],
+            "risks": [],
+        }
+        response = client.post("/clients", json=payload, headers=staff_headers)
+        assert response.status_code == 403
+
+    def test_create_client_missing_name_returns_400(self, client, mock_db, director_headers):
+        response = client.post("/clients", json={"tags": [], "risks": []}, headers=director_headers)
+        assert response.status_code == 400
+
+    def test_upload_profile_photo_director_succeeds(self, client, mock_db, director_headers, tmp_path, monkeypatch):
+        import main
+
+        monkeypatch.setattr(main, "PROFILE_UPLOAD_ROOT", tmp_path)
+        mock_db.send_query.return_value = [{"person_id": 42}]
+        payload = {"dataUrl": "data:image/jpeg;base64,aGVsbG8="}
+
+        response = client.post("/profiles/42/photo", json=payload, headers=director_headers)
+
+        assert response.status_code == 200
+        assert response.json()["photoUrl"] == "/api/uploads/profiles/profile-42.jpg"
+        assert (tmp_path / "profile-42.jpg").read_bytes() == b"hello"
+
+    def test_upload_profile_photo_invalid_payload_returns_400(self, client, mock_db, director_headers):
+        mock_db.send_query.return_value = [{"person_id": 42}]
+        response = client.post("/profiles/42/photo", json={"dataUrl": "not-image"}, headers=director_headers)
+        assert response.status_code == 400
+
+    def test_upload_profile_photo_staff_unassigned_returns_403(self, client, mock_db, staff_headers):
+        response = client.post(
+            "/profiles/42/photo",
+            json={"dataUrl": "data:image/jpeg;base64,aGVsbG8="},
+            headers=staff_headers,
+        )
+        assert response.status_code == 403
+
 
     def test_update_client_director_full_edit(self, client, mock_db, director_headers, sample_client_row):
         mock_db.send_query.side_effect = [[sample_client_row], 1]

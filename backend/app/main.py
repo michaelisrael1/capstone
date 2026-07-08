@@ -9,7 +9,7 @@ import uuid
 import bcrypt
 import jwt
 import os
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -41,7 +41,9 @@ db_client = DatabaseClient()
 DB_HOST = os.getenv("DB_HOST", "db")
 UPLOAD_ROOT = Path(__file__).resolve().parent / "uploads"
 ANNOUNCEMENT_UPLOAD_ROOT = UPLOAD_ROOT / "announcements"
+PROFILE_UPLOAD_ROOT = UPLOAD_ROOT / "profiles"
 ANNOUNCEMENT_UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
+PROFILE_UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(root_path="/api")
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_ROOT)), name="uploads")
@@ -107,6 +109,7 @@ FULL_EDIT_ROLES = {"director", "head_coordinator", "program_coordinator"}
 EMERGENCY_EDIT_ROLES = FULL_EDIT_ROLES | {"staff", "guardian"}
 ANNOUNCEMENT_POST_ROLES = FULL_EDIT_ROLES
 DELETE_PROFILE_ROLES = {"director", "head_coordinator"}
+CREATE_PROFILE_ROLES = {"director", "head_coordinator"}
 
 
 def parse_header_list(value):
@@ -145,6 +148,48 @@ def role_can_post_announcements(role: str):
 
 def role_can_delete_records(role: str):
     return role in DELETE_PROFILE_ROLES
+
+
+def role_can_create_profiles(role: str):
+    return role in CREATE_PROFILE_ROLES
+
+
+def row_value(row, key, index=0, default=None):
+    if row is None:
+        return default
+    if isinstance(row, dict):
+        return row.get(key, default)
+    if hasattr(row, "_mapping"):
+        return row._mapping.get(key, default)
+    try:
+        return row[index]
+    except Exception:
+        return default
+
+
+def get_next_int_id(table_name: str, column_name: str):
+    allowed = {
+        ("Person", "person_id"),
+        ("Address", "address_id"),
+        ("ContactRelationship", "relationship_id"),
+        ("Phone", "phone_id"),
+    }
+    if (table_name, column_name) not in allowed:
+        raise ValueError("Unsupported id source")
+
+    rows = db_client.send_query(
+        text(f"SELECT COALESCE(MAX({column_name}), 0) + 1 AS next_id FROM {table_name}")
+    )
+    return int(row_value(rows[0], "next_id", 0, 1)) if rows else 1
+
+
+def split_full_name(value: str):
+    parts = clean_str(value).split()
+    if not parts:
+        return "", ""
+    if len(parts) == 1:
+        return parts[0], ""
+    return parts[0], " ".join(parts[1:])
 
 
 def row_to_client_dict(row):
@@ -658,6 +703,42 @@ def save_attachment_to_filesystem(attachment: dict):
     normalized["dataUrl"] = ""
     normalized["url"] = f"/api/uploads/announcements/{filename}"
     return normalized
+
+
+def get_profile_photo_path(person_id: int):
+    return PROFILE_UPLOAD_ROOT / f"profile-{person_id}.jpg"
+
+
+def get_profile_photo_url(person_id: int):
+    photo_path = get_profile_photo_path(person_id)
+    if photo_path.exists():
+        return f"/api/uploads/profiles/{photo_path.name}"
+    return ""
+
+
+def save_profile_photo_to_filesystem(person_id: int, data_url: str):
+    data_url = clean_str(data_url)
+    if not data_url.startswith("data:image/"):
+        raise HTTPException(status_code=400, detail="Profile photo must be an image data URL")
+
+    if "," not in data_url:
+        raise HTTPException(status_code=400, detail="Profile photo data is invalid")
+
+    _, encoded = data_url.split(",", 1)
+    try:
+        decoded = base64.b64decode(encoded, validate=True)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Profile photo could not be decoded") from exc
+
+    if not decoded:
+        raise HTTPException(status_code=400, detail="Profile photo is empty")
+
+    if len(decoded) > 2 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Profile photo is too large")
+
+    photo_path = get_profile_photo_path(person_id)
+    photo_path.write_bytes(decoded)
+    return get_profile_photo_url(person_id)
 
 
 # --------------------------------------------------
@@ -1273,6 +1354,158 @@ def get_clients():
             detail="Failed to load clients"
         )
 
+
+@app.post("/clients", tags=["Database"])
+def create_client(payload: dict, request: Request):
+    try:
+        role = get_request_role(request)
+        if not role_can_create_profiles(role):
+            raise HTTPException(status_code=403, detail="Only higher admins can add client profiles")
+
+        first_name = clean_str(payload.get("firstName") or payload.get("first_name"))
+        last_name = clean_str(payload.get("lastName") or payload.get("last_name"))
+        if not first_name and not last_name:
+            first_name, last_name = split_full_name(payload.get("name"))
+
+        if not first_name or not last_name:
+            raise HTTPException(status_code=400, detail="First and last name are required")
+
+        person_id = get_next_int_id("Person", "person_id")
+        media_consent = normalize_media_consent(payload.get("mediaConsent") or payload.get("media_consent")) == "Yes"
+        group_name = clean_str(payload.get("group") or payload.get("group_name") or payload.get("staff_setting"))
+        status = clean_str(payload.get("status"), "active")
+        notes = clean_str(payload.get("notes"))
+        tags = [clean_str(tag).lower() for tag in payload.get("tags", []) if clean_str(tag)]
+        risks = [clean_str(risk).lower() for risk in payload.get("risks", []) if clean_str(risk)]
+        address = payload.get("address") or {}
+
+        person_query = text(
+            """
+            INSERT INTO Person (
+                person_id,
+                first_name,
+                last_name,
+                stakeholder_type,
+                status,
+                staff_setting,
+                start_date,
+                media_consent,
+                notes
+            )
+            VALUES (
+                :person_id,
+                :first_name,
+                :last_name,
+                'client',
+                :status,
+                :staff_setting,
+                CURRENT_DATE,
+                :media_consent,
+                :notes
+            )
+            """
+        )
+        db_client.send_query(
+            person_query,
+            {
+                "person_id": person_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "status": status,
+                "staff_setting": group_name,
+                "media_consent": media_consent,
+                "notes": notes,
+            },
+        )
+
+        if any(clean_str(address.get(field)) for field in ("street", "city", "state", "zip")):
+            address_id = get_next_int_id("Address", "address_id")
+            db_client.send_query(
+                text(
+                    """
+                    INSERT INTO Address (address_id, street, city, state, zip)
+                    VALUES (:address_id, :street, :city, :state, :zip)
+                    """
+                ),
+                {
+                    "address_id": address_id,
+                    "street": clean_str(address.get("street")),
+                    "city": clean_str(address.get("city")),
+                    "state": clean_str(address.get("state")),
+                    "zip": clean_str(address.get("zip")),
+                },
+            )
+            db_client.send_query(
+                text(
+                    """
+                    INSERT INTO PersonAddress (person_id, address_id, address_type)
+                    VALUES (:person_id, :address_id, 'mailing')
+                    """
+                ),
+                {"person_id": person_id, "address_id": address_id},
+            )
+
+        for tag in tags:
+            db_client.send_query(
+                text(
+                    """
+                    INSERT IGNORE INTO Tag (tag_code, tag_label)
+                    VALUES (:tag_code, :tag_label)
+                    """
+                ),
+                {"tag_code": tag, "tag_label": tag.upper()},
+            )
+            db_client.send_query(
+                text(
+                    """
+                    INSERT IGNORE INTO PersonTag (person_id, tag_id)
+                    SELECT :person_id, tag_id FROM Tag WHERE tag_code = :tag_code
+                    """
+                ),
+                {"person_id": person_id, "tag_code": tag},
+            )
+
+        for risk in risks:
+            db_client.send_query(
+                text(
+                    """
+                    INSERT IGNORE INTO Risk (risk_code, risk_label)
+                    VALUES (:risk_code, :risk_label)
+                    """
+                ),
+                {"risk_code": risk, "risk_label": risk.replace("_", " ").title()},
+            )
+            db_client.send_query(
+                text(
+                    """
+                    INSERT IGNORE INTO PersonRisk (person_id, risk_id)
+                    SELECT :person_id, risk_id FROM Risk WHERE risk_code = :risk_code
+                    """
+                ),
+                {"person_id": person_id, "risk_code": risk},
+            )
+
+        return {
+            "person_id": person_id,
+            "first_name": first_name,
+            "last_name": last_name,
+            "stakeholder_type": "client",
+            "media_consent": media_consent,
+            "notes": notes,
+            "status": status,
+            "group": group_name,
+            "tags": tags,
+            "risks": risks,
+            "updated_at": datetime.now(UTC).date().isoformat(),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("create_client_failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Failed to create client")
+
+
 @app.get("/profiles/{person_id}", tags=["Database"])
 def get_profile(person_id: int):
 
@@ -1364,6 +1597,7 @@ def get_profile(person_id: int):
             "first_name": row["first_name"],
             "last_name": row["last_name"],
             "name": f"{row['first_name']} {row['last_name']}",
+            "photoUrl": get_profile_photo_url(row["person_id"]),
 
             "stakeholder_type": row["stakeholder_type"],
             "status": row["status"],
@@ -1413,6 +1647,36 @@ def get_profile(person_id: int):
             status_code=500,
             detail="Failed to load profile"
         )
+
+
+@app.post("/profiles/{person_id}/photo", tags=["Database"])
+def upload_profile_photo(person_id: int, payload: dict, request: Request):
+    try:
+        role = get_request_role(request)
+        allowed_profile_ids = get_allowed_profile_ids(request)
+
+        if role not in EMERGENCY_EDIT_ROLES:
+            raise HTTPException(status_code=403, detail="This role cannot update profile photos")
+
+        if role not in {"director", "head_coordinator"} and str(person_id) not in allowed_profile_ids:
+            raise HTTPException(status_code=403, detail="This role cannot update this profile photo")
+
+        rows = db_client.send_query(
+            text("SELECT person_id FROM Person WHERE person_id = :person_id LIMIT 1"),
+            {"person_id": person_id},
+        )
+        if not rows:
+            raise HTTPException(status_code=404, detail="Profile not found")
+
+        photo_url = save_profile_photo_to_filesystem(person_id, payload.get("dataUrl"))
+        return {"status": "success", "person_id": person_id, "photoUrl": photo_url}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("upload_profile_photo_failed", extra={"person_id": person_id, "error": str(e)})
+        raise HTTPException(status_code=500, detail="Failed to save profile photo")
+
 
 # --------------------------------------------------
 # Update client profile (used by frontend edits)

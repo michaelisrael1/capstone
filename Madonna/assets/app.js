@@ -584,6 +584,25 @@ function getProfileById(id) {
   return profiles.find((p) => p.id === id) || null;
 }
 
+function getRecordStorageId(record, keys = ["id"]) {
+  if (!record) return "";
+  for (const key of keys) {
+    const value = record[key];
+    if (value !== undefined && value !== null && String(value).trim()) {
+      return String(value).trim();
+    }
+  }
+  return "";
+}
+
+function getClientPhotoStorageId(profile) {
+  return getRecordStorageId(profile, ["id", "client_id", "clientId", "person_id", "personId"]);
+}
+
+function getStaffPhotoStorageId(person) {
+  return getRecordStorageId(person, ["id", "staff_id", "staffId", "person_id", "personId"]);
+}
+
 function getStoredPhotoMap(storageKey) {
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
@@ -594,11 +613,13 @@ function getStoredPhotoMap(storageKey) {
 }
 
 function saveStoredPhoto(storageKey, id, dataUrl) {
+  const storageId = String(id || "").trim();
+  if (!storageId) throw new Error("Could not identify this record for photo storage.");
   const saved = getStoredPhotoMap(storageKey);
   if (dataUrl) {
-    saved[id] = dataUrl;
+    saved[storageId] = dataUrl;
   } else {
-    delete saved[id];
+    delete saved[storageId];
   }
   localStorage.setItem(storageKey, JSON.stringify(saved));
 }
@@ -607,7 +628,7 @@ function applyStoredClientPhotos() {
   const saved = getStoredPhotoMap(CLIENT_PHOTO_STORAGE_KEY);
   profiles = profiles.map((profile) => ({
     ...profile,
-    photoUrl: saved[profile.id] || profile.photoUrl || ""
+    photoUrl: saved[getClientPhotoStorageId(profile)] || profile.photoUrl || ""
   }));
 }
 
@@ -615,7 +636,7 @@ function applyStoredStaffPhotos() {
   const saved = getStoredPhotoMap(STAFF_PHOTO_STORAGE_KEY);
   staffRecords = staffRecords.map((person) => ({
     ...person,
-    headshotUrl: saved[person.id] || person.headshotUrl || "assets/empty-headshot.jpg"
+    headshotUrl: saved[getStaffPhotoStorageId(person)] || person.headshotUrl || "assets/empty-headshot.jpg"
   }));
 }
 
@@ -697,12 +718,12 @@ function getStoredProfiles() {
     const storedProfiles = Array.isArray(saved) ? saved.map(normalizeClientFromApi) : structuredClone(defaultProfiles);
     return storedProfiles.map((profile) => ({
       ...profile,
-      photoUrl: savedPhotos[profile.id] || profile.photoUrl || ""
+      photoUrl: savedPhotos[getClientPhotoStorageId(profile)] || profile.photoUrl || ""
     }));
   } catch {
     return structuredClone(defaultProfiles).map((profile) => ({
       ...profile,
-      photoUrl: savedPhotos[profile.id] || profile.photoUrl || ""
+      photoUrl: savedPhotos[getClientPhotoStorageId(profile)] || profile.photoUrl || ""
     }));
   }
 }
@@ -736,12 +757,16 @@ async function fetchJsonOrNull(url, options = {}) {
 }
 
 function normalizeClientFromApi(client) {
+  const firstName = client.first_name || client.firstName || "";
+  const lastName = client.last_name || client.lastName || "";
   return {
-    id: client.id || "",
-    name: client.name || "",
+    id: String(client.id || client.client_id || client.clientId || client.person_id || client.personId || ""),
+    name: client.name || `${firstName} ${lastName}`.trim(),
+    firstName,
+    lastName,
     photoUrl: client.photoUrl || client.photo_url || "",
-    group: client.group || "",
-    mediaConsent: client.mediaConsent || "No",
+    group: client.group || client.group_name || client.staff_setting || client.school || "",
+    mediaConsent: coerceMediaConsentLabel(client.mediaConsent ?? client.media_consent),
     tags: Array.isArray(client.tags) ? client.tags : [],
     risks: Array.isArray(client.risks) ? client.risks : [],
     updated: client.updated || "",
@@ -770,9 +795,40 @@ function normalizeClientFromApi(client) {
   };
 }
 
+function coerceMediaConsentLabel(value) {
+  if (value === true) return "Yes";
+  if (value === false) return "No";
+  const text = String(value || "").trim().toLowerCase();
+  return ["yes", "y", "true", "1"].includes(text) ? "Yes" : "No";
+}
+
+function normalizeDashboardProfileFromApi(profile) {
+  const firstName = profile.first_name || profile.firstName || "";
+  const lastName = profile.last_name || profile.lastName || "";
+  const name = profile.name || `${firstName} ${lastName}`.trim();
+  const rawUpdated = profile.updated_at || profile.updated || "";
+  const updatedDate = rawUpdated ? new Date(rawUpdated) : null;
+
+  return {
+    id: String(profile.person_id || profile.id || ""),
+    firstName,
+    lastName,
+    name,
+    stakeholderType: profile.stakeholder_type || profile.stakeholderType || "",
+    group: profile.group || profile.group_name || profile.staff_setting || profile.school || "",
+    tags: Array.isArray(profile.tags) ? profile.tags : [],
+    risks: Array.isArray(profile.risks) ? profile.risks : [],
+    mediaConsent: coerceMediaConsentLabel(profile.media_consent ?? profile.mediaConsent),
+    updated: updatedDate && !isNaN(updatedDate) ? updatedDate.toLocaleDateString() : rawUpdated,
+    notes: profile.notes || "",
+    status: profile.status || "",
+    inGroup: true
+  };
+}
+
 function normalizeStaffFromApi(person) {
   return {
-    id: person.id || "",
+    id: String(person.id || person.staff_id || person.staffId || person.person_id || person.personId || ""),
     name: person.name || "",
     title: person.title || "Staff",
     email: person.email || "",
@@ -868,6 +924,42 @@ async function saveProfileToBackend(profile) {
   return data;
 }
 
+async function createClientProfileInBackend(payload, session = getSession()) {
+  const res = await fetch("/api/clients", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildSessionHeaders(session)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || "Failed to create profile");
+  }
+
+  return data;
+}
+
+async function saveProfilePhotoToBackend(profileId, dataUrl, session = getSession()) {
+  const res = await fetch(`/api/profiles/${encodeURIComponent(profileId)}/photo`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildSessionHeaders(session)
+    },
+    body: JSON.stringify({ dataUrl })
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || "Failed to save profile photo");
+  }
+
+  return data;
+}
+
 async function deleteProfileFromBackend(profileId, session = getSession()) {
   const res = await fetch(`/api/clients/${encodeURIComponent(profileId)}`, {
     method: "DELETE",
@@ -954,6 +1046,10 @@ function canPostAnnouncements(role) {
 }
 
 function canDeleteRecords(role) {
+  return ["director", "head_coordinator"].includes(normalizeRole(role));
+}
+
+function canCreateProfiles(role) {
   return ["director", "head_coordinator"].includes(normalizeRole(role));
 }
 
@@ -1204,6 +1300,7 @@ async function initDashboard() {
   // Load profiles directly from backend
   // --------------------------------------------
   let accessibleProfiles = [];
+  let profileLoadFailed = false;
 
   try {
 
@@ -1222,22 +1319,11 @@ async function initDashboard() {
     }
 
     // Normalize backend data into frontend shape
-    accessibleProfiles = (data || []).map((p) => ({
-      id: p.person_id,
-      firstName: p.first_name || "",
-      lastName: p.last_name || "",
-      name: `${p.first_name || ""} ${p.last_name || ""}`.trim(),
-      stakeholderType: p.stakeholder_type || "",
-      tags: Array.isArray(p.tags) ? p.tags : [],
-      risks: Array.isArray(p.risks) ? p.risks : [],
-      mediaConsent: p.media_consent ? "Yes" : "No",
-      updated: p.updated_at ? new Date(p.updated_at).toLocaleDateString() : "",
-      notes: p.notes || "",
-      status: p.status || ""
-    }));
+    accessibleProfiles = (data || []).map(normalizeDashboardProfileFromApi);
 
   } catch (err) {
     console.error("dashboard_load_failed", err);
+    profileLoadFailed = true;
 
     const tbody = document.getElementById("profilesBody");
 
@@ -1250,8 +1336,6 @@ async function initDashboard() {
         </tr>
       `;
     }
-
-    return;
   }
 
   // --------------------------------------------
@@ -1276,9 +1360,20 @@ async function initDashboard() {
   // --------------------------------------------
   const tbody = document.getElementById("profilesBody");
 
-  if (tbody) {
-
+  function renderProfilesTable() {
+    if (!tbody) return;
     tbody.innerHTML = "";
+
+    if (profileLoadFailed) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            Failed to load profiles from backend.
+          </td>
+        </tr>
+      `;
+      return;
+    }
 
     accessibleProfiles.forEach((p) => {
 
@@ -1323,6 +1418,123 @@ async function initDashboard() {
         </tr>
       `;
     }
+  }
+
+  renderProfilesTable();
+
+  // --------------------------------------------
+  // High-admin profile creation
+  // --------------------------------------------
+  const canCreate = canCreateProfiles(s.role);
+  const addClientCard = document.getElementById("addClientProfileCard");
+  const addClientButton = document.getElementById("addClientProfileButton");
+  const addClientTile = document.getElementById("addClientTile");
+  const addUserTile = document.getElementById("addUserTile");
+
+  if (addClientCard) addClientCard.style.display = "none";
+  if (addClientButton) addClientButton.style.display = canCreate ? "" : "none";
+  if (addClientTile) addClientTile.style.display = "none";
+  if (addUserTile) addUserTile.style.display = canCreate ? "" : "none";
+
+  const createForm = document.getElementById("addClientProfileForm");
+  const createStatus = document.getElementById("addClientStatus");
+  const createTagsEditor = document.getElementById("newClientTagsEditor");
+  const createRisksEditor = document.getElementById("newClientRisksEditor");
+  const resetCreateForm = document.getElementById("resetClientProfileForm");
+  const closeCreateForm = document.getElementById("closeClientProfileForm");
+
+  if (canCreate) {
+    renderTagCheckboxes(createTagsEditor, []);
+    renderRiskCheckboxes(createRisksEditor, []);
+  }
+
+  if (addClientButton && addClientButton.dataset.bound !== "true") {
+    addClientButton.dataset.bound = "true";
+    addClientButton.addEventListener("click", () => {
+      if (!canCreateProfiles(s.role)) return;
+      if (addClientCard) addClientCard.style.display = "";
+      addClientCard?.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.setTimeout(() => document.getElementById("newClientFirstName")?.focus(), 250);
+    });
+  }
+
+  function clearCreateForm() {
+    createForm?.reset();
+    createTagsEditor?.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      input.checked = false;
+    });
+    createRisksEditor?.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      input.checked = false;
+    });
+    if (createStatus) createStatus.textContent = "";
+  }
+
+  if (resetCreateForm && resetCreateForm.dataset.bound !== "true") {
+    resetCreateForm.dataset.bound = "true";
+    resetCreateForm.addEventListener("click", clearCreateForm);
+  }
+
+  if (closeCreateForm && closeCreateForm.dataset.bound !== "true") {
+    closeCreateForm.dataset.bound = "true";
+    closeCreateForm.addEventListener("click", () => {
+      clearCreateForm();
+      if (addClientCard) addClientCard.style.display = "none";
+    });
+  }
+
+  if (createForm && createForm.dataset.bound !== "true") {
+    createForm.dataset.bound = "true";
+    createForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!canCreateProfiles(s.role)) {
+        alert("Only Director and Head Coordinator can add client profiles.");
+        return;
+      }
+
+      const firstName = document.getElementById("newClientFirstName")?.value.trim() || "";
+      const lastName = document.getElementById("newClientLastName")?.value.trim() || "";
+
+      if (!firstName || !lastName) {
+        alert("First and last name are required.");
+        return;
+      }
+
+      const payload = {
+        firstName,
+        lastName,
+        group: document.getElementById("newClientGroup")?.value.trim() || "",
+        mediaConsent: document.getElementById("newClientMediaConsent")?.value || "No",
+        status: "active",
+        tags: createTagsEditor
+          ? [...createTagsEditor.querySelectorAll('input[type="checkbox"]:checked')].map((input) => input.value)
+          : [],
+        risks: createRisksEditor
+          ? [...createRisksEditor.querySelectorAll('input[type="checkbox"]:checked')].map((input) => input.value)
+          : [],
+        address: {
+          street: document.getElementById("newClientStreet")?.value.trim() || "",
+          city: document.getElementById("newClientCity")?.value.trim() || "",
+          state: document.getElementById("newClientState")?.value.trim() || "",
+          zip: document.getElementById("newClientZip")?.value.trim() || ""
+        },
+        notes: document.getElementById("newClientNotes")?.value.trim() || ""
+      };
+
+      try {
+        if (createStatus) createStatus.textContent = "Creating profile...";
+        const created = await createClientProfileInBackend(payload, s);
+        const normalized = normalizeDashboardProfileFromApi(created);
+        profileLoadFailed = false;
+        accessibleProfiles = [normalized, ...accessibleProfiles];
+        renderProfilesTable();
+        clearCreateForm();
+        if (createStatus) createStatus.textContent = `Created ${normalized.name}.`;
+      } catch (err) {
+        if (createStatus) createStatus.textContent = `Error: ${err.message}`;
+        alert(`Failed to create profile: ${err.message}`);
+      }
+    });
   }
 
   // --------------------------------------------
@@ -1604,7 +1816,11 @@ async function initProfilePage() {
 
   const profilePhoto = document.getElementById("profilePhoto");
   const profilePhotoPlaceholder = document.getElementById("profilePhotoPlaceholder");
-  updatePhotoPreview(profilePhoto, profilePhotoPlaceholder, prof.photoUrl || "");
+  const profilePhotoId = getClientPhotoStorageId(prof);
+  const storedClientPhotos = getStoredPhotoMap(CLIENT_PHOTO_STORAGE_KEY);
+  prof.id = profilePhotoId;
+  prof.photoUrl = prof.photoUrl || storedClientPhotos[profilePhotoId] || "";
+  updatePhotoPreview(profilePhoto, profilePhotoPlaceholder, prof.photoUrl);
   initPhotoUpload({
     inputEl: document.getElementById("profilePhotoUpload"),
     controlsEl: document.getElementById("profilePhotoControls"),
@@ -1614,8 +1830,21 @@ async function initProfilePage() {
     canEdit: canEditPhoto,
     onSave: async (dataUrl) => {
       prof.photoUrl = dataUrl;
-      saveStoredPhoto(CLIENT_PHOTO_STORAGE_KEY, prof.id, dataUrl);
+      saveStoredPhoto(CLIENT_PHOTO_STORAGE_KEY, profilePhotoId, dataUrl);
+      profiles = profiles.map((profile) =>
+        getClientPhotoStorageId(profile) === profilePhotoId
+          ? { ...profile, photoUrl: dataUrl }
+          : profile
+      );
       saveProfiles();
+      if (/^\d+$/.test(profilePhotoId)) {
+        try {
+          const saved = await saveProfilePhotoToBackend(profilePhotoId, dataUrl, s);
+          if (saved.photoUrl) prof.photoUrl = saved.photoUrl;
+        } catch (err) {
+          console.warn("profile_photo_backend_save_failed", err);
+        }
+      }
     }
   });
 
@@ -2458,6 +2687,7 @@ async function initStaffProfilePage() {
   const img = document.getElementById("staffHeadshot");
   if (img) img.src = person.headshotUrl || "assets/empty-headshot.jpg";
 
+  const staffPhotoId = getStaffPhotoStorageId(person);
   const canEditStaffPhoto = canEditStaffMember(session, person);
   initPhotoUpload({
     inputEl: document.getElementById("staffPhotoUpload"),
@@ -2468,8 +2698,12 @@ async function initStaffProfilePage() {
     canEdit: canEditStaffPhoto,
     onSave: async (dataUrl) => {
       person.headshotUrl = dataUrl;
-      saveStoredPhoto(STAFF_PHOTO_STORAGE_KEY, person.id, dataUrl);
-      staffRecords = staffRecords.map((member) => (member.id === person.id ? { ...member, headshotUrl: dataUrl } : member));
+      saveStoredPhoto(STAFF_PHOTO_STORAGE_KEY, staffPhotoId, dataUrl);
+      staffRecords = staffRecords.map((member) =>
+        getStaffPhotoStorageId(member) === staffPhotoId
+          ? { ...member, headshotUrl: dataUrl }
+          : member
+      );
     }
   });
 
